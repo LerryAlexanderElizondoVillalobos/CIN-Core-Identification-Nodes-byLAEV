@@ -15,8 +15,8 @@ Core Identification Node Github/
 
 ## Direct access
 
-- **CIN Lobby:** open `CIN Lobby.url`. It targets the local CIN runtime's default address, `http://127.0.0.1:1221`, and requires that runtime to be running.
-- **Install Genesis Manifest Certificate:** open `Install Genesis Manifest Certificate.url` to retrieve the certificate file directly from this repository.
+- **CIN Lobby:** [Open the local CIN interface](http://127.0.0.1:1221), or open `CIN Lobby.url`. The local runtime must already be running.
+- **Install Genesis Manifest Certificate:** [Download the Genesis Environment Certificate](https://raw.githubusercontent.com/LerryAlexanderElizondoVillalobos/CIN-Core-Identification-Nodes-byLAEV/main/Core%20Identification%20Node%20Github/CIN-GENESIS-ENVIRONMENT.cincert), or open `Install Genesis Manifest Certificate.url`.
 
 ## Genesis Environment Certificate
 
