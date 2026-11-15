@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>CIN Linux Portable Prototype</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,sans-serif;background:#111827;color:#f3f4f6}
+body{max-width:760px;margin:8vh auto;padding:0 24px}
+main{background:#1f2937;border:1px solid #374151;border-radius:16px;padding:28px}
+p{line-height:1.55;color:#cbd5e1}
+button{padding:12px 16px;margin:8px 8px 8px 0;border:0;border-radius:8px;background:#d1d5db;color:#111827;font-weight:650;cursor:pointer}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#0b1220;border-radius:8px;padding:16px;min-height:80px}
+small{color:#9ca3af}
+</style></head>
+<body><main>
+<h1>CIN — Portable Linux Runtime</h1>
+<p>This is a local runtime feasibility prototype. It is not the Genesis Lobby and does not issue CIN records or credentials.</p>
+<p id="status">Checking local runtime…</p>
+<button id="write">Write persistence probe</button><button id="read">Read persisted probe</button>
+<pre id="output">No operation executed.</pre>
+<small>Prototype v0.1.0 · Offline local interface · No production keys or personal data</small>
+</main>
+<script>
+const invoke=window.__TAURI__.core.invoke;
+const output=document.getElementById('output');
+async function run(command){try{output.textContent=await invoke(command)}catch(error){output.textContent='Operation failed: '+error}}
+invoke('runtime_status').then(value=>document.getElementById('status').textContent=value).catch(error=>document.getElementById('status').textContent='Runtime status unavailable: '+error);
+document.getElementById('write').addEventListener('click',()=>run('write_persistence_probe'));
+document.getElementById('read').addEventListener('click',()=>run('read_persistence_probe'));
+</script></body></html>
