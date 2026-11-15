@@ -1,4 +1,4 @@
-name: CIN Linux Portable Runtime Prototype
+name: CIN Linux Portable Local Web Runtime
 
 on:
   pull_request:
@@ -35,14 +35,17 @@ jobs:
       - name: Install Linux build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential curl wget file libxdo-dev libssl-dev librsvg2-dev libwebkit2gtk-4.1-dev zip
+          sudo apt-get install -y build-essential zip
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
       - name: Cache Rust build
         uses: Swatinem/rust-cache@v2
         with:
           workspaces: prototype/linux-runtime
-      - name: Run prototype tests
+      - name: Verify Rust formatting
+        working-directory: prototype/linux-runtime
+        run: cargo fmt --all -- --check
+      - name: Run local web runtime tests
         working-directory: prototype/linux-runtime
         run: cargo test
       - name: Build Linux runtime
