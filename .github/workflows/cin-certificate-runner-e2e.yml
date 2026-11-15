@@ -23,6 +23,29 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  cross-platform-build:
+    name: Build and test on ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Install stable Rust
+        uses: dtolnay/rust-toolchain@stable
+      - name: Check formatting
+        run: cargo fmt --manifest-path prototype/cin-core/Cargo.toml --all -- --check
+      - name: Run Clippy
+        run: cargo clippy --manifest-path prototype/cin-core/Cargo.toml --all-targets -- -D warnings
+      - name: Run tests
+        run: cargo test --manifest-path prototype/cin-core/Cargo.toml --all-targets
+      - name: Build Genesis Certificate Runner
+        run: cargo build --manifest-path prototype/cin-core/Cargo.toml --release --bin cin-certificate-runner
+
   certificate-runner-e2e:
     name: Execute Genesis certificate on Ubuntu
     runs-on: ubuntu-latest
@@ -61,6 +84,8 @@ jobs:
           assert start >= 0, "runner did not print a JSON manifest"
           manifest, _ = json.JSONDecoder().raw_decode(output[start:])
           assert manifest["document_type"] == "cin.genesis-environment-manifest"
+          references = manifest["payload"].get("bibliographic_references", {}).get("references", [])
+          assert len(references) == 12, f"expected 12 certificate references, got {len(references)}"
           fields = manifest["payload"]["audit"]["fields"]
           assert "execution.os.name" in fields
           assert "execution.architecture" in fields
