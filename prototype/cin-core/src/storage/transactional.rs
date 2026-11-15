@@ -271,6 +271,12 @@ impl TransactionalStore {
             )));
         }
         let metadata: TransactionMetadata = read_json(&journal_path)?;
+        if metadata.storage_format_version != STORAGE_FORMAT_VERSION
+            || metadata.operation_id != operation_id
+            || metadata.digest_algorithm != "sha-256"
+        {
+            return Ok(TransactionStatus::Inconsistent);
+        }
         let marker_path = self.marker_path(&metadata.document_id);
         if !marker_path.exists() {
             if self
@@ -319,6 +325,15 @@ impl TransactionalStore {
                     continue;
                 }
             };
+            if encode_id(&metadata.operation_id) != operation_id {
+                report.inconsistent += 1;
+                report.issues.push(RecoveryIssue {
+                    operation_id: metadata.operation_id,
+                    status: TransactionStatus::Inconsistent,
+                    detail: "journal filename does not match its operation ID".into(),
+                });
+                continue;
+            }
             let status = match self.operation_status(&metadata.operation_id) {
                 Ok(status) => status,
                 Err(error) => {
@@ -722,6 +737,27 @@ mod tests {
         let report = store.inspect_recovery().unwrap();
         assert_eq!(report.incomplete, 1);
         assert!(orphan.exists());
+        let _ = fs::remove_dir_all(root);
+    }
+
+    #[test]
+    fn journal_operation_id_mismatch_is_reported_as_inconsistent() {
+        let root = root();
+        let store = TransactionalStore::open(&root).unwrap();
+        let doc = document("cin:transaction:8", 8);
+        store.prepare_record("operation-8", &doc).unwrap();
+
+        let journal = store.journal_path("operation-8");
+        let mut metadata: TransactionMetadata = read_json(&journal).unwrap();
+        metadata.operation_id = "different-operation".into();
+        fs::write(&journal, serde_json::to_vec(&metadata).unwrap()).unwrap();
+
+        assert_eq!(
+            store.operation_status("operation-8").unwrap(),
+            TransactionStatus::Inconsistent
+        );
+        let report = store.inspect_recovery().unwrap();
+        assert_eq!(report.inconsistent, 1);
         let _ = fs::remove_dir_all(root);
     }
 
