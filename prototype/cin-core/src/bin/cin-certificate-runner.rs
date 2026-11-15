@@ -7,26 +7,25 @@ use serde_json::Value;
 use std::{env, error::Error, fs, io, path::{Path, PathBuf}};
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let mut args = env::args_os().skip(1);
-    let certificate_path = args.next().ok_or(
-        "usage: cin-certificate-runner <certificate.cincert> [--package-root <directory>]"
-    )?;
-    let certificate_path = PathBuf::from(certificate_path);
+    let args = env::args_os().skip(1).collect::<Vec<_>>();
+    if args.is_empty() || args.len() != 1 && args.len() != 3 {
+        return Err(
+            "usage: cin-certificate-runner <certificate.cincert> [--package-root <directory>]"
+                .into(),
+        );
+    }
+    let certificate_path = PathBuf::from(&args[0]);
     let certificate: Value = serde_json::from_slice(&fs::read(&certificate_path)?)?;
-
-    if args.next().is_some() {
-        let flag = args.next().ok_or("missing package root after --package-root")?;
-        if flag != "--package-root" {
+    let package_root = if args.len() == 3 {
+        if args[1] != "--package-root" {
             return Err("expected --package-root".into());
         }
-        let root = args.next().ok_or("missing directory after --package-root")?;
-        if args.next().is_some() {
-            return Err("unexpected extra arguments".into());
-        }
-        return execute(&certificate, &certificate_path, Some(PathBuf::from(root)));
-    }
+        Some(PathBuf::from(&args[2]))
+    } else {
+        None
+    };
 
-    execute(&certificate, &certificate_path, None)
+    execute(&certificate, &certificate_path, package_root)
 }
 
 fn execute(
