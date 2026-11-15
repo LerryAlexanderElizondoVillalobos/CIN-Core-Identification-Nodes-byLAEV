@@ -213,8 +213,8 @@ impl TransactionalStore {
         };
         write_json_atomic_create(&marker_path, &marker)?;
 
-        // The marker is the commit decision. A leftover stage file is harmless
-        // and is reported by recovery; cleanup is not part of commit visibility.
+        // The marker is the commit decision. The staged file is retained so a
+        // retry can verify the original operation; cleanup is not part of visibility.
         Ok(receipt(&metadata))
     }
 
