@@ -157,7 +157,7 @@ test('uses an ephemeral loopback port when 1221 and 2112 are occupied', async t 
 });
 
 
-test('launches the runtime through Chromium and renders the local interface', async t => {
+test('launches the runtime through Chromium and renders the local interface', { timeout: 60000 }, async t => {
   const executable = process.env.CIN_CHROMIUM_PATH;
   if (!executable) {
     t.skip('CIN_CHROMIUM_PATH is not configured; Chromium smoke test runs in Linux CI');
@@ -180,13 +180,15 @@ test('launches the runtime through Chromium and renders the local interface', as
   const browser = await chromium.launch({
     executablePath: executable,
     headless: true,
-    args: ['--no-sandbox', '--disable-dev-shm-usage']
+    args: ['--no-sandbox', '--disable-dev-shm-usage'],
+    timeout: 15000
   });
   try {
     const page = await browser.newPage();
-    const response = await page.goto(base, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    const response = await page.goto(base, { waitUntil: 'domcontentloaded', timeout: 10000 });
     assert.equal(response.status(), 200);
-    assert.match(await page.title(), /CIN.*Portable Linux Runtime/);
+    assert.match(await page.title(), /CIN.*Local Web Runtime/);
+    assert.match(await page.locator('h1').innerText(), /CIN.*Portable Linux Runtime/);
     assert.match(await page.locator('body').innerText(), /CIN/);
   } finally {
     await browser.close();
