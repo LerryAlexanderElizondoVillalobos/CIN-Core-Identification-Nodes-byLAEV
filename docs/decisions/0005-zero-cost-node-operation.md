@@ -3,7 +3,7 @@
 - **Status:** Proposed — owner approval and implementation evidence required
 - **Date:** 2026-11-15
 - **Decision owner:** CIN project owner
-- **Related:** M0 Architecture Baseline; [ADR-0002: Portable Runtime and ZIP Packaging Model](0002-portable-runtime-and-zip-packaging-model.md); [ADR-0004: Application Runtime and Technology Selection](0004-application-runtime-and-technology-selection.md) (reserved); [Project Status and Development Roadmap](../project/PROJECT_STATUS_AND_ROADMAP.md)
+- **Related:** M0 Architecture Baseline; [ADR-0002: Portable Runtime and ZIP Packaging Model](0002-portable-runtime-and-zip-packaging-model.md); [Project Status and Development Roadmap](../project/PROJECT_STATUS_AND_ROADMAP.md)
 
 ## Context
 
