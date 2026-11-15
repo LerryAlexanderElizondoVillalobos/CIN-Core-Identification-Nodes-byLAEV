@@ -17,11 +17,12 @@ LAUNCH
 chmod 0755 "$STAGE/run-cin.sh"
 cp "$ROOT/prototype/linux-runtime/README.md" "$STAGE/README.md"
 cat > "$STAGE/PACKAGE-MANIFEST.txt" <<'MANIFEST'
-CIN Linux Portable Runtime Prototype
-Version: 0.1.0
+CIN Linux Portable Local Web Runtime
+Version: 0.2.0
 Target: Linux x86_64
 Launch entry point: ./run-cin.sh
-Runtime: Tauri v2 / host WebKitGTK 4.1 dependency
+Local interface: http://127.0.0.1:1221 (fallback 2112, then dynamic loopback port)
+Runtime: Rust standard-library HTTP server
 Data: outside package by default; see README.md
 Unsigned prototype; not a production CIN release.
 MANIFEST
