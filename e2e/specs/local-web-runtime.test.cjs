@@ -92,6 +92,19 @@ test('serves the web UI and preserves data after restart and package relocation'
   await stop(runtime);
 });
 
+test('prefers 1221 when it is available', async t => {
+  let blocker;
+  try { blocker = await reserve(1221); }
+  catch { t.skip('Port 1221 is already occupied by the test host'); return; }
+  await close(blocker);
+  const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'cin-port-primary-'));
+  t.after(() => fs.rmSync(temp, { recursive: true, force: true }));
+  const runtime = startRuntime(path.join(temp, 'data'));
+  const base = await runtime.ready;
+  assert.equal(new URL(base).port, '1221');
+  await stop(runtime);
+});
+
 test('falls back to 2112 when 1221 is occupied', async t => {
   let blocker;
   try { blocker = await reserve(1221); }
