@@ -256,6 +256,9 @@ impl TransactionalStore {
         let metadata: TransactionMetadata = read_json(&journal_path)?;
         let marker_path = self.marker_path(&metadata.document_id);
         if !marker_path.exists() {
+            if self.repository.document_path(&metadata.document_id).exists() {
+                return Ok(TransactionStatus::Inconsistent);
+            }
             return if self.stage_path(operation_id).exists() {
                 Ok(TransactionStatus::Prepared)
             } else {
@@ -334,6 +337,30 @@ impl TransactionalStore {
                     operation_id: stem.to_owned(),
                     status: TransactionStatus::Incomplete,
                     detail: "staging file has no matching transaction journal".into(),
+                });
+            }
+        }
+
+        // A commit marker without its journal cannot establish a complete
+        // transaction history. Keep the marker and report the missing journal.
+        let commits_dir = self.transactions_dir().join("commits");
+        for entry in fs::read_dir(commits_dir).map_err(io_error)? {
+            let entry = entry.map_err(io_error)?;
+            if !entry.file_type().map_err(io_error)?.is_file() {
+                continue;
+            }
+            let marker_path = entry.path();
+            let marker: CommitMarker = match read_json(&marker_path) {
+                Ok(marker) => marker,
+                Err(_) => continue,
+            };
+            if !self.journal_path(&marker.operation_id).exists() {
+                report.inspected += 1;
+                report.inconsistent += 1;
+                report.issues.push(RecoveryIssue {
+                    operation_id: marker.operation_id,
+                    status: TransactionStatus::Inconsistent,
+                    detail: "commit marker has no matching transaction journal".into(),
                 });
             }
         }
