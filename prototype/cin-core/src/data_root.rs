@@ -41,10 +41,7 @@ impl DataRoot {
         Self::resolve_with(explicit, &|key| env::var_os(key))
     }
 
-    fn resolve_with<F>(
-        explicit: Option<PathBuf>,
-        get_env: &F,
-    ) -> Result<Self, DataRootError>
+    fn resolve_with<F>(explicit: Option<PathBuf>, get_env: &F) -> Result<Self, DataRootError>
     where
         F: Fn(&str) -> Option<OsString>,
     {
@@ -120,10 +117,9 @@ mod tests {
     #[test]
     fn explicit_root_has_highest_precedence() {
         let explicit = PathBuf::from("/cin/explicit");
-        let root = DataRoot::resolve_with(
-            Some(explicit.clone()),
-            &|key| env_value(key, &[(DATA_DIR_ENV, "/cin/environment")]),
-        )
+        let root = DataRoot::resolve_with(Some(explicit.clone()), &|key| {
+            env_value(key, &[(DATA_DIR_ENV, "/cin/environment")])
+        })
         .unwrap();
 
         assert_eq!(root.path(), &explicit);
@@ -132,20 +128,17 @@ mod tests {
 
     #[test]
     fn cin_data_dir_overrides_platform_default() {
-        let root = DataRoot::resolve_with(
-            None,
-            &|key| {
-                env_value(
-                    key,
-                    &[
-                        (DATA_DIR_ENV, "/cin/environment"),
-                        ("HOME", "/home/test"),
-                        ("XDG_DATA_HOME", "/home/test/.local/share"),
-                        ("APPDATA", "C:/Users/test/AppData/Roaming"),
-                    ],
-                )
-            },
-        )
+        let root = DataRoot::resolve_with(None, &|key| {
+            env_value(
+                key,
+                &[
+                    (DATA_DIR_ENV, "/cin/environment"),
+                    ("HOME", "/home/test"),
+                    ("XDG_DATA_HOME", "/home/test/.local/share"),
+                    ("APPDATA", "C:/Users/test/AppData/Roaming"),
+                ],
+            )
+        })
         .unwrap();
 
         assert_eq!(root.path(), &PathBuf::from("/cin/environment"));
@@ -155,10 +148,12 @@ mod tests {
     #[cfg(all(unix, not(target_os = "macos")))]
     #[test]
     fn xdg_data_home_is_the_linux_platform_default() {
-        let root = DataRoot::resolve_with(
-            None,
-            &|key| env_value(key, &[("XDG_DATA_HOME", "/home/test/data"), ("HOME", "/home/test")]),
-        )
+        let root = DataRoot::resolve_with(None, &|key| {
+            env_value(
+                key,
+                &[("XDG_DATA_HOME", "/home/test/data"), ("HOME", "/home/test")],
+            )
+        })
         .unwrap();
 
         assert_eq!(root.path(), &PathBuf::from("/home/test/data/CIN"));
@@ -168,13 +163,10 @@ mod tests {
     #[cfg(all(unix, not(target_os = "macos")))]
     #[test]
     fn home_local_share_is_the_linux_fallback() {
-        let root = DataRoot::resolve_with(None, &|key| env_value(key, &[("HOME", "/home/test")]))
-            .unwrap();
+        let root =
+            DataRoot::resolve_with(None, &|key| env_value(key, &[("HOME", "/home/test")])).unwrap();
 
-        assert_eq!(
-            root.path(),
-            &PathBuf::from("/home/test/.local/share/CIN")
-        );
+        assert_eq!(root.path(), &PathBuf::from("/home/test/.local/share/CIN"));
         assert_eq!(root.source(), &DataRootSource::PlatformDefault);
     }
 
@@ -194,10 +186,9 @@ mod tests {
     #[cfg(target_os = "windows")]
     #[test]
     fn appdata_is_the_windows_default() {
-        let root = DataRoot::resolve_with(
-            None,
-            &|key| env_value(key, &[("APPDATA", "C:/Users/test/AppData/Roaming")]),
-        )
+        let root = DataRoot::resolve_with(None, &|key| {
+            env_value(key, &[("APPDATA", "C:/Users/test/AppData/Roaming")])
+        })
         .unwrap();
 
         assert_eq!(
