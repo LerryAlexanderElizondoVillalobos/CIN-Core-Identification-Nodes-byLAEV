@@ -623,4 +623,60 @@ mod tests {
         );
         let _ = fs::remove_dir_all(root);
     }
+
+    #[test]
+    fn authoritative_file_without_marker_is_never_visible() {
+        let root = root();
+        let store = TransactionalStore::open(&root).unwrap();
+        let doc = document("cin:transaction:6", 6);
+        store.prepare_record("operation-6", &doc).unwrap();
+        fs::hard_link(
+            store.stage_path("operation-6"),
+            store.repository.document_path(&doc.document_id),
+        )
+        .unwrap();
+
+        assert!(matches!(
+            store.read_record(&doc.document_id),
+            Err(StorageError::NotFound(_))
+        ));
+        assert_eq!(
+            store.operation_status("operation-6").unwrap(),
+            TransactionStatus::Inconsistent
+        );
+        let report = store.inspect_recovery().unwrap();
+        assert_eq!(report.inconsistent, 1);
+        let _ = fs::remove_dir_all(root);
+    }
+
+    #[test]
+    fn orphan_staging_file_is_reported_without_mutation() {
+        let root = root();
+        let store = TransactionalStore::open(&root).unwrap();
+        let orphan = store.stage_path("orphan-operation");
+        write_new_synced(&orphan, b"partial").unwrap();
+
+        let report = store.inspect_recovery().unwrap();
+        assert_eq!(report.incomplete, 1);
+        assert!(orphan.exists());
+        let _ = fs::remove_dir_all(root);
+    }
+
+    #[test]
+    fn marker_without_journal_is_reported_as_inconsistent() {
+        let root = root();
+        let store = TransactionalStore::open(&root).unwrap();
+        let doc = document("cin:transaction:7", 7);
+        store.prepare_record("operation-7", &doc).unwrap();
+        store.commit_record("operation-7").unwrap();
+        fs::remove_file(store.journal_path("operation-7")).unwrap();
+
+        assert!(matches!(
+            store.read_record(&doc.document_id),
+            Err(StorageError::Io(_))
+        ));
+        let report = store.inspect_recovery().unwrap();
+        assert_eq!(report.inconsistent, 1);
+        let _ = fs::remove_dir_all(root);
+    }
 }
