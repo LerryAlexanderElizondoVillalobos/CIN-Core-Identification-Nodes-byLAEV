@@ -73,6 +73,12 @@ test('serves the web UI and preserves data after restart and package relocation'
   const status = await fetch(`${base}/api/status`);
   assert.equal(status.status, 200);
   assert.match(await status.text(), /CIN local web runtime ready/);
+  const lifecycle = await fetch(`${base}/api/lifecycle`);
+  assert.equal(lifecycle.status, 200);
+  const lifecycleState = await lifecycle.json();
+  assert.equal(lifecycleState.state, 'READY');
+  assert.equal(lifecycleState.port, Number(new URL(base).port));
+  assert.equal(lifecycleState.browser, 'manual');
   const write = await fetch(`${base}/api/probe/write`, { method: 'POST' });
   assert.equal(write.status, 200);
   assert.match(await write.text(), /Probe committed and read-back verified/);
@@ -89,6 +95,8 @@ test('serves the web UI and preserves data after restart and package relocation'
   assert.match(record, /written_at_unix=/);
   assert.equal(fs.existsSync(path.join(dataRoot, 'runtime-probe.record')), true);
   assert.equal(fs.existsSync(path.join(packageB, 'runtime-probe.record')), false);
+  const shutdown = await fetch(`${relocatedBase}/api/runtime/shutdown`, { method: 'POST' });
+  assert.equal(shutdown.status, 202);
   await stop(runtime);
 });
 
