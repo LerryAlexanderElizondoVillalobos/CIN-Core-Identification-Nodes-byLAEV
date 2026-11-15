@@ -33,3 +33,11 @@ The declared collection profile includes operating system and architecture, allo
 Workflow: `.github/workflows/cin-genesis-lobby-pages.yml`
 
 The workflow publishes **only** `Core Identification Node Github/` as the GitHub Pages artifact. To activate deployment, repository Settings → Pages → Build and deployment → Source must be set to **GitHub Actions**. The first workflow deployment will publish the Lobby at the URL above.
+
+## CIN Node Birth Certificate
+
+- **Certificate descriptor:** [CIN Node Birth Certificate](CIN-NODE-BIRTH.cincert)
+- **Technical specification:** [CIN Node Birth Certificate Specification v1](../specifications/CIN_NODE_BIRTH_CERTIFICATE_SPEC_V1.md)
+- **Output schema:** [CIN Node Birth Record v1](../specifications/schemas/cin-node-birth-record-v1.schema.json)
+
+The Node Birth Certificate consumes the complete registered Genesis Environment Manifest and creates a separate Node Birth Record. Its descriptor is currently at specification stage: the runner action and production issuance remain pending P2 storage, P3 cryptography/verification, P5 Genesis and P6 authorization acceptance. Do not treat the descriptor as an executable certificate until the runner implementation and end-to-end tests are complete.
