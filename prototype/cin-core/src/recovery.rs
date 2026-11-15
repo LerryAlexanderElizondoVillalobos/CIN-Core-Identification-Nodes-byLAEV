@@ -35,7 +35,8 @@ impl RecoveryReport {
 }
 
 /// Inspection only: never deletes, rewrites, or silently quarantines user records.
-pub(crate) fn inspect_storage(repo: &DocumentRepository) -> Result<RecoveryReport, StorageError> {
+#[cfg(test)]
+fn inspect_storage(repo: &DocumentRepository) -> Result<RecoveryReport, StorageError> {
     let entries = fs::read_dir(repo.root().join("documents"))
         .map_err(|error| StorageError::Io(error.to_string()))?;
     let mut report = RecoveryReport::default();
