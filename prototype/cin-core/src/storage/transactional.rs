@@ -103,7 +103,8 @@ impl TransactionalStore {
         document: &DocumentEnvelope,
     ) -> Result<PreparedTransaction, StorageError> {
         validate_operation_id(operation_id)?;
-        validate_document(document).map_err(|error| StorageError::InvalidDocument(error.to_string()))?;
+        validate_document(document)
+            .map_err(|error| StorageError::InvalidDocument(error.to_string()))?;
 
         let bytes = serde_json::to_vec_pretty(document)
             .map_err(|error| StorageError::Serialization(error.to_string()))?;
@@ -156,7 +157,9 @@ impl TransactionalStore {
         if metadata.storage_format_version != STORAGE_FORMAT_VERSION
             || metadata.operation_id != operation_id
         {
-            return Err(StorageError::Integrity("unsupported or mismatched transaction journal".into()));
+            return Err(StorageError::Integrity(
+                "unsupported or mismatched transaction journal".into(),
+            ));
         }
 
         let marker_path = self.marker_path(&metadata.document_id);
@@ -174,9 +177,12 @@ impl TransactionalStore {
         }
         let document: DocumentEnvelope = serde_json::from_slice(&staged)
             .map_err(|error| StorageError::Serialization(error.to_string()))?;
-        validate_document(&document).map_err(|error| StorageError::InvalidDocument(error.to_string()))?;
+        validate_document(&document)
+            .map_err(|error| StorageError::InvalidDocument(error.to_string()))?;
         if document.document_id != metadata.document_id {
-            return Err(StorageError::Integrity("staged document ID differs from journal".into()));
+            return Err(StorageError::Integrity(
+                "staged document ID differs from journal".into(),
+            ));
         }
 
         let record_path = self.repository.document_path(&metadata.document_id);
@@ -224,10 +230,11 @@ impl TransactionalStore {
             || marker.document_id != document_id
             || marker.digest_algorithm != "sha-256"
         {
-            return Err(StorageError::Integrity("commit marker metadata is invalid".into()));
+            return Err(StorageError::Integrity(
+                "commit marker metadata is invalid".into(),
+            ));
         }
-        let metadata: TransactionMetadata =
-            read_json(&self.journal_path(&marker.operation_id))?;
+        let metadata: TransactionMetadata = read_json(&self.journal_path(&marker.operation_id))?;
         self.validate_marker_and_record(&metadata, &marker)?;
         let record_path = self.repository.document_path(document_id);
         let bytes = fs::read(record_path).map_err(io_error)?;
@@ -238,7 +245,8 @@ impl TransactionalStore {
         }
         let document: DocumentEnvelope = serde_json::from_slice(&bytes)
             .map_err(|error| StorageError::Serialization(error.to_string()))?;
-        validate_document(&document).map_err(|error| StorageError::InvalidDocument(error.to_string()))?;
+        validate_document(&document)
+            .map_err(|error| StorageError::InvalidDocument(error.to_string()))?;
         if document.document_id != marker.document_id {
             return Err(StorageError::Integrity("record ID differs from commit marker".into()));
         }
@@ -256,7 +264,11 @@ impl TransactionalStore {
         let metadata: TransactionMetadata = read_json(&journal_path)?;
         let marker_path = self.marker_path(&metadata.document_id);
         if !marker_path.exists() {
-            if self.repository.document_path(&metadata.document_id).exists() {
+            if self
+                .repository
+                .document_path(&metadata.document_id)
+                .exists()
+            {
                 return Ok(TransactionStatus::Inconsistent);
             }
             return if self.stage_path(operation_id).exists() {
@@ -308,7 +320,8 @@ impl TransactionalStore {
                     report.issues.push(RecoveryIssue {
                         operation_id: metadata.operation_id,
                         status,
-                        detail: "commit marker or authoritative record does not match journal".into(),
+                        detail: "commit marker or authoritative record does not match journal"
+                            .into(),
                     });
                 }
             }
@@ -378,11 +391,16 @@ impl TransactionalStore {
             || marker.digest_algorithm != metadata.digest_algorithm
             || marker.digest != metadata.digest
         {
-            return Err(StorageError::Integrity("commit marker does not match journal".into()));
+            return Err(StorageError::Integrity(
+                "commit marker does not match journal".into(),
+            ));
         }
-        let bytes = fs::read(self.repository.document_path(&metadata.document_id)).map_err(io_error)?;
+        let bytes =
+            fs::read(self.repository.document_path(&metadata.document_id)).map_err(io_error)?;
         if digest_hex(&bytes) != metadata.digest {
-            return Err(StorageError::Integrity("committed record digest mismatch".into()));
+            return Err(StorageError::Integrity(
+                "committed record digest mismatch".into(),
+            ));
         }
         Ok(())
     }
@@ -428,7 +446,9 @@ fn receipt(metadata: &TransactionMetadata) -> CommitReceipt {
 
 fn validate_operation_id(operation_id: &str) -> Result<(), StorageError> {
     if operation_id.trim().is_empty() {
-        return Err(StorageError::Conflict("operation ID must not be empty".into()));
+        return Err(StorageError::Conflict(
+            "operation ID must not be empty".into(),
+        ));
     }
     Ok(())
 }
@@ -516,7 +536,10 @@ mod tests {
         std::env::temp_dir().join(format!(
             "cin-transactional-{}-{}",
             std::process::id(),
-            SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos()
+            SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
         ))
     }
 
@@ -611,7 +634,11 @@ mod tests {
         let doc = document("cin:transaction:5", 5);
         store.prepare_record("operation-5", &doc).unwrap();
         store.commit_record("operation-5").unwrap();
-        fs::write(store.repository.document_path(&doc.document_id), b"tampered").unwrap();
+        fs::write(
+            store.repository.document_path(&doc.document_id),
+            b"tampered",
+        )
+        .unwrap();
 
         assert!(matches!(
             store.read_record(&doc.document_id),
