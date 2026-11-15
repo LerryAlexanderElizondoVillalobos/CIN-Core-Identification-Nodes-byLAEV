@@ -52,7 +52,7 @@ The two post-extraction paths are intentional. A user may enter the Lobby withou
 ## 3. Stages
 
 ### Package verification
-The Package Origin Verification Engine checks the ZIP against separately obtained release metadata and independently configured trust material. Its results distinguish archive digest, manifest validity, signature validity, publisher-key trust, metadata match, and installation authorization. A successful package check does not mean a node has been born.
+The Package Origin Verification Engine checks the ZIP against separately obtained release metadata and independently configured trust material. Its results distinguish archive digest, manifest validity, signature validity, publisher-key trust, metadata match, and local execution authorization. A successful package check does not mean a node has been born.
 
 ### Extraction
 The portable package is extracted to a configured location. Extraction provides the software structure from which the future node operates; it is not formal node birth.
@@ -61,7 +61,7 @@ The portable package is extracted to a configured location. Extraction provides 
 The Environment Audit process examines relevant, technically accessible information subject to operating-system permissions and explicit collection rules. It distinguishes observed, declared, derived, external, unavailable, and not-collected data.
 
 ### Genesis Manifest
-The manifest records the environment and CIN package context before formal birth. It is not the Node Birth Record, a human registration record, a certificate, or proof that every discovered capability is installed or active. Exact fields and serialization belong in a versioned specification.
+The manifest records the environment and CIN package context before formal birth. It is not the Node Birth Record, a human registration record, a certificate, or proof that every discovered capability is available in the extracted package or active. Exact fields and serialization belong in a versioned specification.
 
 ### First local registration
 The Genesis Manifest is intended to be the first logical record in private local storage. Minimal technical initialization (directory, database file, metadata structure) may precede it, but must not create an earlier application record. The implementation must test this ordering and specify atomicity, recovery, access control, integrity checks, and references.
@@ -75,7 +75,7 @@ Key generation, external signing, and certificate issuance must be explicitly as
 Before birth, the Lobby should state that the node is prepared and awaiting its birth procedure. After a valid birth record is created and verified, it may present the node as born. Displayed status must reflect records and checks that actually exist.
 
 ### Ecosystem preparation
-After birth, the operator may configure storage, certificates, external signing, request and permission services, ledgers, Merkle services, and network connectivity. Discovery of a component does not mean it is installed, configured, trusted, or active.
+After birth, the operator may configure storage, certificates, external signing, request and permission services, ledgers, Merkle services, and network connectivity. Discovery of a component does not mean it is available in the extracted package, configured, trusted, or active.
 
 ## 4. Proposed high-level states
 
@@ -94,7 +94,7 @@ After birth, the operator may configure storage, certificates, external signing,
 | ECOSYSTEM_SETUP_IN_PROGRESS | Post-birth configuration underway |
 | OPERATIONAL | A defined operational profile passed its checks |
 
-These are proposed states, not an implementation contract. Do not collapse package verification, genesis, birth, human association, and network admission into one “installed” state.
+These are proposed states, not an implementation contract. Do not collapse package verification, genesis, birth, human association, and network admission into one “available in the extracted package” state.
 
 ## 5. Human registration boundary
 
