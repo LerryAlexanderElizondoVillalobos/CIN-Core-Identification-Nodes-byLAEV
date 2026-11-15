@@ -191,10 +191,7 @@ mod tests {
         let report = inspect_storage(&repository).unwrap();
         assert_eq!(report.valid, 0);
         assert_eq!(report.issues.len(), 1);
-        assert_eq!(
-            report.issues[0].kind,
-            RecoveryIssueKind::FilenameIdMismatch
-        );
+        assert_eq!(report.issues[0].kind, RecoveryIssueKind::FilenameIdMismatch);
         assert!(misplaced.exists());
         assert!(!canonical.exists());
         let _ = fs::remove_dir_all(path);
