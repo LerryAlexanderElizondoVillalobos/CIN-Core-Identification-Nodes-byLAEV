@@ -1,4 +1,4 @@
-name: CIN Linux Desktop End-to-End Acceptance
+name: CIN Linux Local Web End-to-End Acceptance
 
 on:
   pull_request:
@@ -8,7 +8,6 @@ on:
       - "prototype/dist/**"
       - "scripts/package-linux-zip.sh"
       - "e2e/**"
-      - ".github/workflows/linux-portable-prototype.yml"
       - ".github/workflows/linux-desktop-e2e.yml"
   push:
     branches: [main]
@@ -17,7 +16,6 @@ on:
       - "prototype/dist/**"
       - "scripts/package-linux-zip.sh"
       - "e2e/**"
-      - ".github/workflows/linux-portable-prototype.yml"
       - ".github/workflows/linux-desktop-e2e.yml"
   workflow_dispatch:
 
@@ -25,39 +23,39 @@ permissions:
   contents: read
 
 concurrency:
-  group: cin-linux-desktop-e2e-${{ github.workflow }}-${{ github.ref }}
+  group: cin-linux-local-web-e2e-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  build-package:
-    name: Build and publish test ZIP
+  portable-local-web:
+    name: Build, serve local web UI, test ports and persistence
     runs-on: ubuntu-24.04
+    timeout-minutes: 20
     steps:
       - name: Check out source
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           persist-credentials: false
 
-      - name: Install Linux build dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential curl wget file libxdo-dev libssl-dev librsvg2-dev libwebkit2gtk-4.1-dev zip
-
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Run Rust tests
+      - name: Verify formatting
+        working-directory: prototype/linux-runtime
+        run: cargo fmt --all -- --check
+
+      - name: Run runtime unit tests
         working-directory: prototype/linux-runtime
         run: cargo test
 
-      - name: Build portable runtime
+      - name: Build local web runtime
         working-directory: prototype/linux-runtime
         run: cargo build --release
 
-      - name: Package extracted-folder ZIP
+      - name: Package portable ZIP
         run: bash scripts/package-linux-zip.sh prototype/linux-runtime/target/release/cin-linux-prototype
 
-      - name: Verify package checksum and structure
+      - name: Verify package checksum and layout
         run: |
           set -euo pipefail
           cd dist
@@ -66,99 +64,6 @@ jobs:
           test -x package-check/CIN-Linux-Portable-x86_64/run-cin.sh
           test -x package-check/CIN-Linux-Portable-x86_64/cin
 
-      - name: Upload the exact ZIP and checksum for the clean-VM test
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: CIN-Linux-Portable-E2E
-          path: |
-            dist/CIN-Linux-Portable-x86_64.zip
-            dist/CIN-Linux-Portable-x86_64.zip.sha256
-          if-no-files-found: error
-          retention-days: 7
-
-  desktop-e2e:
-    name: Install, launch, write, close, relocate, relaunch and read
-    needs: build-package
-    runs-on: ubuntu-24.04
-    timeout-minutes: 25
-    steps:
-      - name: Check out source
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-        with:
-          persist-credentials: false
-
-      - name: Install desktop runtime, WebDriver and virtual display
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-0 libgtk-3-0 webkit2gtk-driver xvfb
-
-      - name: Install Rust stable for the WebDriver bridge
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Install Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
-        with:
-          node-version: "22"
-
-      - name: Download package artifact onto a fresh VM
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
-        with:
-          name: CIN-Linux-Portable-E2E
-          path: ${{ runner.temp }}/cin-download
-
-      - name: Verify the downloaded ZIP and extract it
-        shell: bash
-        run: |
-          set -euo pipefail
-          cd "${RUNNER_TEMP}/cin-download"
-          sha256sum -c CIN-Linux-Portable-x86_64.zip.sha256
-          mkdir -p "${RUNNER_TEMP}/cin-extracted"
-          unzip -q CIN-Linux-Portable-x86_64.zip -d "${RUNNER_TEMP}/cin-extracted"
-          PACKAGE="${RUNNER_TEMP}/cin-extracted/CIN-Linux-Portable-x86_64"
-          test -x "$PACKAGE/run-cin.sh"
-          test -x "$PACKAGE/cin"
-          echo "CIN_APP_BINARY=$PACKAGE/run-cin.sh" >> "$GITHUB_ENV"
-          echo "CIN_DATA_ROOT=${RUNNER_TEMP}/cin-e2e-data" >> "$GITHUB_ENV"
-
-      - name: Install pinned WebdriverIO dependencies
-        run: npm install --no-package-lock
+      - name: Run local HTTP, port selection and relocation acceptance tests
         working-directory: e2e
-
-      - name: Launch from extracted ZIP and write through the GUI
-        env:
-          CIN_E2E_PHASE: write
-        run: xvfb-run -a npm run test:desktop
-        working-directory: e2e
-
-      - name: Confirm data is outside the application package
-        shell: bash
-        run: |
-          set -euo pipefail
-          test -s "$CIN_DATA_ROOT/runtime-probe.record"
-          test ! -e "$RUNNER_TEMP/cin-extracted/CIN-Linux-Portable-x86_64/runtime-probe.record"
-          mkdir -p "$RUNNER_TEMP/cin-relocated"
-          mv "$RUNNER_TEMP/cin-extracted/CIN-Linux-Portable-x86_64" "$RUNNER_TEMP/cin-relocated/CIN-Linux-Portable-x86_64"
-          echo "CIN_APP_BINARY=$RUNNER_TEMP/cin-relocated/CIN-Linux-Portable-x86_64/run-cin.sh" >> "$GITHUB_ENV"
-
-      - name: Relaunch from moved folder and read through the GUI
-        env:
-          CIN_E2E_PHASE: read
-        run: xvfb-run -a npm run test:desktop
-        working-directory: e2e
-
-      - name: Confirm persisted record remains in the external data root
-        run: |
-          set -euo pipefail
-          test -s "$CIN_DATA_ROOT/runtime-probe.record"
-          test ! -e "$RUNNER_TEMP/cin-relocated/CIN-Linux-Portable-x86_64/runtime-probe.record"
-          grep -q '^CIN_LOCAL_PERSISTENCE_PROBE_V1$' "$CIN_DATA_ROOT/runtime-probe.record"
-          echo "PASS: ZIP download, checksum, extraction, GUI launch, GUI write, process shutdown, package relocation, GUI relaunch and GUI read."
-
-      - name: Upload desktop test diagnostics
-        if: failure()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: CIN-Linux-Desktop-E2E-Diagnostics
-          path: ${{ runner.temp }}/cin-desktop-e2e-failure.png
-          if-no-files-found: ignore
-          retention-days: 7
+        run: npm run test:web
