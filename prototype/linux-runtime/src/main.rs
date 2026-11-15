@@ -69,16 +69,23 @@ fn handle_connection(mut stream: TcpStream) -> std::io::Result<()> {
             return response(&mut stream, "431 Request Header Fields Too Large", "text/plain", "Request headers too large");
         }
     }
-    let headers = String::from_utf8_lossy(&request[..header_end]);
-    let mut lines = headers.lines();
-    let first = lines.next().unwrap_or_default();
-    let mut parts = first.split_whitespace();
-    let method = parts.next().unwrap_or("");
-    let path = parts.next().unwrap_or("/");
-    let content_length = lines.find_map(|line| {
-        let (name, value) = line.split_once(':')?;
-        if name.eq_ignore_ascii_case("content-length") { value.trim().parse::<usize>().ok() } else { None }
-    }).unwrap_or(0);
+    let (method, path, content_length) = {
+        let headers = String::from_utf8_lossy(&request[..header_end]);
+        let mut lines = headers.lines();
+        let first = lines.next().unwrap_or_default();
+        let mut parts = first.split_whitespace();
+        let method = parts.next().unwrap_or("").to_string();
+        let path = parts.next().unwrap_or("/").to_string();
+        let content_length = lines.find_map(|line| {
+            let (name, value) = line.split_once(':')?;
+            if name.eq_ignore_ascii_case("content-length") {
+                value.trim().parse::<usize>().ok()
+            } else {
+                None
+            }
+        }).unwrap_or(0);
+        (method, path, content_length)
+    };
     let total = header_end.saturating_add(content_length);
     while request.len() < total {
         let count = stream.read(&mut buffer)?;
