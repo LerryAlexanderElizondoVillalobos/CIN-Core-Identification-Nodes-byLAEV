@@ -68,7 +68,7 @@ jobs:
           unzip -q dist/CIN-Linux-Portable-x86_64.zip -d /tmp/cin-package-check
           test -x /tmp/cin-package-check/CIN-Linux-Portable-x86_64/run-cin.sh
           test -x /tmp/cin-package-check/CIN-Linux-Portable-x86_64/cin
-          sha256sum -c dist/CIN-Linux-Portable-x86_64.zip.sha256
+          (cd dist && sha256sum -c CIN-Linux-Portable-x86_64.zip.sha256)
       - name: Upload portable ZIP artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
