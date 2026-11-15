@@ -38,6 +38,10 @@ Code contributions should have a clear scope, follow existing language conventio
 
 Avoid dependencies without a stated purpose and maintenance rationale. Implement the defined functional purpose first; add defensive controls in response to identified requirements and risks.
 
+## Contribution rights and project license
+
+CIN currently uses a proprietary, all-rights-reserved project declaration rather than a general open-source license. Before submitting a substantial contribution, discuss the intended terms with the maintainers. A pull request must not be assumed to grant the project rights to relicense, distribute, or commercially use a contribution beyond rights actually granted by its author. The maintainers should establish a written contributor agreement or another clear rights process before accepting substantial third-party code or documentation.
+
 ## Pull request expectations
 
 A pull request should include:
