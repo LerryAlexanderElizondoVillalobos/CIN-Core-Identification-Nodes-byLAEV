@@ -42,13 +42,17 @@ function startRuntime(dataRoot) {
   });
   return { child, ready, getOutput: () => output };
 }
+async function waitForExit(runtime, timeoutMs = 3000) {
+  if (runtime.child.exitCode !== null) return runtime.child.exitCode;
+  return Promise.race([
+    new Promise(resolve => runtime.child.once('exit', code => resolve(code))),
+    new Promise(resolve => setTimeout(() => resolve(null), timeoutMs))
+  ]);
+}
 async function stop(runtime) {
   if (runtime.child.exitCode !== null) return;
   runtime.child.kill('SIGTERM');
-  await Promise.race([
-    new Promise(resolve => runtime.child.once('exit', resolve)),
-    new Promise(resolve => setTimeout(resolve, 3000))
-  ]);
+  await waitForExit(runtime);
   if (runtime.child.exitCode === null) runtime.child.kill('SIGKILL');
 }
 
@@ -97,7 +101,7 @@ test('serves the web UI and preserves data after restart and package relocation'
   assert.equal(fs.existsSync(path.join(packageB, 'runtime-probe.record')), false);
   const shutdown = await fetch(`${relocatedBase}/api/runtime/shutdown`, { method: 'POST' });
   assert.equal(shutdown.status, 202);
-  await stop(runtime);
+  assert.equal(await waitForExit(runtime), 0, 'runtime should exit cleanly after graceful shutdown');
 });
 
 test('prefers 1221 when it is available', async t => {
