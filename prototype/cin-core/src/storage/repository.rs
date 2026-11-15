@@ -1,11 +1,17 @@
+use std::{fmt, fs, path::{Path, PathBuf}};
+
+#[cfg(test)]
 use crate::documents::{validate_document, DocumentEnvelope};
+#[cfg(test)]
 use serde_json;
-use std::fmt;
-use std::fs::{self, File, OpenOptions};
+#[cfg(test)]
+use std::fs::{File, OpenOptions};
+#[cfg(test)]
 use std::io::{Read, Write};
-use std::path::{Path, PathBuf};
+#[cfg(test)]
 use std::sync::atomic::{AtomicU64, Ordering};
 
+#[cfg(test)]
 static TEMP_SEQUENCE: AtomicU64 = AtomicU64::new(0);
 
 #[derive(Debug)]
