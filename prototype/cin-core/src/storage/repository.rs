@@ -56,7 +56,7 @@ impl DocumentRepository {
         if target.exists() {
             let existing = self.get(&document.document_id)?;
             if existing == *document {
-                return Ok(()); // idempotent retry of the exact same logical document
+                return Ok(());
             }
             return Err(StorageError::Conflict(document.document_id.clone()));
         }
@@ -72,9 +72,7 @@ impl DocumentRepository {
         file.sync_all().map_err(io_error)?;
         drop(file);
 
-        // Same-directory rename is atomic on the supported local filesystem.
-        // hard_link atomically creates the destination without replacing an existing
-        // record. Unlike rename, this preserves create-only semantics under races.
+        // hard_link atomically creates the destination without replacing an existing record.
         match fs::hard_link(&temp, &target) {
             Ok(()) => {
                 fs::remove_file(&temp).map_err(io_error)?;
@@ -122,7 +120,7 @@ impl DocumentRepository {
         self.document_path(document_id).is_file()
     }
 
-    fn document_path(&self, document_id: &str) -> PathBuf {
+    pub(crate) fn document_path(&self, document_id: &str) -> PathBuf {
         // Hex encoding makes arbitrary IDs safe as filenames and deterministic.
         let encoded: String = document_id
             .as_bytes()
