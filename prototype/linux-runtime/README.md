@@ -40,6 +40,7 @@ Extract dist/CIN-Linux-Portable-x86_64.zip and run ./run-cin.sh.
 - Standard-library HTTP server; no third-party runtime dependency.
 - Browser launch prefers Chromium (`CIN_BROWSER` can select an executable), then falls back to `xdg-open`; the printed URL can be opened manually if neither is available.
 - The Runtime Lifecycle Manager exposes `STARTING`, `READY`, `STOPPING` and `STOPPED` process states. `GET /api/lifecycle` returns the current state; `POST /api/runtime/shutdown` requests graceful shutdown.
+- Linux CI installs Chromium and runs a headless browser acceptance test against the actual local runtime. `CIN_BROWSER_HEADLESS=1` is reserved for this smoke-test mode and uses Chromium's headless DOM-dump launch flags.
 - The prototype package is unsigned and is not a production release.
 - The persistence probe is not the production CIN record store.
 - No USB signer, certificate engine, Genesis, node birth, personal registration or Main Lobby.
