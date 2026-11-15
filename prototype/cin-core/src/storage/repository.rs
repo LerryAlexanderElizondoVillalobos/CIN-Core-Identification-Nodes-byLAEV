@@ -34,22 +34,22 @@ impl std::error::Error for StorageError {}
 
 /// Filesystem repository. It owns the storage root, never the application's UI/runtime.
 #[derive(Debug, Clone)]
-pub struct DocumentRepository {
+pub(crate) struct DocumentRepository {
     root: PathBuf,
 }
 
 impl DocumentRepository {
-    pub fn open(root: impl Into<PathBuf>) -> Result<Self, StorageError> {
+    pub(crate) fn open(root: impl Into<PathBuf>) -> Result<Self, StorageError> {
         let root = root.into();
         fs::create_dir_all(root.join("documents")).map_err(io_error)?;
         Ok(Self { root })
     }
 
-    pub fn root(&self) -> &Path {
+    pub(crate) fn root(&self) -> &Path {
         &self.root
     }
 
-    pub fn put(&self, document: &DocumentEnvelope) -> Result<(), StorageError> {
+    pub(crate) fn put(&self, document: &DocumentEnvelope) -> Result<(), StorageError> {
         validate_document(document).map_err(|e| StorageError::InvalidDocument(e.to_string()))?;
         let target = self.document_path(&document.document_id);
         let bytes = serde_json::to_vec_pretty(document)
@@ -96,7 +96,7 @@ impl DocumentRepository {
         }
     }
 
-    pub fn get(&self, document_id: &str) -> Result<DocumentEnvelope, StorageError> {
+    pub(crate) fn get(&self, document_id: &str) -> Result<DocumentEnvelope, StorageError> {
         let path = self.document_path(document_id);
         let mut file = File::open(&path).map_err(|e| {
             if e.kind() == std::io::ErrorKind::NotFound {
@@ -118,7 +118,7 @@ impl DocumentRepository {
         Ok(document)
     }
 
-    pub fn contains(&self, document_id: &str) -> bool {
+    pub(crate) fn contains(&self, document_id: &str) -> bool {
         self.document_path(document_id).is_file()
     }
 
