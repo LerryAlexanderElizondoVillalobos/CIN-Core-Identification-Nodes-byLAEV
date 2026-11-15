@@ -248,7 +248,9 @@ impl TransactionalStore {
         validate_document(&document)
             .map_err(|error| StorageError::InvalidDocument(error.to_string()))?;
         if document.document_id != marker.document_id {
-            return Err(StorageError::Integrity("record ID differs from commit marker".into()));
+            return Err(StorageError::Integrity(
+                "record ID differs from commit marker".into(),
+            ));
         }
         Ok(document)
     }
