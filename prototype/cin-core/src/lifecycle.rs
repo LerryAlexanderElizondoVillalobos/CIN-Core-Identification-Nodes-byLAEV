@@ -28,9 +28,14 @@ pub struct TransitionError {
 
 impl fmt::Display for TransitionError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "transition {:?} -> {:?} is not permitted by lifecycle model", self.from, self.to)
+        write!(
+            f,
+            "transition {:?} -> {:?} is not permitted by lifecycle model",
+            self.from, self.to
+        )
     }
 }
+
 impl std::error::Error for TransitionError {}
 
 impl LifecycleState {
@@ -62,7 +67,10 @@ impl LifecycleState {
         if self.can_transition_to(next) {
             Ok(next)
         } else {
-            Err(TransitionError { from: self, to: next })
+            Err(TransitionError {
+                from: self,
+                to: next,
+            })
         }
     }
 }
@@ -91,14 +99,25 @@ mod tests {
             LifecycleState::MainLobbyOpen,
         ];
         for pair in sequence.windows(2) {
-            assert!(pair[0].transition(pair[1]).is_ok(), "{:?} -> {:?}", pair[0], pair[1]);
+            assert!(
+                pair[0].transition(pair[1]).is_ok(),
+                "{:?} -> {:?}",
+                pair[0],
+                pair[1]
+            );
         }
     }
 
     #[test]
     fn rejects_skipping_birth_authorization() {
         let result = LifecycleState::Prenatal.transition(LifecycleState::Born);
-        assert_eq!(result, Err(TransitionError { from: LifecycleState::Prenatal, to: LifecycleState::Born }));
+        assert_eq!(
+            result,
+            Err(TransitionError {
+                from: LifecycleState::Prenatal,
+                to: LifecycleState::Born
+            })
+        );
     }
 
     #[test]
@@ -107,6 +126,10 @@ mod tests {
             LifecycleState::MainLobbyOpen.transition(LifecycleState::MainLobbyReady),
             Ok(LifecycleState::MainLobbyReady)
         );
-        assert!(LifecycleState::MainLobbyReady.transition(LifecycleState::Born).is_err());
+        assert!(
+            LifecycleState::MainLobbyReady
+                .transition(LifecycleState::Born)
+                .is_err()
+        );
     }
 }
