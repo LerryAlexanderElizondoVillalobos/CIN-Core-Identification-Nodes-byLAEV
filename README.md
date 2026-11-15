@@ -20,6 +20,13 @@ The initial Rust implementation audits a purpose-limited set of OS/runtime/hardw
 
 Run the initial manifest generator from the extracted package context with `cargo run --manifest-path prototype/cin-core/Cargo.toml --bin cin-genesis-manifest -- --package-root ./path/to/extracted-cin` (or omit the argument when the executable is already inside the extracted package directory). It prints the candidate and waits for explicit confirmation before committing it to the resolved CIN data root.
 
+## Certificate Runner — first vertical slice
+
+- [Certificate Runner v1 specification](specifications/CIN_CERTIFICATE_RUNNER_V1.md)
+- [Genesis Environment Certificate](certificates/CIN-GENESIS-ENVIRONMENT.cincert)
+
+Run the first certificate with `cargo run --manifest-path prototype/cin-core/Cargo.toml --bin cin-certificate-runner -- certificates/CIN-GENESIS-ENVIRONMENT.cincert`. The Runner prints the candidate Genesis Manifest and asks for confirmation before registering it through the existing DataRoot and TransactionalStore. This first implementation supports only the Genesis Environment profile; OS double-click association is subsequent packaging work.
+
 ## Current maturity
 The repository contains architecture/specifications, schema validation, a Linux portable runtime feasibility prototype, and an initial Rust domain foundation with lifecycle unit tests. The complete CIN engines and Main Lobby are not yet implemented. Passing documentation or foundation CI does not mean the complete product is accepted.
 
