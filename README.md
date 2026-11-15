@@ -120,6 +120,10 @@ The Package Origin Verification Engine and its v1 manifest profile are documente
 
 ## 9. Foundational Documentation and Architecture
 
+- [CIN Architecture Baseline v1](docs/architecture/CIN_ARCHITECTURE_BASELINE_V1.md) — first Main Lobby scope, component responsibilities, maturity gates and unresolved decisions.
+- [CIN Component Dependency Map](docs/architecture/CIN_COMPONENT_DEPENDENCY_MAP.md) — ordered dependencies from ZIP verification through persistent Main Lobby recovery.
+- [CIN Architecture Decision Register](docs/decisions/README.md) — numbered architectural decisions and reserved identifiers.
+
 The following documents establish the conceptual foundation and proposed node lifecycle. They describe intended architecture; they do not claim implementation.
 
 - [CIN Foundational Principles](docs/foundations/CIN_FOUNDATIONAL_PRINCIPLES.md) — equality, human dignity, evidence, privacy, continuity, decentralization, and the distinction between a node and a person.

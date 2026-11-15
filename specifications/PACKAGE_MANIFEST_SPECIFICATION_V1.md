@@ -11,7 +11,7 @@
 
 ## 1. Scope
 
-This specification defines the release manifest used by CIN to describe a ZIP distribution and authenticate that description before installation.
+This specification defines the release manifest used by CIN to describe a ZIP distribution and authenticate that description before extraction and local execution.
 
 Version 1 defines:
 
@@ -23,7 +23,7 @@ Version 1 defines:
 - publisher key identification and out-of-band trust requirements;
 - verification and acceptance rules.
 
-This specification authenticates the manifest and binds the exact ZIP byte sequence to it. It does not establish that package contents are safe, bug-free, or appropriate for a particular installation.
+This specification authenticates the manifest and binds the exact ZIP byte sequence to it. It does not establish that package contents are safe, bug-free, or appropriate for local execution.
 
 ## 2. Normative profile
 
@@ -231,7 +231,7 @@ A conforming verifier MUST:
 8. Compare the received ZIP filename, byte size, and calculated SHA-256 digest with the authenticated manifest values.
 9. Return separate machine-readable results for manifest validity, signature validity, key trust, metadata match, and archive digest match.
 
-The package is **verified for origin and byte integrity** only if all required checks succeed. Installation authorization remains a separate decision made by the installation policy.
+The package is **verified for origin and byte integrity** only if all required checks succeed. Local execution authorization remains a separate decision made by the local execution policy.
 
 ## 11. Failure states
 
@@ -269,7 +269,7 @@ The Package Manifest Specification is consumed by the Package Origin Verificatio
 - ESMT provides Merkle commitments and proofs for structured records and ledger data;
 - the Certificate Engine manages certificate-related operations and trust material;
 - the Request & Permission Engine governs operations requiring authorization;
-- the Ledger Installation Engine consumes verification results and applies installation policy.
+- the portable launcher or local package-admission component consumes verification results and applies local execution policy.
 
 The verifier is not required to possess a private key. Publisher-side signing and verifier-side validation are separate operational roles.
 
@@ -304,7 +304,7 @@ The next implementation work is:
 2. implement a publisher-side manifest builder and signer;
 3. implement the ZIP Origin Verification Engine;
 4. validate interoperability between independent implementations;
-5. integrate verified results with the portable package installation workflow.
+5. integrate verified results with the portable ZIP extraction and local execution workflow.
 
 ---
 
