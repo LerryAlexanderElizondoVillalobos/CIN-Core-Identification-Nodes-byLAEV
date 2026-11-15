@@ -155,6 +155,7 @@ impl TransactionalStore {
         validate_operation_id(operation_id)?;
         let metadata: TransactionMetadata = read_json(&self.journal_path(operation_id))?;
         if metadata.storage_format_version != STORAGE_FORMAT_VERSION
+            || metadata.digest_algorithm != "sha-256"
             || metadata.operation_id != operation_id
         {
             return Err(StorageError::Integrity(
@@ -312,7 +313,18 @@ impl TransactionalStore {
                     continue;
                 }
             };
-            let status = self.operation_status(&metadata.operation_id)?;
+            let status = match self.operation_status(&metadata.operation_id) {
+                Ok(status) => status,
+                Err(error) => {
+                    report.inconsistent += 1;
+                    report.issues.push(RecoveryIssue {
+                        operation_id: metadata.operation_id,
+                        status: TransactionStatus::Inconsistent,
+                        detail: error.to_string(),
+                    });
+                    continue;
+                }
+            };
             match status {
                 TransactionStatus::Prepared => report.prepared += 1,
                 TransactionStatus::Committed => report.committed += 1,
@@ -405,6 +417,7 @@ impl TransactionalStore {
         if marker.storage_format_version != STORAGE_FORMAT_VERSION
             || marker.operation_id != metadata.operation_id
             || marker.document_id != metadata.document_id
+            || metadata.digest_algorithm != "sha-256"
             || marker.digest_algorithm != metadata.digest_algorithm
             || marker.digest != metadata.digest
         {
