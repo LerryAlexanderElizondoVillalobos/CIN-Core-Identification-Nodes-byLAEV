@@ -27,5 +27,5 @@ Unsigned prototype; not a production CIN release.
 MANIFEST
 mkdir -p "$OUT"
 (cd "$OUT" && zip -qr "CIN-Linux-Portable-x86_64.zip" "CIN-Linux-Portable-x86_64")
-sha256sum "$OUT/CIN-Linux-Portable-x86_64.zip" > "$OUT/CIN-Linux-Portable-x86_64.zip.sha256"
+(cd "$OUT" && sha256sum "CIN-Linux-Portable-x86_64.zip" > "CIN-Linux-Portable-x86_64.zip.sha256")
 echo "Created $OUT/CIN-Linux-Portable-x86_64.zip"
