@@ -114,6 +114,8 @@ jobs:
           start = output.find("{")
           assert start >= 0, "approved run did not print a JSON manifest"
           manifest, _ = json.JSONDecoder().raw_decode(output[start:])
+          references = manifest["payload"].get("bibliographic_references", {}).get("references", [])
+          assert len(references) == 12, f"expected 12 certificate references, got {len(references)}"
           pathlib.Path("test-results/GENESIS-ENVIRONMENT-MANIFEST.json").write_text(
               json.dumps(manifest, indent=2, ensure_ascii=False) + "\n"
           )
