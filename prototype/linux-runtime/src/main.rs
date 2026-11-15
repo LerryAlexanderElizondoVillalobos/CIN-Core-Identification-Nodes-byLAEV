@@ -15,7 +15,7 @@ fn write_probe() -> Result<String, String> {
     let root = data_root()?;
     fs::create_dir_all(&root).map_err(|e| e.to_string())?;
     let stamp = SystemTime::now().duration_since(UNIX_EPOCH).map_err(|e| e.to_string())?.as_secs();
-    let payload = format!("CIN_LOCAL_PERSISTENCE_PROBE_V1\\nwritten_at_unix={stamp}\\n");
+    let payload = format!("CIN_LOCAL_PERSISTENCE_PROBE_V1\nwritten_at_unix={stamp}\n");
     let target = root.join("runtime-probe.record");
     let staged = root.join("runtime-probe.record.pending");
     fs::write(&staged, payload.as_bytes()).map_err(|e| e.to_string())?;
@@ -32,7 +32,7 @@ fn read_probe() -> Result<String, String> {
 #[tauri::command]
 fn runtime_status() -> Result<String, String> {
     let root = data_root()?;
-    Ok(format!("Linux prototype runtime ready\\nData root: {}", root.display()))
+    Ok(format!("Linux prototype runtime ready\nData root: {}", root.display()))
 }
 
 #[tauri::command]
@@ -45,7 +45,7 @@ fn main() {
     // Headless commands let CI prove persistence across distinct OS processes.
     match env::args().nth(1).as_deref() {
         Some("--probe-write") => { println!("{}", write_probe().unwrap_or_else(|e| { eprintln!("{e}"); std::process::exit(1) })); return; }
-        Some("--probe-read") => { println!("{}", read_probe().unwrap_or_else(|e| { eprintln!("{e}"); std::process::exit(1) })); return; }
+        Some("--probe-read") => { print!("{}", read_probe().unwrap_or_else(|e| { eprintln!("{e}"); std::process::exit(1) })); return; }
         _ => {}
     }
 
@@ -58,21 +58,24 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use std::{fs, path::PathBuf, process, time::{SystemTime, UNIX_EPOCH}};
+
     fn test_root() -> PathBuf {
         let nonce = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos();
         std::env::temp_dir().join(format!("cin-prototype-{}-{nonce}", process::id()))
     }
+
     #[test]
     fn staged_record_is_verified_before_commit() {
         let root = test_root();
         fs::create_dir_all(&root).unwrap();
         let staged = root.join("runtime-probe.record.pending");
         let record = root.join("runtime-probe.record");
-        let content = b"CIN_LOCAL_PERSISTENCE_PROBE_V1\\n";
+        let content = b"CIN_LOCAL_PERSISTENCE_PROBE_V1\n";
         fs::write(&staged, content).unwrap();
         assert_eq!(fs::read(&staged).unwrap(), content);
         fs::rename(&staged, &record).unwrap();
         assert_eq!(fs::read(&record).unwrap(), content);
+        assert!(!staged.exists());
         fs::remove_dir_all(root).unwrap();
     }
 }
