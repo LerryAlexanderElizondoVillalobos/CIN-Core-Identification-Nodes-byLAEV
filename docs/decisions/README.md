@@ -8,5 +8,6 @@ An ADR may be Proposed, Accepted, Superseded or Rejected. A proposed decision is
 
 | ADR | Subject | Status |
 |---|---|---|
-| [ADR-0001](ADR-0001-APPLICATION-STACK.md) | Application stack for the portable desktop runtime | Proposed — feasibility prototype required |
+| [ADR-0001](0001-genesis-manifest-and-node-birth-separation.md) | Separation of Genesis Manifest and Node Birth Record | Proposed |
+| [ADR-0002](0002-portable-runtime-and-zip-packaging-model.md) | Portable ZIP runtime and packaging model | Proposed — implementation feasibility evidence required |
 
