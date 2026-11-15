@@ -48,6 +48,17 @@ jobs:
       - name: Build Linux runtime
         working-directory: prototype/linux-runtime
         run: cargo build --release
+      - name: Verify persistence across separate user processes
+        run: |
+          set -euo pipefail
+          TEST_HOME="$(mktemp -d)"
+          trap 'rm -rf "$TEST_HOME"' EXIT
+          export CIN_DATA_ROOT="$TEST_HOME/cin-data"
+          BIN="$GITHUB_WORKSPACE/prototype/linux-runtime/target/release/cin-linux-prototype"
+          "$BIN" --probe-write
+          "$BIN" --probe-read | grep -q '^CIN_LOCAL_PERSISTENCE_PROBE_V1$'
+          test -s "$CIN_DATA_ROOT/runtime-probe.record"
+          test ! -e "$CIN_DATA_ROOT/runtime-probe.record.pending"
       - name: Assemble extracted-folder ZIP
         run: bash scripts/package-linux-zip.sh prototype/linux-runtime/target/release/cin-linux-prototype
       - name: Verify ZIP layout and checksum
