@@ -41,7 +41,7 @@ fn execute(
     if certificate["execution"]["instruction"] != "RUN CERTIFICATE"
         || certificate["execution"]["action"] != "generate-genesis-environment-manifest"
         || certificate["certificate_type"] != "cin.genesis-environment"
-        || certificate["certificate_version"] != "1.0.0"
+        || certificate["certificate_version"] != "1.0.1"
         || certificate["collection_profile"]["id"] != "cin.genesis-environment/1.0.0"
         || certificate["output_profile"]["document_type"] != "cin.genesis-environment-manifest"
     {
@@ -67,7 +67,10 @@ fn execute(
     };
 
     let audit = audit_current_environment(Some(&package_root));
-    let manifest = build_genesis_manifest(&audit, &audit.captured_at)?;
+    let mut manifest = build_genesis_manifest(&audit, &audit.captured_at)?;
+    if let Some(references) = certificate.get("bibliographic_references").cloned() {
+        manifest.payload["bibliographic_references"] = references;
+    }
     println!("{}", serde_json::to_string_pretty(&manifest)?);
     println!();
     println!(
