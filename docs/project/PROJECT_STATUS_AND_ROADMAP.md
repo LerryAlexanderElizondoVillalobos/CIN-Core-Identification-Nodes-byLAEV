@@ -1,7 +1,7 @@
 # CIN Project Status and Development Roadmap
 
 **Project:** CIN — Core Identification Nodes  
-**Status:** Architecture and specification development; first local runtime not yet implemented  
+**Status:** Architecture/specification plus Linux x86_64 runtime feasibility prototype; first functional CIN node and Main Lobby not yet implemented  
 **Current planning phase:** M0 — Architecture Baseline  
 **Last status review:** 2026-11-15
 
@@ -11,14 +11,15 @@ This document gives external reviewers and contributors a transparent view of pr
 
 ## 2. Current repository baseline
 
-The repository now contains **36 tracked files** in the current main-branch snapshot:
-- 25 Markdown documents;
-- 4 YAML workflow/template files;
+The repository now contains **46 tracked files** in the current main-branch snapshot:
+- 27 Markdown documents;
+- 5 YAML workflow/template files;
 - 2 Python CI validation scripts;
-- 4 JSON schema/example files;
-- 1 pinned CI requirements file.
+- 5 JSON files (schemas, examples and runtime configuration);
+- 1 pinned CI requirements file;
+- 1 HTML interface, 1 TOML manifest, 2 Rust source files, 1 PNG icon and 1 shell packaging script.
 
-The repository contains architecture, specifications, examples and documentation/schema validation automation. It does **not** yet contain a launchable CIN application, application framework, runtime dependency manifest, application build pipeline, storage engine, cryptographic engine, external signer implementation or Main Lobby runtime.
+The repository now contains a Linux x86_64 Tauri v2 feasibility prototype with local HTML, Rust command boundary, ZIP packaging script and CI build/persistence checks. This prototype is not the Genesis Lobby or Main Lobby. The repository still does **not** contain a production storage engine, production cryptographic engine, external signer implementation, Genesis/Node Birth/Personal Registration flows or Main Lobby runtime.
 
 The [CIN Repository Technical Audit](../architecture/CIN_REPOSITORY_TECHNICAL_AUDIT.md) records a reproducible 25-file inventory snapshot from before the common-document and storage specification PRs. The current count above reflects the later merged M0 additions.
 
@@ -30,7 +31,8 @@ The Package Manifest v1 proposes JSON, RFC 8785 JCS, SHA-256, Ed25519 and a deta
 |---|---|---|
 | Architecture baseline (#2) | Closed — specified and documentation-validated | Baseline, dependency map and decision register merged |
 | Node lifecycle (#3) | Closed — specified and documentation-validated | PRENATAL, Genesis Lobby, birth, personal registration and Main Lobby transitions specified; runtime tests remain future work |
-| Runtime and portable build (#4) | In progress | Full repository inventory and provisional Tauri/Electron/Qt comparison; extracted-folder runtime prototype and persistence proof pending |
+| Runtime and portable build (#4) | In progress — prototype merged | PR #18 integrated; latest PR CI passed build, Rust tests, headless cross-process persistence, ZIP layout and checksum. Actual Linux desktop launch/close/reopen and final ADR-0004 remain pending |
+| Linux portable runtime proof (#17) | In progress — desktop acceptance pending | Prototype merged; controlled GUI launch, write, full close/reopen/read and package relocation still require a real supported Linux desktop |
 | Common document and verification contracts (#5) | In progress | Common envelope, verifier-result model, JSON Schemas, examples and structural CI validation integrated; cryptographic interoperability vectors pending |
 | Private local storage (#6) | In progress | Storage contract and logical layout integrated; actual storage backend and interruption/restart tests pending |
 | Package origin verification | Proposed specification | Implement ZIP digest/signature verifier, publisher trust lifecycle and independent test vectors |
@@ -69,7 +71,7 @@ This does not require completing global consensus, decentralized networking, fut
 ## 5. Recommended sequence
 
 ### M0 — Architecture and feasibility gates
-Complete the runtime proof, common document interoperability vectors and storage recovery proof. Keep unresolved authority, global uniqueness and data-root decisions explicit.
+The Linux x86_64 feasibility prototype is integrated, but actual desktop acceptance remains open. Complete the GUI extracted-ZIP and close/reopen test, common document interoperability vectors and storage recovery proof. Audit dependency licenses and the proprietary end-user execution/redistribution permission against Zero-Cost Node Operation. Keep unresolved authority, global uniqueness and data-root decisions explicit.
 
 ### M1 — Portable Bootstrap
 Implement ZIP verification integration, extraction-to-folder launch, local runtime startup and the first Genesis Lobby surface. Preserve the extracted-folder model; do not substitute a conventional installer.
@@ -120,7 +122,13 @@ The project uses four evidence gates for each component: **Specified → Impleme
 
 A status applies only to the stated scope. Tested does not automatically mean production-ready or institutionally recognized.
 
-## 8. Change management
+## 8. Current architectural decision status
+
+- PR #18 merged the Linux x86_64 Tauri v2 feasibility prototype. This does not approve Tauri as the final framework.
+- PR #19 merged ADR-0005 — Zero-Cost Node Operation. ADR-0005 remains **Proposed** until the documented operational and dependency/license acceptance evidence is complete.
+- ADR-0004 remains reserved pending runtime evidence and project-owner review.
+
+## 9. Change management
 
 Material changes to principles, data models, cryptographic profiles, identifiers, lifecycle states or protocol behavior should be recorded as architectural decisions. Specifications require explicit versions. Breaking changes require a new version or documented migration path.
 
