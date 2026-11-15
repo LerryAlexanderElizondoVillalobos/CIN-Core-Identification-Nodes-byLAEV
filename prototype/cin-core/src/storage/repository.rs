@@ -49,6 +49,7 @@ impl DocumentRepository {
         &self.root
     }
 
+    #[cfg(test)]
     pub(crate) fn put(&self, document: &DocumentEnvelope) -> Result<(), StorageError> {
         validate_document(document).map_err(|e| StorageError::InvalidDocument(e.to_string()))?;
         let target = self.document_path(&document.document_id);
@@ -96,6 +97,7 @@ impl DocumentRepository {
         }
     }
 
+    #[cfg(test)]
     pub(crate) fn get(&self, document_id: &str) -> Result<DocumentEnvelope, StorageError> {
         let path = self.document_path(document_id);
         let mut file = File::open(&path).map_err(|e| {
@@ -118,6 +120,7 @@ impl DocumentRepository {
         Ok(document)
     }
 
+    #[cfg(test)]
     pub(crate) fn contains(&self, document_id: &str) -> bool {
         self.document_path(document_id).is_file()
     }
