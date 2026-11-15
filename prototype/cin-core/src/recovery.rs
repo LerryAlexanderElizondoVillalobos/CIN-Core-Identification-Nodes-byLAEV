@@ -94,6 +94,15 @@ pub fn inspect_storage(repo: &DocumentRepository) -> Result<RecoveryReport, Stor
             continue;
         }
 
+        if path != repo.document_path(&document.document_id) {
+            report.issues.push(RecoveryIssue {
+                path,
+                kind: RecoveryIssueKind::FilenameIdMismatch,
+                detail: "record filename does not match its document ID".into(),
+            });
+            continue;
+        }
+
         match repo.get(&document.document_id) {
             Ok(readback) if readback == document => report.valid += 1,
             Ok(_) => report.issues.push(RecoveryIssue {
@@ -165,6 +174,29 @@ mod tests {
         assert_eq!(report.issues.len(), 2);
         assert!(documents.join("bad.json").exists());
         assert!(documents.join("interrupted.tmp-1").exists());
+        let _ = fs::remove_dir_all(path);
+    }
+
+    #[test]
+    fn detects_filename_id_mismatch_without_mutating() {
+        let path = root();
+        let repository = DocumentRepository::open(&path).unwrap();
+        let document = document();
+        repository.put(&document).unwrap();
+
+        let canonical = repository.document_path(&document.document_id);
+        let misplaced = path.join("documents").join("misplaced.json");
+        fs::rename(&canonical, &misplaced).unwrap();
+
+        let report = inspect_storage(&repository).unwrap();
+        assert_eq!(report.valid, 0);
+        assert_eq!(report.issues.len(), 1);
+        assert_eq!(
+            report.issues[0].kind,
+            RecoveryIssueKind::FilenameIdMismatch
+        );
+        assert!(misplaced.exists());
+        assert!(!canonical.exists());
         let _ = fs::remove_dir_all(path);
     }
 }
