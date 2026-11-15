@@ -4,7 +4,7 @@
 **Version:** 1.0.0-draft  
 **Status:** Proposed contract — dependent on M0 architecture acceptance  
 **Planning phase:** M0 — Architecture Baseline  
-**Related:** [CIN Architecture Baseline v1](../architecture/CIN_ARCHITECTURE_BASELINE_V1.md), [Node Lifecycle Architecture](../architecture/NODE_LIFECYCLE_ARCHITECTURE.md), [Genesis Preparation Architecture](../architecture/GENESIS_PREPARATION_ARCHITECTURE.md), Issue #3
+**Related:** [CIN Architecture Baseline v1](../docs/architecture/CIN_ARCHITECTURE_BASELINE_V1.md), [Node Lifecycle Architecture](../docs/architecture/NODE_LIFECYCLE_ARCHITECTURE.md), [Genesis Preparation Architecture](../docs/architecture/GENESIS_PREPARATION_ARCHITECTURE.md), Issue #3
 
 ## 1. Purpose
 
