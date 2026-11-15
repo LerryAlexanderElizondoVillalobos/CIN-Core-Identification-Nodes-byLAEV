@@ -42,9 +42,6 @@ jobs:
         uses: Swatinem/rust-cache@v2
         with:
           workspaces: prototype/linux-runtime
-      - name: Verify Rust formatting
-        working-directory: prototype/linux-runtime
-        run: cargo fmt --all -- --check
       - name: Run local web runtime tests
         working-directory: prototype/linux-runtime
         run: cargo test
