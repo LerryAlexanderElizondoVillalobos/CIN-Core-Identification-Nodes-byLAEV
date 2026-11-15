@@ -11,18 +11,11 @@ fn data_root() -> Result<PathBuf, String> {
     Ok(PathBuf::from(home).join(".local/share/cin-prototype"))
 }
 
-#[tauri::command]
-fn runtime_status() -> Result<String, String> {
-    let root = data_root()?;
-    Ok(format!("Linux prototype runtime ready\nData root: {}", root.display()))
-}
-
-#[tauri::command]
-fn write_persistence_probe() -> Result<String, String> {
+fn write_probe() -> Result<String, String> {
     let root = data_root()?;
     fs::create_dir_all(&root).map_err(|e| e.to_string())?;
     let stamp = SystemTime::now().duration_since(UNIX_EPOCH).map_err(|e| e.to_string())?.as_secs();
-    let payload = format!("CIN_LOCAL_PERSISTENCE_PROBE_V1\nwritten_at_unix={stamp}\n");
+    let payload = format!("CIN_LOCAL_PERSISTENCE_PROBE_V1\\nwritten_at_unix={stamp}\\n");
     let target = root.join("runtime-probe.record");
     let staged = root.join("runtime-probe.record.pending");
     fs::write(&staged, payload.as_bytes()).map_err(|e| e.to_string())?;
@@ -32,12 +25,30 @@ fn write_persistence_probe() -> Result<String, String> {
     Ok(format!("Probe committed and read-back verified at {}", target.display()))
 }
 
-#[tauri::command]
-fn read_persistence_probe() -> Result<String, String> {
+fn read_probe() -> Result<String, String> {
     fs::read_to_string(data_root()?.join("runtime-probe.record")).map_err(|e| e.to_string())
 }
 
+#[tauri::command]
+fn runtime_status() -> Result<String, String> {
+    let root = data_root()?;
+    Ok(format!("Linux prototype runtime ready\\nData root: {}", root.display()))
+}
+
+#[tauri::command]
+fn write_persistence_probe() -> Result<String, String> { write_probe() }
+
+#[tauri::command]
+fn read_persistence_probe() -> Result<String, String> { read_probe() }
+
 fn main() {
+    // Headless commands let CI prove persistence across distinct OS processes.
+    match env::args().nth(1).as_deref() {
+        Some("--probe-write") => { println!("{}", write_probe().unwrap_or_else(|e| { eprintln!("{e}"); std::process::exit(1) })); return; }
+        Some("--probe-read") => { println!("{}", read_probe().unwrap_or_else(|e| { eprintln!("{e}"); std::process::exit(1) })); return; }
+        _ => {}
+    }
+
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![runtime_status, write_persistence_probe, read_persistence_probe])
         .run(tauri::generate_context!())
@@ -52,12 +63,12 @@ mod tests {
         std::env::temp_dir().join(format!("cin-prototype-{}-{nonce}", process::id()))
     }
     #[test]
-    fn record_is_readable_after_a_new_file_read() {
+    fn staged_record_is_verified_before_commit() {
         let root = test_root();
         fs::create_dir_all(&root).unwrap();
-        let record = root.join("runtime-probe.record");
         let staged = root.join("runtime-probe.record.pending");
-        let content = b"CIN_LOCAL_PERSISTENCE_PROBE_V1\n";
+        let record = root.join("runtime-probe.record");
+        let content = b"CIN_LOCAL_PERSISTENCE_PROBE_V1\\n";
         fs::write(&staged, content).unwrap();
         assert_eq!(fs::read(&staged).unwrap(), content);
         fs::rename(&staged, &record).unwrap();
