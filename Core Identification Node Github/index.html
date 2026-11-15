@@ -156,7 +156,7 @@
         status("Manifest generated. This browser does not support direct folder saving; download the JSON and place it inside CIN 001.");
       }
     }catch(e){status("Genesis generation failed: "+e.message,true);}
-    finally{button.disabled=false;button.textContent="Install Genesis Certificate & Generate Manifest";}
+    finally{button.disabled=false;button.textContent="Generate Browser Preview (PWA)";}
   });
   $("viewButton").addEventListener("click",()=>{if(currentManifest){$("manifestPanel").style.display="block";$("manifestPanel").scrollIntoView({behavior:"smooth"});}});
   $("downloadButton").addEventListener("click",downloadManifest);
