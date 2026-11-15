@@ -19,9 +19,17 @@ function reserve(port) {
 function close(server) {
   return new Promise(resolve => server.close(resolve));
 }
-function startRuntime(dataRoot) {
+function startRuntime(dataRoot, browserOptions = null) {
+  const runtimeEnv = { ...process.env, CIN_DATA_ROOT: dataRoot };
+  if (browserOptions) {
+    runtimeEnv.CIN_BROWSER = browserOptions.executable;
+    runtimeEnv.CIN_BROWSER_HEADLESS = '1';
+    delete runtimeEnv.CIN_NO_BROWSER;
+  } else {
+    runtimeEnv.CIN_NO_BROWSER = '1';
+  }
   const child = spawn(binary, [], {
-    env: { ...process.env, CIN_DATA_ROOT: dataRoot, CIN_NO_BROWSER: '1' },
+    env: runtimeEnv,
     stdio: ['ignore', 'pipe', 'pipe']
   });
   let output = '';
@@ -146,4 +154,45 @@ test('uses an ephemeral loopback port when 1221 and 2112 are occupied', async t 
   assert.notEqual(new URL(base).port, '1221');
   assert.notEqual(new URL(base).port, '2112');
   await stop(runtime);
+});
+
+
+test('launches the runtime through Chromium and renders the local interface', async t => {
+  const executable = process.env.CIN_CHROMIUM_PATH;
+  if (!executable) {
+    t.skip('CIN_CHROMIUM_PATH is not configured; Chromium smoke test runs in Linux CI');
+    return;
+  }
+
+  const { chromium } = require('playwright');
+  const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'cin-chromium-e2e-'));
+  const dataRoot = path.join(temp, 'data');
+  t.after(() => fs.rmSync(temp, { recursive: true, force: true }));
+
+  const runtime = startRuntime(dataRoot, { executable });
+  const base = await runtime.ready;
+  const lifecycle = await fetch(`${base}/api/lifecycle`);
+  assert.equal(lifecycle.status, 200);
+  const state = await lifecycle.json();
+  assert.equal(state.state, 'READY');
+  assert.equal(state.browser, `chromium:${executable}`);
+
+  const browser = await chromium.launch({
+    executablePath: executable,
+    headless: true,
+    args: ['--no-sandbox', '--disable-dev-shm-usage']
+  });
+  try {
+    const page = await browser.newPage();
+    const response = await page.goto(base, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    assert.equal(response.status(), 200);
+    assert.match(await page.title(), /CIN.*Portable Linux Runtime/);
+    assert.match(await page.locator('body').innerText(), /CIN/);
+  } finally {
+    await browser.close();
+  }
+
+  const shutdown = await fetch(`${base}/api/runtime/shutdown`, { method: 'POST' });
+  assert.equal(shutdown.status, 202);
+  assert.equal(await waitForExit(runtime), 0, 'runtime should exit cleanly after Chromium smoke test');
 });
