@@ -1,9 +1,12 @@
 //! Non-destructive storage inspection and recovery report.
+#[cfg(test)]
 use crate::{
     documents::{validate_document, DocumentEnvelope},
     storage::{DocumentRepository, StorageError},
 };
-use std::{fs, path::PathBuf};
+#[cfg(test)]
+use std::fs;
+use std::path::PathBuf;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum RecoveryIssueKind {
