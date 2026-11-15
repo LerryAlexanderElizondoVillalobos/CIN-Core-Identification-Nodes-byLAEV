@@ -367,7 +367,22 @@ impl TransactionalStore {
             let marker_path = entry.path();
             let marker: CommitMarker = match read_json(&marker_path) {
                 Ok(marker) => marker,
-                Err(_) => continue,
+                Err(error) => {
+                    report.inspected += 1;
+                    report.inconsistent += 1;
+                    report.issues.push(RecoveryIssue {
+                        operation_id: format!(
+                            "marker:{}",
+                            marker_path
+                                .file_stem()
+                                .and_then(|value| value.to_str())
+                                .unwrap_or("unknown")
+                        ),
+                        status: TransactionStatus::Inconsistent,
+                        detail: error.to_string(),
+                    });
+                    continue;
+                }
             };
             if !self.journal_path(&marker.operation_id).exists() {
                 report.inspected += 1;
