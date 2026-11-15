@@ -45,6 +45,8 @@ The roadmap describes the repository as an architecture/specification baseline a
 
 Conventional root-level application manifests checked during the initial probe included `package.json`, `Cargo.toml`, `pyproject.toml`, `requirements.txt` and `index.html`; these were not found at the root. This bounded probe is not a complete inventory of all tracked files, nested application projects or build scripts. A complete inventory remains required by Issue #4.
 
+The development workflow and initial GitHub Actions baseline have now been merged to main through PR #1. The active checks validate repository documentation references and workflow YAML syntax; they do not validate a CIN runtime, cryptographic engine, storage engine or Main Lobby.
+
 ## 4. Architecture constraints for implementation
 
 - Preserve the ZIP → verify → extract → run-local sequence.
