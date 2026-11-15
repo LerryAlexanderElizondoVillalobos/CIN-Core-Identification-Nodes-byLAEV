@@ -120,11 +120,6 @@ impl DocumentRepository {
         Ok(document)
     }
 
-    #[cfg(test)]
-    pub(crate) fn contains(&self, document_id: &str) -> bool {
-        self.document_path(document_id).is_file()
-    }
-
     pub(crate) fn document_path(&self, document_id: &str) -> PathBuf {
         // Hex encoding makes arbitrary IDs safe as filenames and deterministic.
         let encoded: String = document_id
