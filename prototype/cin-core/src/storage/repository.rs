@@ -107,11 +107,13 @@ impl DocumentRepository {
         })?;
         let mut bytes = Vec::new();
         file.read_to_end(&mut bytes).map_err(io_error)?;
-        let document: DocumentEnvelope =
-            serde_json::from_slice(&bytes).map_err(|e| StorageError::Serialization(e.to_string()))?;
+        let document: DocumentEnvelope = serde_json::from_slice(&bytes)
+            .map_err(|e| StorageError::Serialization(e.to_string()))?;
         validate_document(&document).map_err(|e| StorageError::InvalidDocument(e.to_string()))?;
         if document.document_id != document_id {
-            return Err(StorageError::InvalidDocument("stored document id does not match requested id".into()));
+            return Err(StorageError::InvalidDocument(
+                "stored document id does not match requested id".into(),
+            ));
         }
         Ok(document)
     }
@@ -122,7 +124,11 @@ impl DocumentRepository {
 
     fn document_path(&self, document_id: &str) -> PathBuf {
         // Hex encoding makes arbitrary IDs safe as filenames and deterministic.
-        let encoded: String = document_id.as_bytes().iter().map(|byte| format!("{byte:02x}")).collect();
+        let encoded: String = document_id
+            .as_bytes()
+            .iter()
+            .map(|byte| format!("{byte:02x}"))
+            .collect();
         self.root.join("documents").join(format!("{encoded}.json"))
     }
 }
@@ -138,7 +144,10 @@ mod tests {
     use std::time::{SystemTime, UNIX_EPOCH};
 
     fn test_root() -> PathBuf {
-        let nonce = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos();
+        let nonce = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
         std::env::temp_dir().join(format!("cin-storage-test-{}-{nonce}", std::process::id()))
     }
 
@@ -182,7 +191,10 @@ mod tests {
     fn reports_missing_document() {
         let root = test_root();
         let repo = DocumentRepository::open(&root).unwrap();
-        assert!(matches!(repo.get("cin:missing"), Err(StorageError::NotFound(_))));
+        assert!(matches!(
+            repo.get("cin:missing"),
+            Err(StorageError::NotFound(_))
+        ));
         let _ = fs::remove_dir_all(root);
     }
 }
