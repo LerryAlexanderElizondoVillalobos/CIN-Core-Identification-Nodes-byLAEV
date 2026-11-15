@@ -2,7 +2,7 @@
 
 **Project:** CIN — Core Identification Nodes  
 **Component:** Environment Audit and Genesis Preparation  
-**Status:** Proposed architecture; specification and implementation pending
+**Status:** Architecture established; v1 specification and initial implementation under review
 
 ## 1. Purpose and lifecycle position
 

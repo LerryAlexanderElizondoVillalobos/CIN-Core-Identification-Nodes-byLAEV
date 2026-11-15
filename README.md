@@ -11,6 +11,15 @@ The first delivery target is **First Successful CIN Main Lobby**: a portable loc
 - [Development Backlog](docs/project/DEVELOPMENT_BACKLOG.md)
 - [Project Status and Roadmap](docs/project/PROJECT_STATUS_AND_ROADMAP.md)
 
+## Genesis Environment Manifest
+- [Genesis Manifest v1 specification](specifications/CIN_GENESIS_ENVIRONMENT_MANIFEST_V1.md)
+- [Genesis Manifest JSON Schema](schemas/cin-genesis-environment-manifest-v1.schema.json)
+- [Illustrative Genesis Manifest fixture](examples/cin-genesis-environment-manifest-v1.example.json)
+
+The initial Rust implementation audits a purpose-limited set of OS/runtime/hardware/network/package fields, preserves field provenance and unavailable states, and can register the manifest as the first logical document. It does not yet provide production signatures, archive-origin verification, complete cross-platform hardware discovery or a GUI review step.
+
+Run the initial manifest generator from the extracted package context with `cargo run --manifest-path prototype/cin-core/Cargo.toml --bin cin-genesis-manifest -- --package-root ./path/to/extracted-cin` (or omit the argument when the executable is already inside the extracted package directory). It prints the candidate and waits for explicit confirmation before committing it to the resolved CIN data root.
+
 ## Current maturity
 The repository contains architecture/specifications, schema validation, a Linux portable runtime feasibility prototype, and an initial Rust domain foundation with lifecycle unit tests. The complete CIN engines and Main Lobby are not yet implemented. Passing documentation or foundation CI does not mean the complete product is accepted.
 

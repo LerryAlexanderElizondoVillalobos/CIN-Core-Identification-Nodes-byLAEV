@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cin.bylaev.org/schemas/cin-genesis-environment-manifest-v1.schema.json",
+  "title": "CIN Genesis Environment Manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["document_id", "document_type", "schema_version", "created_at", "references", "payload"],
+  "properties": {
+    "document_id": { "const": "cin:genesis:initial" },
+    "document_type": { "const": "cin.genesis-environment-manifest" },
+    "schema_version": { "const": "1.0.0" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "issuer": {
+      "type": ["object", "null"],
+      "properties": { "issuer_id": { "type": "string", "minLength": 1 } },
+      "required": ["issuer_id"],
+      "additionalProperties": false
+    },
+    "references": { "type": "array", "items": { "type": "object" } },
+    "payload": {
+      "type": "object",
+      "required": ["manifest_profile", "lifecycle_stage", "capture_scope", "audit", "privacy", "limitations"],
+      "properties": {
+        "manifest_profile": { "const": "cin.genesis-environment-manifest/1.0.0" },
+        "lifecycle_stage": { "const": "pre-birth" },
+        "capture_scope": { "type": "string", "minLength": 1 },
+        "audit": {
+          "type": "object",
+          "required": ["captured_at", "fields"],
+          "properties": {
+            "captured_at": { "type": "string", "format": "date-time" },
+            "fields": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "required": ["value", "source", "method", "observed_at", "status", "sensitivity", "limitation"],
+                "properties": {
+                  "value": {},
+                  "source": { "type": "string", "minLength": 1 },
+                  "method": { "type": "string", "minLength": 1 },
+                  "observed_at": { "type": "string", "format": "date-time" },
+                  "status": { "enum": ["observed", "declared", "derived", "external", "unavailable", "not_collected", "not_applicable"] },
+                  "sensitivity": { "enum": ["public", "internal", "confidential", "sensitive"] },
+                  "limitation": { "type": ["string", "null"] }
+                },
+                "additionalProperties": false
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        "privacy": {
+          "type": "object",
+          "required": ["absolute_paths_collected", "arbitrary_environment_variables_collected", "user_file_contents_collected", "credentials_or_private_keys_collected", "network_payloads_collected"],
+          "properties": {
+            "absolute_paths_collected": { "const": false },
+            "arbitrary_environment_variables_collected": { "const": false },
+            "user_file_contents_collected": { "const": false },
+            "credentials_or_private_keys_collected": { "const": false },
+            "network_payloads_collected": { "const": false }
+          },
+          "additionalProperties": false
+        },
+        "limitations": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": false
+    }
+  }
+}
