@@ -4,6 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#07111f">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./cin-icon.svg" type="image/svg+xml">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <title>CIN Genesis Lobby — byLAEV</title>
 <style>
 :root{color-scheme:dark;--bg:#07111f;--panel:#0d1b2d;--line:#20334a;--text:#eaf2ff;--muted:#91a7c2;--cyan:#57d6ff;--green:#7ee7b2;--amber:#f6c779}
@@ -22,9 +26,9 @@
 <section class="hero">
 <div class="eyebrow">Core Identification Nodes · Genesis</div>
 <h1>Prepare your node.<br><span>Record its environment.</span></h1>
-<p class="lead">Generate a Genesis Environment Manifest by applying the certificate's collection profile to the information this browser can expose. The certificate's APA 7 bibliography is embedded in the resulting manifest.</p>
+<p class="lead">The Android-installable CIN Genesis web app provides the Lobby and a browser-limited preview. Full operating-system collection and transactional CIN 001 registration require the local CIN Certificate Runner, which is not yet connected to this page.</p>
 <div class="actions">
-<button class="btn primary" id="installButton">Install Genesis Certificate &amp; Generate Manifest</button>
+<button class="btn primary" id="installButton">Generate Browser Preview (PWA)</button>
 <button class="btn secondary" id="viewButton" disabled>View Generated Manifest</button>
 </div>
 <div class="actions" style="margin-top:8px">
@@ -34,18 +38,19 @@
 </div>
 <div id="status" role="status" aria-live="polite"></div>
 <div id="manifestPanel"><h2>Genesis Environment Manifest</h2><p class="note" id="manifestMeta"></p><pre id="manifestOutput"></pre><button class="btn secondary" id="downloadButton">Download Manifest JSON</button></div>
-<p class="note">Browser execution can only collect browser-visible data. It cannot inspect the full operating system or write to a private folder without your permission. When supported, you can select the CIN 001 folder to save the manifest there; otherwise the Lobby downloads it for you to place in CIN 001.</p>
+<p class="note">Android: install this Lobby as a web app from your browser menu (Add to Home screen / Install app). The PWA is an interface, not a native system scanner. Without an installed local companion, Android and desktop browsers expose only browser-limited data.</p>
 </section>
 <section class="grid" aria-label="Genesis workflow">
 <article class="card"><div class="num">01 / CERTIFICATE</div><h2>Load certificate</h2><p>Fetches the published Genesis Environment Certificate, including its embedded APA 7 references and collection profile.</p><div class="status"><span class="dot"></span> Certificate published</div></article>
-<article class="card"><div class="num">02 / ENVIRONMENT</div><h2>Collect available data</h2><p>Collects a limited browser environment snapshot. Browser APIs do not expose all operating-system and hardware details.</p><div class="status"><span class="dot"></span> Browser collection enabled</div></article>
-<article class="card"><div class="num">03 / CIN 001</div><h2>Save and inspect</h2><p>Offers a user-authorized save into the CIN 001 folder, with a download fallback and an in-page manifest viewer.</p><div class="status"><span class="dot"></span> Local save workflow enabled</div></article>
+<article class="card"><div class="num">02 / ENVIRONMENT</div><h2>Collect available data</h2><p>The PWA can collect browser-visible metadata only. Full OS and hardware inventory requires the local Runner.</p><div class="status"><span class="dot"></span> Browser preview only</div></article>
+<article class="card"><div class="num">03 / CIN 001</div><h2>Save and inspect</h2><p>Shows or downloads the browser preview. The Runner will own the real CIN DataRoot and TransactionalStore registration.</p><div class="status"><span class="dot"></span> Runner integration pending</div></article>
 </section>
 <footer class="footer"><span>Core Identification Nodes — Civilizational Foundations byLAEV</span><span>Genesis Lobby · GitHub Pages</span></footer>
 </main>
 <script>
 (() => {
   const certificateUrl = "https://raw.githubusercontent.com/LerryAlexanderElizondoVillalobos/CIN-Core-Identification-Nodes-byLAEV/main/Core%20Identification%20Node%20Github/CIN-GENESIS-ENVIRONMENT.cincert";
+  if ("serviceWorker" in navigator && window.isSecureContext) { navigator.serviceWorker.register("./service-worker.js").catch(() => {}); }
   const $ = id => document.getElementById(id);
   let currentManifest = null;
   function status(message, error=false) {
