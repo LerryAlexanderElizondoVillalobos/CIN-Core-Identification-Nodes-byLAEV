@@ -10,31 +10,31 @@
 
 ## 1. Purpose
 
-CIN requires an independent mechanism to verify software distribution packages before they are admitted to the portable environment or passed to an installation process.
+CIN requires an independent mechanism to verify software distribution packages before the archive is extracted and package-provided content is executed locally.
 
 The proposed **Package Origin Verification Engine** verifies a received ZIP archive against an independently obtained, digitally signed package manifest. It separates three questions:
 
 1. **File integrity:** Are the bytes of the received archive identical to the bytes described by the published digest?
 2. **Publisher authenticity:** Is the manifest signature valid under a public key that the local trust configuration recognizes?
-3. **Installation authorization:** Does the local installation policy permit this verified package to be installed?
+3. **Local execution authorization:** Does CIN's local policy permit the verified package to proceed to extraction and local execution?
 
-These are related but distinct decisions. A successful hash comparison does not identify the publisher. A valid signature does not prove that the received ZIP matches the package described by the signed manifest. Installation authorization remains a separate policy decision.
+These are related but distinct decisions. A successful hash comparison does not identify the publisher. A valid signature does not prove that the received ZIP matches the package described by the signed manifest. Local execution authorization remains a separate policy decision.
 
 ## 2. Architectural rationale
 
 The design is based on a simple principle:
 
-> A package must not be trusted for installation merely because it was downloaded, copied, or presented as an official distribution. Its origin and integrity must be independently verifiable.
+> A package must not be trusted for extraction and execution merely because it was downloaded, copied, or presented as an official distribution. Its origin and integrity must be independently verifiable.
 
 CIN should retain its own ability to perform this verification rather than relying exclusively on a browser, operating system, archive manager, hosting platform, or distribution channel. Those systems may provide additional checks, but they do not replace the verification responsibility of the CIN environment.
 
 This mechanism is intended to:
 
-- establish a verification step before package installation;
+- establish a verification step before package extraction and local execution;
 - distinguish integrity evidence from publisher authentication;
 - avoid placing publisher private keys inside the portable package;
 - make verification reproducible and independently inspectable;
-- preserve a result that can later be referenced by installation records and audit mechanisms.
+- preserve a result that can later be referenced by local execution records and audit mechanisms.
 
 This is not an assumption that every distribution channel is malicious. It is an architectural decision that trust should be based on verifiable evidence rather than an implicit assumption about the channel.
 
@@ -77,9 +77,9 @@ The publisher's private signing key remains outside the portable package and out
 4. The verifier validates the manifest signature using a public key whose trust status is established independently of the package being checked.
 5. The verifier checks that the signed manifest describes the selected package, including its package identifier, version, filename and digest.
 6. The verifier compares the locally calculated digest with the digest in the authenticated manifest.
-7. The verifier produces a structured result for the installation policy and user interface.
+7. The verifier produces a structured result for the local execution policy and user interface.
 
-A package is eligible to proceed to installation only when the signature is valid, the signing key is trusted for the relevant purpose, the manifest is valid and applicable, and the locally calculated archive digest matches the signed digest. The installation policy may impose additional requirements.
+A package is eligible to proceed to extraction and local execution only when the signature is valid, the signing key is trusted for the relevant purpose, the manifest is valid and applicable, and the locally calculated archive digest matches the signed digest. The local execution policy may impose additional requirements.
 
 ## 5. Result states
 
@@ -96,13 +96,13 @@ The user interface and machine-readable result must distinguish at least the fol
 
 An incomplete or failed verification must never be displayed as a successful verification. The interface should show the separate outcomes for digest comparison, signature validation, key trust, and manifest applicability.
 
-## 6. Relationship to installation
+## 6. Relationship to extraction and local execution
 
-Package verification is a gate before extraction for installation and before execution of package-provided content.
+Package verification is a gate before extraction and execution of package-provided content.
 
-The verifier does not itself install the package, execute its contents, or decide every installation permission. Its responsibility is to return evidence about the archive and its signed origin metadata.
+The verifier does not itself extract the package, execute its contents, or decide every local execution permission. Its responsibility is to return evidence about the archive and its signed origin metadata.
 
-The Ledger Installation Engine or package manager consumes that result and applies the installation policy. A failed or incomplete result does not authorize installation.
+The portable launcher or local package admission component consumes that result and applies the local execution policy. A failed or incomplete result does not authorize extraction or execution.
 
 ## 7. Relationship to other CIN components
 
@@ -164,9 +164,9 @@ A matching digest proves byte-for-byte equality with the digest reference; it do
 
 ## 11. Architectural principle
 
-**Trust must not be an assumed condition during installation. It must be a verifiable condition before installation.**
+**Trust must not be an assumed condition before execution. It must be a verifiable condition before extraction and local execution.**
 
-The Package Origin Verification Engine gives CIN an independent capability to examine the origin evidence supplied for a distribution, compare the received archive with the authenticated reference, and provide a clear result to the installation process.
+The Package Origin Verification Engine gives CIN an independent capability to examine the origin evidence supplied for a distribution, compare the received archive with the authenticated reference, and provide a clear result to the local execution process.
 
 ---
 
