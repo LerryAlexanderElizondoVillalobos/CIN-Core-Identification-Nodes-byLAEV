@@ -59,7 +59,8 @@ A candidate Genesis Manifest is not registered merely because it was generated o
 
 | State | Meaning | Entry condition | Persistent evidence |
 |---|---|---|---|
-| BIRTH_PENDING | Genesis is registered; node has not been born | Registered Genesis and birth prerequisites are available | Existing Genesis record; no birth record yet |
+| PRENATAL | Genesis Manifest is registered; the node has not completed its birth operation | Genesis registration is committed and verified, and no valid Node Birth Record exists | Derived from the registered Genesis record and the absence of a valid birth record; no separate mutable status file is authoritative |
+| BIRTH_PENDING | The operator has entered the birth procedure; node has not been born | PRENATAL state and required birth profile are available | Genesis record plus birth-operation request/reference; no birth record yet |
 | BIRTH_AUTHORIZATION_PENDING | Birth operation awaits an authority decision | A scoped birth authorization request is submitted | Request reference and current decision status |
 | BIRTH_AUTHORIZED | Valid authorization for this birth operation is verified | Issuer trust, signature, scope, subject/reference, validity and policy checks pass | Authorization record or independently verifiable authorization reference |
 | BIRTH_AUTHORIZATION_REJECTED | Authority rejected or authorization is invalid/out of scope | Explicit rejection or failed authorization verification | Rejection/verification report |
@@ -96,8 +97,9 @@ A locally generated CIN Personal Number must not be presented as globally unique
 | EVIDENCE_REJECTED | Evidence fails a required check or is explicitly rejected | Failed verification or rejection | Failure/rejection report |
 | PROFILE_INCOMPLETE | Required profile inputs are missing, unresolved or invalid | Profile assembly cannot satisfy its declared completeness profile | Assembly report and unresolved references |
 | PROFILE_INITIALIZED | Versioned profile and history records exist and validate | Initial profile transaction commits | Profile version and history event(s) |
-| LOBBY_READY | Header can be assembled from persisted records and actual verification outcomes | Profile assembly succeeds for required header fields | Rebuildable projection or assembly report |
-| LOBBY_OPEN | Lobby interface is displaying the current assembled state | User opens Lobby | UI session state may be transient |
+| GENESIS_LOBBY_OPEN | The pre-birth preparation interface is displaying the current package, audit and Genesis state | User opens the Genesis Lobby from RUNTIME_READY | Transient UI session; authoritative lifecycle state comes from persisted records |
+| LOBBY_READY | Main Lobby header can be assembled from persisted records and actual verification outcomes | Profile assembly succeeds for required Main Lobby header fields | Rebuildable projection or assembly report |
+| MAIN_LOBBY_OPEN | Main Lobby interface is displaying the current assembled profile | User opens Main Lobby from LOBBY_READY | Transient UI session; not an authoritative source record |
 | STORAGE_RECOVERY_REQUIRED | Authoritative record recovery or integrity review is required | Corruption, uncertain commit or unresolved storage transaction is detected | Recovery incident/report |
 
 Evidence may be associated while remaining unverified, pending, rejected or unavailable. The Lobby must show the actual status and must not infer verification from mere existence.
@@ -109,13 +111,14 @@ Evidence may be associated while remaining unverified, pending, rejected or unav
 | PACKAGE_UNVERIFIED | Verify selected ZIP | Manifest and detached signature available; independent trust configuration available | PACKAGE_VERIFIED or PACKAGE_VERIFICATION_FAILED | Package verification report |
 | PACKAGE_VERIFIED | Extract archive | Exact verified archive remains unchanged; extraction destination approved | EXTRACTED | Extraction result |
 | EXTRACTED | Launch CIN | Runtime prerequisites satisfied | RUNTIME_READY | Launch result |
-| RUNTIME_READY | Open Lobby | No Genesis requirement for pre-birth Lobby entry | LOBBY_OPEN with pre-birth presentation | Read-only pre-birth view |
+| RUNTIME_READY | Open Genesis Lobby | Local runtime is ready; no birth record is presumed | GENESIS_LOBBY_OPEN | Read-only preparation view showing the actual audit and Genesis state |
 | RUNTIME_READY | Start environment audit | Collection rules and operator consent/permissions satisfied | AUDIT_IN_PROGRESS | Audit operation reference |
 | AUDIT_IN_PROGRESS | Audit completes | Each field has provenance and collection status | AUDIT_COMPLETED or AUDIT_PARTIAL | Audit result |
 | AUDIT_COMPLETED or AUDIT_PARTIAL | Build Genesis candidate | Required fields and schema version available; unknown values remain explicit | GENESIS_MANIFEST_CREATED or GENESIS_VALIDATION_FAILED | Candidate manifest and validation report |
 | GENESIS_MANIFEST_CREATED | Confirm local registration | Destination and storage policy reviewed; no prior registered Genesis exists | GENESIS_MANIFEST_REGISTRATION_PENDING | Registration operation reference |
 | GENESIS_MANIFEST_REGISTRATION_PENDING | Commit and read back | Atomic commit succeeds; stored bytes validate and record is first logical CIN record | GENESIS_MANIFEST_REGISTERED or GENESIS_STORAGE_FAILED | Registration receipt or recovery report |
-| GENESIS_MANIFEST_REGISTERED | Enter birth procedure | Required birth profile and trust/authorization interfaces available | BIRTH_PENDING | Birth preparation state |
+| GENESIS_MANIFEST_REGISTERED | Establish prenatal state | Genesis record is committed and read-back verified; no valid birth record exists | PRENATAL | Prenatal state derived from authoritative Genesis and birth records |
+| PRENATAL | Request node birth | Operator explicitly starts the birth procedure; required birth profile and authorization interface are available | BIRTH_PENDING | Birth-operation request/reference |
 | BIRTH_PENDING | Request birth authorization | Request references exact Genesis record/digest and intended operation | BIRTH_AUTHORIZATION_PENDING | Authorization request |
 | BIRTH_AUTHORIZATION_PENDING | Verify authority response | Signature, issuer trust, scope, validity and references pass | BIRTH_AUTHORIZED or BIRTH_AUTHORIZATION_REJECTED | Authorization verification result |
 | BIRTH_AUTHORIZED | Execute birth | Idempotency key unique for this birth operation; Genesis and authorization references unchanged | BIRTH_CREATION_PENDING | Birth transaction reference |
@@ -131,10 +134,11 @@ Evidence may be associated while remaining unverified, pending, rejected or unav
 | EVIDENCE_ASSOCIATED | Run evidence-specific verifier | Verifier and evidence format supported | EVIDENCE_VERIFIED or EVIDENCE_REJECTED; unsupported/unavailable remains associated with that status | Verification report |
 | Evidence/profile inputs available | Initialize or update profile | Attribute assertions authorized; history append transaction available | PROFILE_INITIALIZED or PROFILE_INCOMPLETE | Profile version and history events |
 | PROFILE_INITIALIZED | Assemble Lobby header | Required source records resolve and their validation states are available | LOBBY_READY or PROFILE_INCOMPLETE | Profile assembly result |
-| LOBBY_READY | Open Lobby | Local read model loaded | LOBBY_OPEN | Display session |
-| LOBBY_OPEN | Close and relaunch | Authoritative local storage remains available | RUNTIME_READY then LOBBY_READY after reconstruction | Rebuilt header from stored records |
+| LOBBY_READY | Open Main Lobby | Local Main Lobby read model loaded | MAIN_LOBBY_OPEN | Display session |
+| GENESIS_LOBBY_OPEN | Close and relaunch before birth | Authoritative local storage remains available | RUNTIME_READY then GENESIS_LOBBY_OPEN after state reconstruction | Rebuilt preparation view from stored records |
+| MAIN_LOBBY_OPEN | Close and relaunch after profile initialization | Authoritative local storage remains available | RUNTIME_READY then LOBBY_READY after reconstruction | Rebuilt Main Lobby header from stored records |
 
-The named states describe domain state. UI navigation, progress indicators and an open window are transient session states and must not overwrite authoritative lifecycle records.
+The named domain states describe lifecycle facts. PRENATAL is derived from a registered Genesis Manifest and the absence of a valid Node Birth Record. GENESIS_LOBBY_OPEN and MAIN_LOBBY_OPEN are transient presentation states; UI navigation, progress indicators and an open window must not overwrite authoritative lifecycle records.
 
 ## 5. Persistence and event rules
 
@@ -150,6 +154,7 @@ Persist authoritative events and documents, not merely the latest UI state. At m
 - Evidence references, provenance, consent/association event and verification reports.
 - Attribute change events and profile versions.
 - Profile assembly results where useful for audit; the projection remains rebuildable.
+- The prenatal condition is reconstructed from the registered Genesis Manifest and the absence/presence of a valid Node Birth Record; do not maintain a conflicting mutable prenatal flag.
 
 Do not persist a state as successful before its authoritative output has been committed and read back. Transient progress may be stored for safe resumption but must not be mistaken for a completed event.
 
@@ -191,7 +196,7 @@ A later-stage failure does not roll back earlier valid historical events. Correc
 
 The Profile Assembly Service reads authoritative records, resolves stable references, invokes or consumes verification results, and produces a rebuildable read model. It must not treat file presence as proof of validity.
 
-After a full process restart, the application reconstructs the current state from stored records and transaction outcomes. It must not rely on in-memory state from the previous process. If required records are absent, corrupt or unverifiable, the Lobby must display an incomplete/recovery state rather than a successful header.
+After a full process restart, the application reconstructs the current state from stored records and transaction outcomes. If a Genesis Manifest is registered and no valid Node Birth Record exists, the Genesis Lobby presents the PRENATAL state. If the birth record exists, later profile state is reconstructed from its records. The application must not rely on in-memory state from the previous process. If required records are absent, corrupt or unverifiable, the relevant Lobby must display an incomplete/recovery state rather than a successful header.
 
 ## 9. Conformance scenarios
 
@@ -214,7 +219,8 @@ The future executable test suite must include, at minimum:
 15. Evidence association without verifier success remains unverified.
 16. Attribute update preserves prior history and does not create another birth.
 17. Missing/corrupt references prevent a complete Lobby header.
-18. Full process shutdown/relaunch reconstructs the header from persisted records.
+18. After Genesis registration and before birth, full process shutdown/relaunch reconstructs the PRENATAL state in the Genesis Lobby.
+19. After profile initialization, full process shutdown/relaunch reconstructs the Main Lobby header from persisted records.
 
 These are acceptance requirements, not claims that tests already exist or pass.
 
