@@ -1,0 +1,9 @@
+{
+  "name": "cin-local-web-e2e",
+  "private": true,
+  "version": "0.2.0",
+  "description": "HTTP and portable lifecycle acceptance tests for the CIN local web runtime",
+  "scripts": {
+    "test:web": "node --test ./specs/local-web-runtime.test.cjs"
+  }
+}

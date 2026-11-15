@@ -1,47 +1,45 @@
-# CIN Linux Portable Runtime Prototype
+# CIN Linux Portable Local Web Runtime
 
-This is a feasibility prototype for the delivery contract: verify ZIP → extract directory → launch locally. It is not a conventional installer and is not the CIN Genesis or Main Lobby implementation.
+This prototype launches a local HTTP service and serves its interface in the user's normal browser. It is not the CIN Genesis Lobby and does not issue production CIN records or credentials.
 
-## User-level execution model
-- The extracted application is launched by the current desktop user; no `sudo`, root account or system-wide installation is used.
-- The application writes its data under `CIN_DATA_ROOT`, otherwise `$XDG_DATA_HOME/cin-prototype`, otherwise `$HOME/.local/share/cin-prototype`.
-- The user must have normal write permission to their own data directory and execute permission on the extracted folder.
-- The build runner installs development packages as part of CI image preparation. This is not an instruction for the CIN end user.
-- A target Linux desktop must already provide compatible GTK 3 and WebKitGTK 4.1 runtime libraries. CIN does not attempt privileged package installation.
+## User experience
+- Extract the ZIP and run ./run-cin.sh as the current desktop user.
+- CIN binds only to 127.0.0.1.
+- Port selection order: 1221, then 2112, then an operating-system-assigned ephemeral port.
+- The selected address is printed as CIN_URL=... and opened using xdg-open when available.
+- No root privileges, system-wide installation or external network connection are required.
 
-## Current scope
-- Tauri v2 desktop shell with bundled local HTML.
-- Local runtime status and persistence probe.
-- Staged write, read-back comparison and rename commit.
-- Headless probe commands used to verify persistence across separate process invocations.
-- No network service, production credentials, personal data or production signing keys.
+## Data location
+- CIN_DATA_ROOT, when set to a non-empty path.
+- Otherwise $XDG_DATA_HOME/cin.
+- Otherwise $HOME/.local/share/cin.
 
-## Linux prerequisites
-Ubuntu/Debian build prerequisites for developers/CI:
-`build-essential curl wget file libxdo-dev libssl-dev librsvg2-dev libwebkit2gtk-4.1-dev zip`.
-
-The ZIP does not bundle host GTK/WebKitGTK libraries and is not yet self-contained across Linux distributions.
+Application data remains outside the extracted application directory so the portable folder can be moved without moving the data store.
 
 ## Build and package
-From this directory run `cargo test` and `cargo build --release`.
-From the repository root run:
-`bash scripts/package-linux-zip.sh prototype/linux-runtime/target/release/cin-linux-prototype`
+From this directory:
+cargo test
+cargo build --release
 
-Extract `dist/CIN-Linux-Portable-x86_64.zip` and launch with `./run-cin.sh`.
+From the repository root:
+bash scripts/package-linux-zip.sh prototype/linux-runtime/target/release/cin-linux-prototype
 
-## Persistence proof
-1. Launch the extracted folder as the current user.
-2. Select Write persistence probe.
-3. Close the application completely.
-4. Launch it again from the extracted folder.
-5. Select Read persisted probe.
+Extract dist/CIN-Linux-Portable-x86_64.zip and run ./run-cin.sh.
 
-CI also invokes the executable twice as separate OS processes with a temporary user-owned data directory.
+## HTTP routes
+- GET / — local web interface.
+- GET /health — process health check.
+- GET /api/status — runtime and data-root status.
+- GET /api/lifecycle — process lifecycle state, selected browser and uptime.
+- POST /api/runtime/shutdown — requests graceful runtime shutdown.
+- POST /api/probe/write — writes and verifies the persistence probe.
+- GET /api/probe/read — reads the persisted probe.
 
-## Limitations
-- Linux x86_64 feasibility target only.
-- Host WebKitGTK/GTK runtime libraries required; no privileged installation is performed by CIN.
-- ZIP publisher signature verification is not implemented; this prototype package is unsigned.
-- Persistence probe is not the production CIN record store.
-- No USB signer, certificates, Genesis, node birth, personal registration or Main Lobby.
-- This prototype does not approve Tauri as the final framework.
+## Scope and limitations
+- Linux x86_64 prototype.
+- Standard-library HTTP server; no third-party runtime dependency.
+- Browser launch prefers Chromium (`CIN_BROWSER` can select an executable), then falls back to `xdg-open`; the printed URL can be opened manually if neither is available.
+- The Runtime Lifecycle Manager exposes `STARTING`, `READY`, `STOPPING` and `STOPPED` process states. `GET /api/lifecycle` returns the current state; `POST /api/runtime/shutdown` requests graceful shutdown.
+- The prototype package is unsigned and is not a production release.
+- The persistence probe is not the production CIN record store.
+- No USB signer, certificate engine, Genesis, node birth, personal registration or Main Lobby.
