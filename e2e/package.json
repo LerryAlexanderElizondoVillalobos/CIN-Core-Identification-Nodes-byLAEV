@@ -1,16 +1,9 @@
 {
-  "name": "cin-desktop-e2e",
+  "name": "cin-local-web-e2e",
   "private": true,
-  "version": "0.1.0",
-  "description": "End-to-end desktop acceptance tests for the CIN Linux portable prototype",
+  "version": "0.2.0",
+  "description": "HTTP and portable lifecycle acceptance tests for the CIN local web runtime",
   "scripts": {
-    "test:desktop": "wdio run ./wdio.conf.cjs"
-  },
-  "devDependencies": {
-    "@wdio/cli": "9.19.1",
-    "@wdio/local-runner": "9.19.1",
-    "@wdio/mocha-framework": "9.19.1",
-    "@wdio/spec-reporter": "9.19.1",
-    "@wdio/tauri-service": "1.4.0"
+    "test:web": "node --test ./specs/local-web-runtime.test.cjs"
   }
 }
