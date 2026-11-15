@@ -226,6 +226,9 @@ impl TransactionalStore {
         {
             return Err(StorageError::Integrity("commit marker metadata is invalid".into()));
         }
+        let metadata: TransactionMetadata =
+            read_json(&self.journal_path(&marker.operation_id))?;
+        self.validate_marker_and_record(&metadata, &marker)?;
         let record_path = self.repository.document_path(document_id);
         let bytes = fs::read(record_path).map_err(io_error)?;
         if digest_hex(&bytes) != marker.digest {
@@ -305,6 +308,33 @@ impl TransactionalStore {
                         detail: "commit marker or authoritative record does not match journal".into(),
                     });
                 }
+            }
+        }
+
+        // A staged file without a journal has no recoverable operation metadata.
+        // Preserve it and report it as incomplete instead of treating it as a record.
+        let staging_dir = self.transactions_dir().join("staging");
+        for entry in fs::read_dir(staging_dir).map_err(io_error)? {
+            let entry = entry.map_err(io_error)?;
+            if !entry.file_type().map_err(io_error)?.is_file() {
+                continue;
+            }
+            let path = entry.path();
+            let Some(stem) = path.file_stem().and_then(|value| value.to_str()) else {
+                continue;
+            };
+            let operation_path = self
+                .transactions_dir()
+                .join("journal")
+                .join(format!("{stem}.json"));
+            if !operation_path.exists() {
+                report.inspected += 1;
+                report.incomplete += 1;
+                report.issues.push(RecoveryIssue {
+                    operation_id: stem.to_owned(),
+                    status: TransactionStatus::Incomplete,
+                    detail: "staging file has no matching transaction journal".into(),
+                });
             }
         }
         Ok(report)
