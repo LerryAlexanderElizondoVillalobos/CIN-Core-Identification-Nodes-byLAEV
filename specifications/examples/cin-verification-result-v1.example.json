@@ -38,7 +38,7 @@
       "status": "resolved"
     },
     "policy": {
-      "status": "pending"
+      "status": "indeterminate"
     }
   },
   "findings": [
