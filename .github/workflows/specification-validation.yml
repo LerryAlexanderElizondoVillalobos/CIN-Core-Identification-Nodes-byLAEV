@@ -1,0 +1,37 @@
+name: CIN Specification Validation
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "docs/**"
+      - "specifications/**"
+      - "scripts/ci/**"
+      - ".github/workflows/specification-validation.yml"
+  push:
+    branches: [main]
+    paths:
+      - "docs/**"
+      - "specifications/**"
+      - "scripts/ci/**"
+      - ".github/workflows/specification-validation.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  specification-integrity:
+    name: Specification and reference integrity
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Validate document references and metadata
+        run: python3 scripts/ci/validate_repository.py
+      - name: Report implementation maturity boundary
+        run: |
+          echo "This repository baseline contains architecture and specifications, not a complete runtime."
+          echo "Runtime unit, integration, cryptographic, storage and end-to-end jobs require corresponding implementations."

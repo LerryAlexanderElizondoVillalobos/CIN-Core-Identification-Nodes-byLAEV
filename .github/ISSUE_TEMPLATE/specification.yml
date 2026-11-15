@@ -1,0 +1,36 @@
+name: Specification task
+description: Define or revise a versioned CIN technical contract.
+title: "[Specification]: "
+labels: ["type:specification"]
+body:
+  - type: textarea
+    id: purpose
+    attributes:
+      label: Purpose and scope
+    validations:
+      required: true
+  - type: textarea
+    id: contract
+    attributes:
+      label: Normative contract
+      description: Define data structures, constraints, serialization, inputs, outputs, states and errors.
+    validations:
+      required: true
+  - type: textarea
+    id: trust
+    attributes:
+      label: Trust and authorization assumptions
+    validations:
+      required: true
+  - type: textarea
+    id: compatibility
+    attributes:
+      label: Versioning and compatibility
+    validations:
+      required: true
+  - type: textarea
+    id: conformance
+    attributes:
+      label: Conformance tests and acceptance evidence
+    validations:
+      required: true
