@@ -9,7 +9,7 @@ const absoluteAppPath = path.resolve(appBinaryPath);
 
 exports.config = {
   runner: 'local',
-  specs: ['./e2e/specs/**/*.spec.cjs'],
+  specs: ['./specs/**/*.spec.cjs'],
   maxInstances: 1,
   capabilities: [
     {
