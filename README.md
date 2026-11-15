@@ -118,7 +118,24 @@ Proposed capabilities, technical specifications, prototypes, and validated imple
 
 The Package Origin Verification Engine and its v1 manifest profile are documented as proposed specifications. The publisher-key trust lifecycle, implementation, interoperability, and test results remain to be completed and validated.
 
-## 9. Repository Organization
+## 9. Foundational Documentation and Architecture
+
+The following documents establish the conceptual foundation and proposed node lifecycle. They describe intended architecture; they do not claim implementation.
+
+- [CIN Foundational Principles](docs/foundations/CIN_FOUNDATIONAL_PRINCIPLES.md) — equality, human dignity, evidence, privacy, continuity, decentralization, and the distinction between a node and a person.
+- [CIN Node Lifecycle Architecture](docs/architecture/NODE_LIFECYCLE_ARCHITECTURE.md) — package verification, extraction, pre-birth preparation, Genesis Manifest, node birth, Lobby, and ecosystem setup.
+- [Genesis Preparation Architecture](docs/architecture/GENESIS_PREPARATION_ARCHITECTURE.md) — environment audit, provenance, manifest construction, operator review, and first logical local record.
+- [Package Origin Verification Architecture](docs/architecture/PACKAGE_ORIGIN_VERIFICATION.md) — ZIP integrity, signed manifest verification, publisher trust, and installation gate.
+- [CIN Package Manifest Specification v1](specifications/PACKAGE_MANIFEST_SPECIFICATION_V1.md) — proposed versioned cryptographic package-manifest profile.
+- [Project Status and Development Roadmap](docs/project/PROJECT_STATUS_AND_ROADMAP.md) — maturity status, workstreams, and recommended implementation sequence.
+- [Contributing to CIN](CONTRIBUTING.md) — contribution, documentation, implementation, and review expectations.
+- [License and Project Rights](LICENSE.md) — project-specific rights and authorship declaration.
+
+## 10. Development Maturity
+
+CIN distinguishes conceptual proposals, proposed architecture, published specifications, implementation, testing, integration, and validation. A document describing a component is not evidence that its software exists. Current status and next evidence requirements are maintained in the [Project Status and Development Roadmap](docs/project/PROJECT_STATUS_AND_ROADMAP.md).
+
+## 11. Repository Organization
 
 The repository progressively organizes documentation and development work using the following structure:
 
@@ -126,24 +143,29 @@ The repository progressively organizes documentation and development work using 
 CIN-Core-Identification-Nodes-byLAEV/
 ├── README.md
 ├── LICENSE.md
+├── CONTRIBUTING.md
 ├── docs/
-│   └── architecture/
-│       └── PACKAGE_ORIGIN_VERIFICATION.md
-├── specifications/
-├── research/
-├── architecture/
-└── development/
+│   ├── foundations/
+│   │   └── CIN_FOUNDATIONAL_PRINCIPLES.md
+│   ├── architecture/
+│   │   ├── PACKAGE_ORIGIN_VERIFICATION.md
+│   │   ├── NODE_LIFECYCLE_ARCHITECTURE.md
+│   │   └── GENESIS_PREPARATION_ARCHITECTURE.md
+│   └── project/
+│       └── PROJECT_STATUS_AND_ROADMAP.md
+└── specifications/
+    └── PACKAGE_MANIFEST_SPECIFICATION_V1.md
 ```
 
-Directories will be expanded as their corresponding documentation or implementation is created.
+Additional directories should be introduced when their content and maintenance purpose are established.
 
-## 10. Project Origin
+## 12. Project Origin
 
 CIN is an independent research and architectural initiative developed by **LAEV**. It emerges from the intersection of architectural thinking, systems design, distributed computing, blockchain technology, cryptographic structures, and institutional infrastructure.
 
 The project investigates how architectural principles can inform the design of large-scale technological systems intended to support fundamental human and institutional processes.
 
-## 11. Official Project Reference
+## 13. Official Project Reference
 
 **CIN — Core Identification Nodes**  
 **The Global Blockchain Architecture**  
