@@ -6,12 +6,14 @@
 <meta name="theme-color" content="#07111f">
 <title>CIN Genesis Lobby — byLAEV</title>
 <style>
-:root{color-scheme:dark;--bg:#07111f;--panel:#0d1b2d;--line:#20334a;--text:#eaf2ff;--muted:#91a7c2;--cyan:#57d6ff;--green:#7ee7b2}
+:root{color-scheme:dark;--bg:#07111f;--panel:#0d1b2d;--line:#20334a;--text:#eaf2ff;--muted:#91a7c2;--cyan:#57d6ff;--green:#7ee7b2;--amber:#f6c779}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 15% 0%,#12304b 0,transparent 42%),var(--bg);color:var(--text);font:16px/1.55 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;min-height:100vh}
-.wrap{max-width:1060px;margin:auto;padding:28px 22px 70px}.top{display:flex;justify-content:space-between;align-items:center;gap:18px;margin-bottom:70px}.brand{display:flex;align-items:center;gap:12px;font-weight:750;letter-spacing:.08em}.mark{width:38px;height:38px;border:1px solid #3d7997;border-radius:12px;display:grid;place-items:center;color:var(--cyan);font-size:20px}.tag{font-size:12px;color:var(--muted);border:1px solid var(--line);padding:6px 10px;border-radius:999px}
-.hero{max-width:780px}.eyebrow{color:var(--cyan);font-size:12px;letter-spacing:.18em;text-transform:uppercase;font-weight:700}h1{font-size:clamp(42px,7vw,76px);line-height:1.02;letter-spacing:-.055em;margin:16px 0 22px}h1 span{color:var(--cyan)}.lead{font-size:19px;color:#b6c8dc;max-width:700px}.actions{display:flex;flex-wrap:wrap;gap:12px;margin:32px 0 18px}.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:14px 20px;border-radius:12px;text-decoration:none;font-weight:750;border:1px solid transparent}.primary{background:var(--cyan);color:#03101b}.secondary{border-color:var(--line);color:var(--text);background:#0b1727}.note{font-size:13px;color:var(--muted);max-width:700px}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:58px}.card{background:linear-gradient(180deg,#102239,#0b1727);border:1px solid var(--line);border-radius:16px;padding:22px}.num{font-size:12px;color:var(--cyan);letter-spacing:.12em}.card h2{font-size:18px;margin:12px 0 8px}.card p{color:var(--muted);font-size:14px;margin:0}.status{display:inline-flex;align-items:center;gap:8px;color:var(--green);font-size:13px;margin-top:20px}.dot{width:7px;height:7px;background:var(--green);border-radius:50%}.footer{border-top:1px solid var(--line);margin-top:54px;padding-top:20px;color:var(--muted);font-size:13px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
-@media(max-width:700px){.top{margin-bottom:48px}.grid{grid-template-columns:1fr}.lead{font-size:17px}.wrap{padding-inline:16px}}
+.wrap{max-width:1060px;margin:auto;padding:28px 22px 70px}.top{display:flex;justify-content:space-between;align-items:center;gap:18px;margin-bottom:65px}.brand{display:flex;align-items:center;gap:12px;font-weight:750;letter-spacing:.08em}.mark{width:38px;height:38px;border:1px solid #3d7997;border-radius:12px;display:grid;place-items:center;color:var(--cyan);font-size:20px}.tag{font-size:12px;color:var(--muted);border:1px solid var(--line);padding:6px 10px;border-radius:999px}
+.hero{max-width:790px}.eyebrow{color:var(--cyan);font-size:12px;letter-spacing:.18em;text-transform:uppercase;font-weight:700}h1{font-size:clamp(42px,7vw,76px);line-height:1.02;letter-spacing:-.055em;margin:16px 0 22px}h1 span{color:var(--cyan)}.lead{font-size:19px;color:#b6c8dc;max-width:720px}.actions{display:flex;flex-wrap:wrap;gap:12px;margin:30px 0 18px}.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:14px 20px;border-radius:12px;text-decoration:none;font-weight:750;border:1px solid transparent;cursor:pointer;font:inherit;font-weight:750}.primary{background:var(--cyan);color:#03101b}.secondary{border-color:var(--line);color:var(--text);background:#0b1727}.btn:disabled{opacity:.55;cursor:wait}.note{font-size:13px;color:var(--muted);max-width:740px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:50px}.card{background:linear-gradient(180deg,#102239,#0b1727);border:1px solid var(--line);border-radius:16px;padding:22px}.num{font-size:12px;color:var(--cyan);letter-spacing:.12em}.card h2{font-size:18px;margin:12px 0 8px}.card p{color:var(--muted);font-size:14px;margin:0}.status{display:inline-flex;align-items:center;gap:8px;color:var(--green);font-size:13px;margin-top:20px}.dot{width:7px;height:7px;background:var(--green);border-radius:50%}
+#status{margin-top:18px;padding:13px 15px;border:1px solid var(--line);border-radius:12px;color:var(--muted);font-size:14px;display:none}#manifestPanel{display:none;margin-top:26px;background:#091625;border:1px solid #31506c;border-radius:16px;padding:20px}#manifestPanel h2{margin:0 0 10px}pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:520px;overflow:auto;background:#050d17;padding:16px;border-radius:10px;color:#c7e5ff;font-size:12px}#loadManifest{display:none}
+.footer{border-top:1px solid var(--line);margin-top:54px;padding-top:20px;color:var(--muted);font-size:13px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+@media(max-width:700px){.top{margin-bottom:45px}.grid{grid-template-columns:1fr}.lead{font-size:17px}.wrap{padding-inline:16px}}
 </style>
 </head>
 <body>
@@ -20,19 +22,147 @@
 <section class="hero">
 <div class="eyebrow">Core Identification Nodes · Genesis</div>
 <h1>Prepare your node.<br><span>Record its environment.</span></h1>
-<p class="lead">The Genesis Environment Certificate defines the initial collection profile for a CIN node. Start by obtaining the certificate; the local certificate runner will execute it and generate the environment manifest.</p>
+<p class="lead">Generate a Genesis Environment Manifest by applying the certificate's collection profile to the information this browser can expose. The certificate's APA 7 bibliography is embedded in the resulting manifest.</p>
 <div class="actions">
-<a class="btn primary" href="https://raw.githubusercontent.com/LerryAlexanderElizondoVillalobos/CIN-Core-Identification-Nodes-byLAEV/main/Core%20Identification%20Node%20Github/CIN-GENESIS-ENVIRONMENT.cincert" download>↓ &nbsp; Download Genesis Certificate</a>
-<a class="btn secondary" href="https://github.com/LerryAlexanderElizondoVillalobos/CIN-Core-Identification-Nodes-byLAEV/tree/main/Core%20Identification%20Node%20Github">View repository folder ↗</a>
+<button class="btn primary" id="installButton">Install Genesis Certificate &amp; Generate Manifest</button>
+<button class="btn secondary" id="viewButton" disabled>View Generated Manifest</button>
 </div>
-<p class="note">This GitHub Pages Lobby is a static interface. It does not inspect your device, execute the certificate, or write files to your computer. Those operations require the local CIN Certificate Runner.</p>
+<div class="actions" style="margin-top:8px">
+<button class="btn secondary" id="loadButton">Open Existing Manifest</button>
+<input id="loadManifest" type="file" accept=".json,application/json">
+<a class="btn secondary" href="https://raw.githubusercontent.com/LerryAlexanderElizondoVillalobos/CIN-Core-Identification-Nodes-byLAEV/main/Core%20Identification%20Node%20Github/CIN-GENESIS-ENVIRONMENT.cincert">Download Certificate</a>
+</div>
+<div id="status" role="status" aria-live="polite"></div>
+<div id="manifestPanel"><h2>Genesis Environment Manifest</h2><p class="note" id="manifestMeta"></p><pre id="manifestOutput"></pre><button class="btn secondary" id="downloadButton">Download Manifest JSON</button></div>
+<p class="note">Browser execution can only collect browser-visible data. It cannot inspect the full operating system or write to a private folder without your permission. When supported, you can select the CIN 001 folder to save the manifest there; otherwise the Lobby downloads it for you to place in CIN 001.</p>
 </section>
 <section class="grid" aria-label="Genesis workflow">
-<article class="card"><div class="num">01 / CERTIFICATE</div><h2>Install or download</h2><p>Obtain the declarative Genesis Environment Certificate (v1.0.1), including its embedded APA 7 bibliography.</p><div class="status"><span class="dot"></span> Certificate published</div></article>
-<article class="card"><div class="num">02 / LOCAL RUNNER</div><h2>Collect environment</h2><p>The local runner will interpret the collection profile and gather only the declared, purpose-limited technical information.</p><div class="status" style="color:#f6c779"><span class="dot" style="background:#f6c779"></span> Runner integration pending</div></article>
-<article class="card"><div class="num">03 / CIN 001</div><h2>Generate manifest</h2><p>The engine will combine collected environment data and certificate-supplied references, then save the generated manifest to the local CIN 001 DataRoot.</p><div class="status" style="color:#f6c779"><span class="dot" style="background:#f6c779"></span> Manifest engine pending</div></article>
+<article class="card"><div class="num">01 / CERTIFICATE</div><h2>Load certificate</h2><p>Fetches the published Genesis Environment Certificate, including its embedded APA 7 references and collection profile.</p><div class="status"><span class="dot"></span> Certificate published</div></article>
+<article class="card"><div class="num">02 / ENVIRONMENT</div><h2>Collect available data</h2><p>Collects a limited browser environment snapshot. Browser APIs do not expose all operating-system and hardware details.</p><div class="status"><span class="dot"></span> Browser collection enabled</div></article>
+<article class="card"><div class="num">03 / CIN 001</div><h2>Save and inspect</h2><p>Offers a user-authorized save into the CIN 001 folder, with a download fallback and an in-page manifest viewer.</p><div class="status"><span class="dot"></span> Local save workflow enabled</div></article>
 </section>
-<footer class="footer"><span>Core Identification Nodes — Civilizational Foundations byLAEV</span><span>Genesis Lobby · Static GitHub Pages</span></footer>
+<footer class="footer"><span>Core Identification Nodes — Civilizational Foundations byLAEV</span><span>Genesis Lobby · GitHub Pages</span></footer>
 </main>
+<script>
+(() => {
+  const certificateUrl = "https://raw.githubusercontent.com/LerryAlexanderElizondoVillalobos/CIN-Core-Identification-Nodes-byLAEV/main/Core%20Identification%20Node%20Github/CIN-GENESIS-ENVIRONMENT.cincert";
+  const $ = id => document.getElementById(id);
+  let currentManifest = null;
+  function status(message, error=false) {
+    const el=$("status"); el.style.display="block"; el.textContent=message;
+    el.style.color=error?"#ffaaaa":"#b7c8dc"; el.style.borderColor=error?"#8d4242":"#31506c";
+  }
+  function collectBrowserEnvironment() {
+    const nav=navigator;
+    const screenInfo=window.screen ? {width:screen.width,height:screen.height,color_depth:screen.colorDepth,pixel_ratio:window.devicePixelRatio||null} : null;
+    const connection=nav.connection||nav.mozConnection||nav.webkitConnection;
+    return {
+      collection_scope:"browser-accessible subset; not a complete operating-system inventory",
+      collected_at:new Date().toISOString(),
+      execution:{
+        user_agent:nav.userAgent||null,
+        platform:nav.userAgentData?.platform||nav.platform||null,
+        language:nav.language||null,
+        languages:Array.isArray(nav.languages)?nav.languages:[],
+        timezone:Intl.DateTimeFormat().resolvedOptions().timeZone||null,
+        logical_processors:nav.hardwareConcurrency||null,
+        device_memory_gb:nav.deviceMemory||null,
+        cookie_enabled:!!nav.cookieEnabled,
+        online:!!nav.onLine,
+        secure_context:!!window.isSecureContext
+      },
+      display:screenInfo,
+      network:{
+        effective_type:connection?.effectiveType||null,
+        downlink_mbps:connection?.downlink||null,
+        rtt_ms:connection?.rtt||null,
+        save_data:connection?.saveData??null
+      },
+      browser_capabilities:{
+        crypto_subtle:!!(window.crypto&&crypto.subtle),
+        sha256_available:!!(window.crypto&&crypto.subtle),
+        file_system_access_api:typeof window.showDirectoryPicker==="function",
+        service_worker:"serviceWorker" in navigator,
+        web_workers:typeof Worker!=="undefined"
+      },
+      limitations:["Browser APIs do not reveal a complete operating-system build, full hardware inventory, arbitrary environment variables, disk inventory, or network interface identifiers."]
+    };
+  }
+  async function sha256(text) {
+    if (!crypto?.subtle) return null;
+    const digest=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(text));
+    return Array.from(new Uint8Array(digest)).map(x=>x.toString(16).padStart(2,"0")).join("");
+  }
+  function showManifest(manifest) {
+    currentManifest=manifest;
+    $("manifestOutput").textContent=JSON.stringify(manifest,null,2);
+    $("manifestMeta").textContent="Generated "+manifest.generated_at+" · Certificate "+manifest.certificate.version+" · "+manifest.bibliographic_references.references.length+" references";
+    $("manifestPanel").style.display="block"; $("viewButton").disabled=false;
+    $("viewButton").scrollIntoView({behavior:"smooth",block:"nearest"});
+  }
+  async function downloadManifest() {
+    if(!currentManifest)return;
+    const blob=new Blob([JSON.stringify(currentManifest,null,2)+"\n"],{type:"application/json"});
+    const url=URL.createObjectURL(blob); const a=document.createElement("a");
+    a.href=url;a.download="CIN-001-GENESIS-ENVIRONMENT-MANIFEST.json";a.click();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }
+  $("installButton").addEventListener("click",async()=>{
+    const button=$("installButton");button.disabled=true;button.textContent="Generating Manifest…";
+    try{
+      status("Loading Genesis Environment Certificate…");
+      const response=await fetch(certificateUrl,{cache:"no-store"});
+      if(!response.ok)throw new Error("Certificate download failed: HTTP "+response.status);
+      const certificate=await response.json();
+      if(certificate.certificate_type!=="cin.genesis-environment")throw new Error("The downloaded file is not a recognized CIN Genesis Environment Certificate.");
+      const environment=collectBrowserEnvironment();
+      const packageFingerprint=await sha256(JSON.stringify(certificate.collection_profile));
+      currentManifest={
+        document_type:"cin.genesis-environment-manifest",
+        schema_version:certificate.output_profile?.schema_version||"1.0.0",
+        manifest_id:"cin:manifest:cin-001:"+crypto.randomUUID(),
+        generated_at:new Date().toISOString(),
+        node:{node_id:"CIN 001",storage_target:"CIN 001"},
+        certificate:{certificate_id:certificate.certificate_id,version:certificate.certificate_version,type:certificate.certificate_type,collection_profile_id:certificate.collection_profile?.id,profile_sha256:packageFingerprint},
+        environment_data:environment,
+        bibliographic_references:certificate.bibliographic_references,
+        generation:{
+          engine:"CIN Genesis Lobby browser collector",
+          execution_mode:"browser-limited",
+          complete_os_collection:false,
+          runner_integration:"pending",
+          notes:"This manifest contains only data exposed by the browser and must not be represented as a full local-runner environment scan."
+        }
+      };
+      showManifest(currentManifest);
+      status("Manifest generated in browser memory. Choose the CIN 001 folder to save it, or use the download fallback.");
+      if(typeof window.showDirectoryPicker==="function"){
+        try{
+          const dir=await window.showDirectoryPicker({id:"cin001",mode:"readwrite"});
+          const handle=await dir.getFileHandle("CIN-001-GENESIS-ENVIRONMENT-MANIFEST.json",{create:true});
+          const writable=await handle.createWritable();
+          await writable.write(JSON.stringify(currentManifest,null,2)+"\n");await writable.close();
+          status("Genesis Environment Manifest saved to the folder you selected as CIN 001.");
+        }catch(e){
+          if(e.name==="AbortError")status("Folder selection cancelled. The manifest remains available below; use Download Manifest JSON to save it.");
+          else status("Manifest generated, but folder saving was unavailable: "+e.message+". Use Download Manifest JSON.",true);
+        }
+      }else{
+        status("Manifest generated. This browser does not support direct folder saving; download the JSON and place it inside CIN 001.");
+      }
+    }catch(e){status("Genesis generation failed: "+e.message,true);}
+    finally{button.disabled=false;button.textContent="Install Genesis Certificate & Generate Manifest";}
+  });
+  $("viewButton").addEventListener("click",()=>{if(currentManifest){$("manifestPanel").style.display="block";$("manifestPanel").scrollIntoView({behavior:"smooth"});}});
+  $("downloadButton").addEventListener("click",downloadManifest);
+  $("loadButton").addEventListener("click",()=>$("loadManifest").click());
+  $("loadManifest").addEventListener("change",async event=>{
+    const file=event.target.files?.[0];if(!file)return;
+    try{const parsed=JSON.parse(await file.text());if(parsed.document_type!=="cin.genesis-environment-manifest")throw new Error("This file is not a CIN Genesis Environment Manifest.");showManifest(parsed);status("Existing manifest loaded for viewing.");}
+    catch(e){status("Could not open manifest: "+e.message,true);}
+    event.target.value="";
+  });
+})();
+</script>
 </body>
 </html>
