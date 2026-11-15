@@ -14,6 +14,7 @@ pub enum StorageError {
     NotFound(String),
     Conflict(String),
     Serialization(String),
+    Integrity(String),
     Io(String),
 }
 
@@ -24,6 +25,7 @@ impl fmt::Display for StorageError {
             Self::NotFound(s) => write!(f, "document not found: {s}"),
             Self::Conflict(s) => write!(f, "document id conflict: {s}"),
             Self::Serialization(s) => write!(f, "serialization error: {s}"),
+            Self::Integrity(s) => write!(f, "storage integrity error: {s}"),
             Self::Io(s) => write!(f, "storage I/O error: {s}"),
         }
     }
