@@ -717,7 +717,7 @@ mod tests {
 
         assert!(matches!(
             store.read_record(&doc.document_id),
-            Err(StorageError::Io(_))
+            Err(StorageError::Integrity(_))
         ));
         let report = store.inspect_recovery().unwrap();
         assert_eq!(report.inconsistent, 1);
