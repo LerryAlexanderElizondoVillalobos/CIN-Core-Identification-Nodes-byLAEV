@@ -31,6 +31,10 @@ jobs:
           persist-credentials: false
       - name: Validate document references and metadata
         run: python3 scripts/ci/validate_repository.py
+      - name: Install pinned schema validation dependency
+        run: python3 -m pip install --disable-pip-version-check -r requirements-ci.txt
+      - name: Validate common document schemas and examples
+        run: python3 scripts/ci/validate_schemas.py
       - name: Report implementation maturity boundary
         run: |
           echo "This repository baseline contains architecture and specifications, not a complete runtime."
