@@ -3,6 +3,7 @@
 The first delivery target is **First Successful CIN Main Lobby**: a portable local node that verifies its package, persists its lifecycle records, completes authorized birth and personal registration, assembles its Main Lobby from verified records, and recovers after close/reopen.
 
 ## Development control
+- [Latest Repository Audit Report (2026-11-15)](docs/project/CIN_AUDIT_REPORT_2026-11-15.md)
 - [Master Implementation Workplan](docs/project/CIN_MASTER_IMPLEMENTATION_WORKPLAN.md)
 - [Implementation Directory Map](docs/architecture/CIN_IMPLEMENTATION_DIRECTORY_MAP.md)
 - [Workflow Catalog](docs/project/CIN_WORKFLOW_CATALOG.md)
