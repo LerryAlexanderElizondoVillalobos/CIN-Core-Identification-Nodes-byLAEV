@@ -126,10 +126,8 @@ mod tests {
             LifecycleState::MainLobbyOpen.transition(LifecycleState::MainLobbyReady),
             Ok(LifecycleState::MainLobbyReady)
         );
-        assert!(
-            LifecycleState::MainLobbyReady
-                .transition(LifecycleState::Born)
-                .is_err()
-        );
+        assert!(LifecycleState::MainLobbyReady
+            .transition(LifecycleState::Born)
+            .is_err());
     }
 }
