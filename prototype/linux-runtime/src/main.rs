@@ -93,7 +93,7 @@ fn handle_connection(mut stream: TcpStream) -> std::io::Result<()> {
         request.extend_from_slice(&buffer[..count]);
     }
 
-    match (method, path) {
+    match (method.as_str(), path.as_str()) {
         ("GET", "/") | ("GET", "/index.html") => response(&mut stream, "200 OK", "text/html", HTML),
         ("GET", "/health") => response(&mut stream, "200 OK", "text/plain", "ok"),
         ("GET", "/api/status") => {
