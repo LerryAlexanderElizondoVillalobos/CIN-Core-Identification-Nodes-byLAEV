@@ -1,0 +1,108 @@
+name: CIN Certificate Runner E2E
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "prototype/cin-core/**"
+      - "certificates/**"
+      - ".github/workflows/cin-certificate-runner-e2e.yml"
+  push:
+    branches: [main]
+    paths:
+      - "prototype/cin-core/**"
+      - "certificates/**"
+      - ".github/workflows/cin-certificate-runner-e2e.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cin-certificate-e2e-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  certificate-runner-e2e:
+    name: Execute Genesis certificate on Ubuntu
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+
+      - name: Install stable Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Build Certificate Runner
+        run: cargo build --manifest-path prototype/cin-core/Cargo.toml --bin cin-certificate-runner
+
+      - name: Prepare an extracted-package fixture
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/cin-package/certificates" "$RUNNER_TEMP/cin-package/prototype"
+          cp certificates/CIN-GENESIS-ENVIRONMENT.cincert "$RUNNER_TEMP/cin-package/certificates/"
+          printf 'CIN package fixture for Genesis inventory test\n' > "$RUNNER_TEMP/cin-package/README.txt"
+          printf 'fixture component\n' > "$RUNNER_TEMP/cin-package/prototype/component.txt"
+          echo "CIN_PACKAGE=$RUNNER_TEMP/cin-package" >> "$GITHUB_ENV"
+          echo "CIN_DATA_DIR=$RUNNER_TEMP/cin-data" >> "$GITHUB_ENV"
+
+      - name: Verify decline path generates manifest without registration
+        shell: bash
+        run: |
+          mkdir -p "$CIN_DATA_DIR"
+          printf 'n\n' | cargo run --quiet --manifest-path prototype/cin-core/Cargo.toml --bin cin-certificate-runner -- "$CIN_PACKAGE/certificates/CIN-GENESIS-ENVIRONMENT.cincert" --package-root "$CIN_PACKAGE" | tee "$RUNNER_TEMP/declined-output.txt"
+          python3 - "$RUNNER_TEMP/declined-output.txt" "$CIN_PACKAGE" <<'PY'
+          import json, pathlib, sys
+          output = pathlib.Path(sys.argv[1]).read_text()
+          root = pathlib.Path(sys.argv[2])
+          start = output.find("{")
+          assert start >= 0, "runner did not print a JSON manifest"
+          manifest, _ = json.JSONDecoder().raw_decode(output[start:])
+          assert manifest["document_type"] == "cin.genesis-environment-manifest"
+          fields = manifest["payload"]["fields"]
+          assert "execution.os.name" in fields
+          assert "execution.architecture" in fields
+          assert fields["package.files"]["status"] == "observed"
+          files = fields["package.files"]["value"]
+          paths = [item.get("path", "") for item in files]
+          assert any(path.endswith("README.txt") for path in paths), paths
+          assert any(path.endswith("component.txt") for path in paths), paths
+          assert "not registered" in output.lower(), output
+          print("DECLINE_PATH_OK: manifest collected; operator rejection did not register it")
+          PY
+          test -z "$(find "$CIN_DATA_DIR" -type f -print -quit)"
+
+      - name: Verify approval path registers and reads back manifest
+        shell: bash
+        run: |
+          printf 'y\n' | cargo run --quiet --manifest-path prototype/cin-core/Cargo.toml --bin cin-certificate-runner -- "$CIN_PACKAGE/certificates/CIN-GENESIS-ENVIRONMENT.cincert" --package-root "$CIN_PACKAGE" | tee "$RUNNER_TEMP/approved-output.txt"
+          grep -q "registered and read-back verified" "$RUNNER_TEMP/approved-output.txt"
+          grep -q "Storage digest (SHA-256):" "$RUNNER_TEMP/approved-output.txt"
+          test -n "$(find "$CIN_DATA_DIR" -type f -print -quit)"
+          mkdir -p test-results
+          cp "$RUNNER_TEMP/approved-output.txt" test-results/GENESIS-ENVIRONMENT-MANIFEST-RUNNER-OUTPUT.txt
+          python3 - "$RUNNER_TEMP/approved-output.txt" <<'PY'
+          import json, pathlib, sys
+          output = pathlib.Path(sys.argv[1]).read_text()
+          start = output.find("{")
+          assert start >= 0, "approved run did not print a JSON manifest"
+          manifest, _ = json.JSONDecoder().raw_decode(output[start:])
+          pathlib.Path("test-results/GENESIS-ENVIRONMENT-MANIFEST.json").write_text(
+              json.dumps(manifest, indent=2, ensure_ascii=False) + "\n"
+          )
+          print("APPROVAL_PATH_OK: manifest registered and storage read-back verified")
+          PY
+
+      - name: Upload real runner test results
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: cin-genesis-certificate-e2e-results
+          path: |
+            test-results/
+            ${{ runner.temp }}/declined-output.txt
+            ${{ runner.temp }}/approved-output.txt
+          if-no-files-found: warn
+          retention-days: 14
