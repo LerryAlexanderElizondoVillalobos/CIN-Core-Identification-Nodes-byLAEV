@@ -1,0 +1,98 @@
+{
+  "certificate_id": "cin:certificate:node-birth:v1",
+  "certificate_type": "cin.node-birth",
+  "certificate_version": "1.0.0",
+  "title": "CIN Node Birth Certificate",
+  "description": "Consumes the complete registered Genesis Environment Manifest and creates the distinct CIN Node Birth Record after the required authorization, cryptographic, and storage contracts are available.",
+  "status": "specification-stage",
+  "execution": {
+    "instruction": "RUN CERTIFICATE",
+    "runner": "cin-certificate-runner",
+    "action": "create-node-birth-record",
+    "implementation_status": "pending",
+    "required_capabilities": [
+      "genesis-manifest-import",
+      "strict-json-validation",
+      "versioned-canonicalization",
+      "sha256-digest",
+      "cin-node-identifier-derivation",
+      "birth-authorization-verification",
+      "transactional-document-storage",
+      "independent-document-verification"
+    ]
+  },
+  "input_profile": {
+    "document_type": "cin.genesis-environment-manifest",
+    "accepted_schema_versions": [
+      "1.0.0"
+    ],
+    "input_modes": [
+      "registered-document-reference",
+      "json-file-import",
+      "complete-json-paste"
+    ],
+    "source_scope": "complete-root-document",
+    "preserve_original_bytes": true,
+    "reject_duplicate_object_keys": true,
+    "reject_unsupported_schema_versions": true
+  },
+  "processing_profile": {
+    "canonicalization": "RFC8785-JCS",
+    "canonicalization_status": "proposed-pending-ADR-0003-acceptance",
+    "raw_digest_algorithm": "sha-256",
+    "manifest_digest_algorithm": "sha-256",
+    "identifier_derivation_profile": "cin.node-identifier-derivation/1.0.0",
+    "identifier_derivation_status": "proposed-pending-cryptographic-interoperability-vectors",
+    "domain_separation": true,
+    "deterministic_source": "complete-canonical-genesis-manifest"
+  },
+  "identifier_profile": {
+    "required": [
+      "CIN-NID",
+      "CIN-NSID",
+      "CIN-BID",
+      "CIN-REF"
+    ],
+    "conditional": [
+      {
+        "type": "CIN-ENID",
+        "requires": [
+          "ecosystem_id",
+          "ecosystem_scope_profile"
+        ]
+      },
+      {
+        "type": "CIN-PVID",
+        "requires": [
+          "explicit_parent_or_provenance_reference"
+        ]
+      }
+    ],
+    "source_labels_are_not_identifiers": [
+      "node.node_id",
+      "manifest_id"
+    ]
+  },
+  "authorization_profile": {
+    "operation": "cin.node.birth",
+    "required": true,
+    "decision_source": "CIN Authorization Engine",
+    "signature_trust_and_authorization_are_independent_checks": true
+  },
+  "output_profile": {
+    "document_type": "cin.node-birth-record",
+    "schema_version": "1.0.0",
+    "document_envelope": "cin.common-document-model/1.0.0-draft",
+    "source_reference_required": true,
+    "source_manifest_embedded": false,
+    "source_manifest_preserved_as_separate_record": true,
+    "integrity_section": true,
+    "detached_proofs": "optional-external-signer",
+    "storage": "CIN DataRoot TransactionalStore",
+    "registration_state": "born-only-after-commit-and-independent-verification"
+  },
+  "bibliographic_references": {
+    "transfer_to_birth_record": false,
+    "inheritance_rule": "The complete Genesis Manifest remains the source record. The birth record references its document ID and digest; it does not duplicate or reinterpret its bibliographic metadata."
+  }
+}
