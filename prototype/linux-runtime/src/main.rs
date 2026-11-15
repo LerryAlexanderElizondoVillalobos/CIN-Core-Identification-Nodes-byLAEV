@@ -1,12 +1,18 @@
+mod browser;
+mod runtime_lifecycle;
+
 use std::{
     env, fs,
     io::{Read, Write},
     net::{TcpListener, TcpStream},
     path::PathBuf,
-    process::{Command, Stdio},
+    sync::{Arc, Mutex},
     thread,
     time::{Duration, SystemTime, UNIX_EPOCH},
 };
+
+use browser::BrowserLaunch;
+use runtime_lifecycle::RuntimeLifecycleManager;
 
 const HTML: &str = include_str!("../../dist/index.html");
 
@@ -52,7 +58,7 @@ fn response(stream: &mut TcpStream, status: &str, content_type: &str, body: &str
         body.as_bytes().len(), body)
 }
 
-fn handle_connection(mut stream: TcpStream) -> std::io::Result<()> {
+fn handle_connection(mut stream: TcpStream, lifecycle: Arc<Mutex<RuntimeLifecycleManager>>) -> std::io::Result<()> {
     stream.set_read_timeout(Some(Duration::from_secs(3)))?;
     let mut request = Vec::new();
     let mut buffer = [0u8; 4096];
@@ -96,6 +102,14 @@ fn handle_connection(mut stream: TcpStream) -> std::io::Result<()> {
     match (method.as_str(), path.as_str()) {
         ("GET", "/") | ("GET", "/index.html") => response(&mut stream, "200 OK", "text/html", HTML),
         ("GET", "/health") => response(&mut stream, "200 OK", "text/plain", "ok"),
+        ("GET", "/api/lifecycle") => {
+            let status = lifecycle.lock().map_err(|_| std::io::Error::other("lifecycle lock poisoned"))?.status_json();
+            response(&mut stream, "200 OK", "application/json", &status)
+        }
+        ("POST", "/api/runtime/shutdown") => {
+            lifecycle.lock().map_err(|_| std::io::Error::other("lifecycle lock poisoned"))?.request_shutdown();
+            response(&mut stream, "202 Accepted", "text/plain", "CIN runtime shutdown requested")
+        }
         ("GET", "/api/status") => {
             let root = data_root().map_err(std::io::Error::other)?;
             response(&mut stream, "200 OK", "text/plain", &format!("CIN local web runtime ready\nData root: {}", root.display()))
@@ -112,28 +126,49 @@ fn handle_connection(mut stream: TcpStream) -> std::io::Result<()> {
     }
 }
 
-fn open_browser(url: &str) {
-    if env::var("CIN_NO_BROWSER").as_deref() == Ok("1") { return; }
-    match Command::new("xdg-open").arg(url).stdout(Stdio::null()).stderr(Stdio::null()).spawn() {
-        Ok(_) => println!("CIN_BROWSER=launched"),
-        Err(error) => eprintln!("CIN_BROWSER=not-launched ({error}); open {url} manually"),
+fn browser_status(launch: BrowserLaunch) -> String {
+    match launch {
+        BrowserLaunch::Chromium(path) => format!("chromium:{}", path.display()),
+        BrowserLaunch::SystemDefault(path) => format!("system-default:{}", path.display()),
+        BrowserLaunch::Manual => "manual".to_string(),
     }
 }
 
 fn run_server() -> Result<(), String> {
     let listener = bind_local_server()?;
+    listener.set_nonblocking(true).map_err(|e| e.to_string())?;
     let address = listener.local_addr().map_err(|e| e.to_string())?;
     let url = format!("http://127.0.0.1:{}", address.port());
+    let lifecycle = Arc::new(Mutex::new(RuntimeLifecycleManager::new(address.port())));
+    let browser = browser_status(browser::launch(&url));
+    lifecycle.lock().map_err(|_| "Runtime lifecycle lock poisoned".to_string())?.mark_ready(browser.clone());
     println!("CIN_URL={url}");
     println!("CIN_PORT={}", address.port());
     println!("CIN_BIND=127.0.0.1");
-    open_browser(&url);
-    for incoming in listener.incoming() {
-        match incoming {
-            Ok(stream) => { thread::spawn(move || { if let Err(error) = handle_connection(stream) { eprintln!("CIN_HTTP_ERROR={error}"); } }); }
+    println!("CIN_STATE=READY");
+    println!("CIN_BROWSER={browser}");
+
+    loop {
+        if lifecycle.lock().map_err(|_| "Runtime lifecycle lock poisoned".to_string())?.shutdown_requested() {
+            break;
+        }
+        match listener.accept() {
+            Ok((stream, _)) => {
+                let state = Arc::clone(&lifecycle);
+                thread::spawn(move || {
+                    if let Err(error) = handle_connection(stream, state) {
+                        eprintln!("CIN_HTTP_ERROR={error}");
+                    }
+                });
+            }
+            Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {
+                thread::sleep(Duration::from_millis(25));
+            }
             Err(error) => eprintln!("CIN_ACCEPT_ERROR={error}"),
         }
     }
+    lifecycle.lock().map_err(|_| "Runtime lifecycle lock poisoned".to_string())?.mark_stopped();
+    println!("CIN_STATE=STOPPED");
     Ok(())
 }
 
