@@ -1,0 +1,199 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cin.bylaev.org/schemas/cin-verification-result-v1.schema.json",
+  "title": "CIN Verification Result v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "report_id",
+    "target_document_id",
+    "verifier_profile",
+    "policy_id",
+    "evaluated_at",
+    "decision",
+    "checks",
+    "findings"
+  ],
+  "properties": {
+    "report_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "target_document_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "verifier_profile": {
+      "type": "string",
+      "minLength": 1
+    },
+    "policy_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evaluated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "decision": {
+      "enum": [
+        "accept",
+        "reject",
+        "defer",
+        "not-evaluated"
+      ]
+    },
+    "checks": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "canonicalization",
+        "digest",
+        "signatures",
+        "issuer_trust",
+        "authorization",
+        "validity",
+        "revocation",
+        "references",
+        "policy"
+      ],
+      "properties": {
+        "schema": {
+          "$ref": "#/$defs/check"
+        },
+        "canonicalization": {
+          "$ref": "#/$defs/check"
+        },
+        "digest": {
+          "$ref": "#/$defs/check"
+        },
+        "signatures": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/check"
+          }
+        },
+        "issuer_trust": {
+          "$ref": "#/$defs/check"
+        },
+        "authorization": {
+          "$ref": "#/$defs/check"
+        },
+        "validity": {
+          "$ref": "#/$defs/check"
+        },
+        "revocation": {
+          "$ref": "#/$defs/check"
+        },
+        "references": {
+          "$ref": "#/$defs/check"
+        },
+        "policy": {
+          "$ref": "#/$defs/check"
+        }
+      }
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "code",
+          "category",
+          "severity",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "minLength": 1
+          },
+          "category": {
+            "enum": [
+              "structure",
+              "integrity",
+              "signature",
+              "trust",
+              "authorization",
+              "validity",
+              "revocation",
+              "reference",
+              "policy",
+              "availability"
+            ]
+          },
+          "severity": {
+            "enum": [
+              "info",
+              "warning",
+              "error",
+              "critical"
+            ]
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1
+          },
+          "related_id": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "verifier_software_version": {
+      "type": "string"
+    },
+    "trust_profile_reference": {
+      "type": "string"
+    }
+  },
+  "$defs": {
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "pass",
+            "fail",
+            "trusted",
+            "untrusted",
+            "unknown",
+            "expired",
+            "revoked",
+            "authorized",
+            "unauthorized",
+            "unavailable",
+            "valid",
+            "not_yet_valid",
+            "not_revoked",
+            "resolved",
+            "missing",
+            "invalid",
+            "incomplete",
+            "unsupported",
+            "pending",
+            "not_applicable",
+            "not_checked",
+            "error"
+          ]
+        },
+        "detail_code": {
+          "type": "string"
+        },
+        "evaluated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "evidence_reference": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
