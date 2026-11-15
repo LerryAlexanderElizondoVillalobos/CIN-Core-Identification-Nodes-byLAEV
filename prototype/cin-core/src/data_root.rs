@@ -25,9 +25,10 @@ pub enum DataRootError {
 impl fmt::Display for DataRootError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::NoPlatformDataDirectory => {
-                write!(f, "cannot resolve platform user data directory; set CIN_DATA_DIR")
-            }
+            Self::NoPlatformDataDirectory => write!(
+                f,
+                "cannot resolve platform user data directory; set CIN_DATA_DIR"
+            ),
         }
     }
 }
@@ -84,9 +85,9 @@ fn platform_default() -> Option<PathBuf> {
         if let Some(xdg) = env::var_os("XDG_DATA_HOME").filter(|value| !value.is_empty()) {
             return Some(PathBuf::from(xdg).join(APP_DATA_NAME));
         }
-        return env::var_os("HOME").map(PathBuf::from).map(|path| {
-            path.join(".local").join("share").join(APP_DATA_NAME)
-        });
+        return env::var_os("HOME")
+            .map(PathBuf::from)
+            .map(|path| path.join(".local").join("share").join(APP_DATA_NAME));
     }
     #[allow(unreachable_code)]
     None
