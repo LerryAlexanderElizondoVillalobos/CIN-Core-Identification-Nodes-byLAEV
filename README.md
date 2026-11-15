@@ -35,6 +35,7 @@ The project aims to translate foundational architectural principles into documen
 - **Independent verification:** The ability to verify defined properties of records without relying exclusively on one central operator.
 - **Modularity:** Separation of foundational infrastructure from specialized applications and ledger implementations.
 - **Long-term continuity:** Consideration of record preservation, historical references, and the ability to verify records over time.
+- **Verifiable software distribution:** Software packages must be checked against authenticated origin metadata before they are admitted to the installation process.
 
 ## 4. Core Identification Nodes
 
@@ -57,6 +58,7 @@ The architecture is expected to investigate and define:
 - Structured event registration and record references.
 - Institutional interoperability and application integration.
 - Data preservation, historical continuity, and auditability.
+- Software package provenance and pre-installation verification.
 - Governance boundaries and operational responsibilities.
 
 Specific mechanisms will be documented in their corresponding technical specifications as research and development progresses.
@@ -77,12 +79,29 @@ CIN is intended to evolve through independently specified components. Research a
 2. **Node structures:** Node roles, operational models, communication, and coordination.
 3. **Cryptographic layer:** Hashing, commitments, proofs, and verification procedures.
 4. **Merkle tree infrastructure:** Binary Merkle tree construction, proofs, and hierarchical record verification.
-5. **Ledger architecture:** Core and specialized ledger models, registration, and record lifecycle.
-6. **Application integration:** Dedicated application ledgers and institutional interfaces.
-7. **Interoperability:** Common formats, interfaces, and cross-system verification.
-8. **Validation:** Prototypes, test cases, technical evaluation, and documented results.
+5. **Package origin verification:** Independent verification of received ZIP archives against signed package manifests before installation.
+6. **Ledger architecture:** Core and specialized ledger models, registration, and record lifecycle.
+7. **Application integration:** Dedicated application ledgers and institutional interfaces.
+8. **Interoperability:** Common formats, interfaces, and cross-system verification.
+9. **Validation:** Prototypes, test cases, technical evaluation, and documented results.
 
 Each component should have a defined purpose, interfaces, assumptions, and validation criteria. Implementations will be documented separately from conceptual proposals.
+
+### 7.1. Package Origin Verification
+
+CIN proposes a **Package Origin Verification Engine** as part of its portable software architecture.
+
+Before a ZIP distribution is admitted to the installation process, the engine calculates the digest of the received archive, verifies the digital signature of its package manifest using independently trusted public-key material, and compares the calculated digest with the digest contained in that authenticated manifest.
+
+This separates:
+
+- **Integrity:** whether the received archive matches the signed digest reference;
+- **Publisher authenticity:** whether the manifest signature is valid under a key trusted by the configured trust policy;
+- **Installation authorization:** whether CIN's installation policy permits the package to proceed.
+
+The verifier does not require publisher private keys inside the portable package. It does not replace ESMT: exact-file archive verification and Merkle proofs for structured ledger records are separate functions.
+
+**Architecture document:** [Package Origin Verification Architecture](docs/architecture/PACKAGE_ORIGIN_VERIFICATION.md).
 
 ## 8. Research and Documentation Status
 
@@ -96,29 +115,26 @@ This repository is the principal documentation and development reference for CIN
 
 Proposed capabilities, technical specifications, prototypes, and validated implementations should be clearly distinguished in project documentation.
 
+The Package Origin Verification Engine is currently documented as a proposed architectural component. Its manifest format, signature profile, trust lifecycle, implementation, and test results remain to be specified and validated.
+
 ## 9. Repository Organization
 
-The repository may progressively organize documentation and development work using the following structure:
+The repository progressively organizes documentation and development work using the following structure:
 
 ```text
 CIN-Core-Identification-Nodes-byLAEV/
 ├── README.md
-├── LICENSE
+├── LICENSE.md
 ├── docs/
-│   ├── foundations/
-│   ├── architecture/
-│   ├── node-structure/
-│   ├── cryptography/
-│   ├── merkle-trees/
-│   ├── civil-registration/
-│   └── interoperability/
+│   └── architecture/
+│       └── PACKAGE_ORIGIN_VERIFICATION.md
 ├── specifications/
 ├── research/
 ├── architecture/
 └── development/
 ```
 
-This is a proposed organizational structure; directories will be added as their corresponding documentation or implementation is created.
+Directories will be expanded as their corresponding documentation or implementation is created.
 
 ## 10. Project Origin
 
