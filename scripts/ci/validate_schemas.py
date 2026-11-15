@@ -65,6 +65,10 @@ def main():
     del missing_check["checks"]["issuer_trust"]
     expect_invalid(result_validator, missing_check, "verification report requires issuer_trust result")
 
+    invalid_check_status = deepcopy(result_example)
+    invalid_check_status["checks"]["schema"]["status"] = "trusted"
+    expect_invalid(result_validator, invalid_check_status, "schema check cannot report issuer trust status")
+
     print("CIN schema validation passed. Structural validity does not prove cryptographic validity or trust.")
 
 
