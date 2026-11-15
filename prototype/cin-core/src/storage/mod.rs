@@ -1,4 +1,9 @@
-//! Local JSON document repository with atomic replacement and recovery-friendly writes.
+//! Local document storage and transaction services.
 mod repository;
+mod transactional;
 
 pub use repository::{DocumentRepository, StorageError};
+pub use transactional::{
+    CommitMarker, CommitReceipt, PreparedTransaction, RecoveryIssue, TransactionMetadata,
+    TransactionRecoveryReport, TransactionStatus, TransactionalStore,
+};
