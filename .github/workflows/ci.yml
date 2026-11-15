@@ -46,14 +46,4 @@ jobs:
           persist-credentials: false
       - name: Parse workflow YAML
         run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          import yaml
-          files = sorted(Path(".github/workflows").glob("*.yml"))
-          if not files:
-              raise SystemExit("No workflow YAML files found.")
-          for path in files:
-              with path.open(encoding="utf-8") as stream:
-                  yaml.safe_load(stream)
-              print(f"Valid YAML: {path}")
-          PY
+          ruby -e 'require "yaml"; Dir.glob(".github/workflows/*.yml").each { |path| YAML.load_file(path); puts "Valid YAML: #{path}" }'
