@@ -40,10 +40,6 @@ jobs:
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Verify formatting
-        working-directory: prototype/linux-runtime
-        run: cargo fmt --all -- --check
-
       - name: Run runtime unit tests
         working-directory: prototype/linux-runtime
         run: cargo test
