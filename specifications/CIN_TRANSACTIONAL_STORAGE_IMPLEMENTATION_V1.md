@@ -32,7 +32,11 @@ The SHA-256 digest protects the exact serialized bytes managed by this storage a
 
 A document without a valid commit marker and matching journal is not visible through `read_record`. Recovery inspection classifies prepared, committed, incomplete and inconsistent transaction artifacts. Inspection does not delete, rewrite, repair or silently quarantine files.
 
-## 5. Deliberate limitations
+## 5. Public API boundary
+
+The public storage module exposes `TransactionalStore` as the authoritative API. The underlying raw `DocumentRepository` is crate-internal; its direct unmarked file operations are retained only for legacy unit tests and cannot be called by external consumers. New engines must use `prepare_record`, `commit_record` and `read_record`.
+
+## 6. Deliberate limitations
 
 - Single-process/single-writer prototype; no multi-process lock.
 - Existing `documents/` record layout is retained for this slice.
@@ -41,6 +45,6 @@ A document without a valid commit marker and matching journal is not visible thr
 - The current envelope serialization is not canonical. The digest must not be reused as signature input.
 - Genesis-first-record policy is not implemented by this storage slice.
 
-## 6. Acceptance evidence required
+## 7. Acceptance evidence required
 
 Format, Clippy, compilation and tests must pass. Tests cover invisibility before commit, restart/read-back, idempotent retry, operation-ID conflict, staged-byte tampering, committed-byte tampering, unmarked record invisibility and non-destructive recovery of incomplete artifacts.
