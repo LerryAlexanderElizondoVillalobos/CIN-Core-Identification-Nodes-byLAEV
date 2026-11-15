@@ -61,7 +61,7 @@ jobs:
           assert start >= 0, "runner did not print a JSON manifest"
           manifest, _ = json.JSONDecoder().raw_decode(output[start:])
           assert manifest["document_type"] == "cin.genesis-environment-manifest"
-          fields = manifest["payload"]["fields"]
+          fields = manifest["payload"]["audit"]["fields"]
           assert "execution.os.name" in fields
           assert "execution.architecture" in fields
           assert fields["package.files"]["status"] == "observed"
