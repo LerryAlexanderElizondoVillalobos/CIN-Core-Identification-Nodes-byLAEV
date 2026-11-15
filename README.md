@@ -101,7 +101,8 @@ This separates:
 
 The verifier does not require publisher private keys inside the portable package. It does not replace ESMT: exact-file archive verification and Merkle proofs for structured ledger records are separate functions.
 
-**Architecture document:** [Package Origin Verification Architecture](docs/architecture/PACKAGE_ORIGIN_VERIFICATION.md).
+**Architecture document:** [Package Origin Verification Architecture](docs/architecture/PACKAGE_ORIGIN_VERIFICATION.md).  
+**Manifest specification:** [CIN Package Manifest Specification v1](specifications/PACKAGE_MANIFEST_SPECIFICATION_V1.md).
 
 ## 8. Research and Documentation Status
 
@@ -115,7 +116,7 @@ This repository is the principal documentation and development reference for CIN
 
 Proposed capabilities, technical specifications, prototypes, and validated implementations should be clearly distinguished in project documentation.
 
-The Package Origin Verification Engine is currently documented as a proposed architectural component. Its manifest format, signature profile, trust lifecycle, implementation, and test results remain to be specified and validated.
+The Package Origin Verification Engine and its v1 manifest profile are documented as proposed specifications. The publisher-key trust lifecycle, implementation, interoperability, and test results remain to be completed and validated.
 
 ## 9. Repository Organization
 
