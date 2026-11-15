@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#07111f">
+<title>CIN Genesis Lobby — byLAEV</title>
+<style>
+:root{color-scheme:dark;--bg:#07111f;--panel:#0d1b2d;--line:#20334a;--text:#eaf2ff;--muted:#91a7c2;--cyan:#57d6ff;--green:#7ee7b2}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 15% 0%,#12304b 0,transparent 42%),var(--bg);color:var(--text);font:16px/1.55 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;min-height:100vh}
+.wrap{max-width:1060px;margin:auto;padding:28px 22px 70px}.top{display:flex;justify-content:space-between;align-items:center;gap:18px;margin-bottom:70px}.brand{display:flex;align-items:center;gap:12px;font-weight:750;letter-spacing:.08em}.mark{width:38px;height:38px;border:1px solid #3d7997;border-radius:12px;display:grid;place-items:center;color:var(--cyan);font-size:20px}.tag{font-size:12px;color:var(--muted);border:1px solid var(--line);padding:6px 10px;border-radius:999px}
+.hero{max-width:780px}.eyebrow{color:var(--cyan);font-size:12px;letter-spacing:.18em;text-transform:uppercase;font-weight:700}h1{font-size:clamp(42px,7vw,76px);line-height:1.02;letter-spacing:-.055em;margin:16px 0 22px}h1 span{color:var(--cyan)}.lead{font-size:19px;color:#b6c8dc;max-width:700px}.actions{display:flex;flex-wrap:wrap;gap:12px;margin:32px 0 18px}.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:14px 20px;border-radius:12px;text-decoration:none;font-weight:750;border:1px solid transparent}.primary{background:var(--cyan);color:#03101b}.secondary{border-color:var(--line);color:var(--text);background:#0b1727}.note{font-size:13px;color:var(--muted);max-width:700px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:58px}.card{background:linear-gradient(180deg,#102239,#0b1727);border:1px solid var(--line);border-radius:16px;padding:22px}.num{font-size:12px;color:var(--cyan);letter-spacing:.12em}.card h2{font-size:18px;margin:12px 0 8px}.card p{color:var(--muted);font-size:14px;margin:0}.status{display:inline-flex;align-items:center;gap:8px;color:var(--green);font-size:13px;margin-top:20px}.dot{width:7px;height:7px;background:var(--green);border-radius:50%}.footer{border-top:1px solid var(--line);margin-top:54px;padding-top:20px;color:var(--muted);font-size:13px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+@media(max-width:700px){.top{margin-bottom:48px}.grid{grid-template-columns:1fr}.lead{font-size:17px}.wrap{padding-inline:16px}}
+</style>
+</head>
+<body>
+<main class="wrap">
+<header class="top"><div class="brand"><div class="mark">C</div><span>CIN <span style="color:var(--cyan)">byLAEV</span></span></div><span class="tag">GENESIS · ENVIRONMENT</span></header>
+<section class="hero">
+<div class="eyebrow">Core Identification Nodes · Genesis</div>
+<h1>Prepare your node.<br><span>Record its environment.</span></h1>
+<p class="lead">The Genesis Environment Certificate defines the initial collection profile for a CIN node. Start by obtaining the certificate; the local certificate runner will execute it and generate the environment manifest.</p>
+<div class="actions">
+<a class="btn primary" href="https://raw.githubusercontent.com/LerryAlexanderElizondoVillalobos/CIN-Core-Identification-Nodes-byLAEV/main/Core%20Identification%20Node%20Github/CIN-GENESIS-ENVIRONMENT.cincert" download>↓ &nbsp; Download Genesis Certificate</a>
+<a class="btn secondary" href="https://github.com/LerryAlexanderElizondoVillalobos/CIN-Core-Identification-Nodes-byLAEV/tree/main/Core%20Identification%20Node%20Github">View repository folder ↗</a>
+</div>
+<p class="note">This GitHub Pages Lobby is a static interface. It does not inspect your device, execute the certificate, or write files to your computer. Those operations require the local CIN Certificate Runner.</p>
+</section>
+<section class="grid" aria-label="Genesis workflow">
+<article class="card"><div class="num">01 / CERTIFICATE</div><h2>Install or download</h2><p>Obtain the declarative Genesis Environment Certificate (v1.0.1), including its embedded APA 7 bibliography.</p><div class="status"><span class="dot"></span> Certificate published</div></article>
+<article class="card"><div class="num">02 / LOCAL RUNNER</div><h2>Collect environment</h2><p>The local runner will interpret the collection profile and gather only the declared, purpose-limited technical information.</p><div class="status" style="color:#f6c779"><span class="dot" style="background:#f6c779"></span> Runner integration pending</div></article>
+<article class="card"><div class="num">03 / CIN 001</div><h2>Generate manifest</h2><p>The engine will combine collected environment data and certificate-supplied references, then save the generated manifest to the local CIN 001 DataRoot.</p><div class="status" style="color:#f6c779"><span class="dot" style="background:#f6c779"></span> Manifest engine pending</div></article>
+</section>
+<footer class="footer"><span>Core Identification Nodes — Civilizational Foundations byLAEV</span><span>Genesis Lobby · Static GitHub Pages</span></footer>
+</main>
+</body>
+</html>
