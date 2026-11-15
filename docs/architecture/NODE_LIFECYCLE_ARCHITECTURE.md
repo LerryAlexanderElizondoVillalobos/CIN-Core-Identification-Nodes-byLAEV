@@ -108,7 +108,7 @@ A locally born node is not automatically a trusted or admitted network participa
 
 ## 7. Architectural invariants
 
-1. Package verification precedes trusting a distribution for installation.
+1. Package verification precedes trusting a distribution for extraction and local execution.
 2. Extraction is not node birth.
 3. The Genesis Manifest describes pre-birth conditions.
 4. The Genesis Manifest is the first logical CIN record in private local storage.
