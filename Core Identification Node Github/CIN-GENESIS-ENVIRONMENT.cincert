@@ -1,0 +1,40 @@
+{
+  "certificate_id": "cin:certificate:genesis-environment:v1",
+  "certificate_type": "cin.genesis-environment",
+  "certificate_version": "1.0.0",
+  "title": "CIN Genesis Environment Certificate",
+  "description": "Collects purpose-limited technical evidence about the extracted CIN package and the runtime environment before node birth.",
+  "execution": {
+    "instruction": "RUN CERTIFICATE",
+    "runner": "cin-certificate-runner",
+    "action": "generate-genesis-environment-manifest"
+  },
+  "collection_profile": {
+    "id": "cin.genesis-environment/1.0.0",
+    "package_root": "..",
+    "include": [
+      "execution.os",
+      "execution.architecture",
+      "execution.configuration.allowlist",
+      "hardware.capabilities",
+      "package.file_inventory.sha256",
+      "network.interface_names",
+      "cryptographic.digest_capabilities",
+      "storage.configuration_presence"
+    ],
+    "exclude": [
+      "credentials",
+      "private_keys",
+      "arbitrary_environment_variables",
+      "user_file_contents",
+      "network_payloads",
+      "absolute_paths"
+    ]
+  },
+  "output_profile": {
+    "document_type": "cin.genesis-environment-manifest",
+    "schema_version": "1.0.0",
+    "storage": "CIN DataRoot TransactionalStore",
+    "registration": "first-logical-record"
+  }
+}
