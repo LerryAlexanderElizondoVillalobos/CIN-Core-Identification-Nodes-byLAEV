@@ -46,7 +46,10 @@ pub fn inspect_storage(repo: &DocumentRepository) -> Result<RecoveryReport, Stor
         if !path.is_file() {
             continue;
         }
-        let name = path.file_name().and_then(|name| name.to_str()).unwrap_or("");
+        let name = path
+            .file_name()
+            .and_then(|name| name.to_str())
+            .unwrap_or("");
         if name.contains(".tmp-") {
             report.issues.push(RecoveryIssue {
                 path,
