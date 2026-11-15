@@ -2,7 +2,7 @@
 
 **Specification ID:** cin.node-lifecycle  
 **Version:** 1.0.0-draft  
-**Status:** Proposed contract — dependent on M0 architecture acceptance  
+**Status:** Proposed contract — review required  
 **Planning phase:** M0 — Architecture Baseline  
 **Related:** [CIN Architecture Baseline v1](../docs/architecture/CIN_ARCHITECTURE_BASELINE_V1.md), [Node Lifecycle Architecture](../docs/architecture/NODE_LIFECYCLE_ARCHITECTURE.md), [Genesis Preparation Architecture](../docs/architecture/GENESIS_PREPARATION_ARCHITECTURE.md), Issue #3
 
@@ -10,7 +10,7 @@
 
 This specification turns the proposed CIN lifecycle into a testable state and transition contract for the first successful local Main Lobby. It distinguishes package verification, extraction, local execution, pre-birth preparation, Genesis registration, node birth, personal registration, evidence association, profile assembly and Lobby presentation.
 
-This is a draft contract. It does not claim that lifecycle engines, records, schemas, storage or UI have been implemented. Final adoption depends on acceptance of the M0 architecture baseline and review of unresolved decisions.
+This is a draft contract. It does not claim that lifecycle engines, records, schemas, storage or UI have been implemented. The M0 architecture baseline is accepted; final adoption of this lifecycle contract depends on technical review of its transitions, persistence and recovery rules.
 
 ## 2. Normative distinctions
 
@@ -234,7 +234,7 @@ This draft intentionally does not select:
 - Global CIN Personal Number coordination protocol.
 - Evidence-specific verification standards and person-association governance.
 
-The state names and transition semantics may be refined after the M0 architecture baseline is accepted. Schema fixtures and executable state-machine tests should be added only after the repository agrees the machine-readable format and runtime test harness.
+The M0 architecture baseline has been accepted. The state names and transition semantics are now being reviewed against that baseline and the defined Genesis Lobby → PRENATAL → birth → Main Lobby sequence. Schema fixtures and executable state-machine tests should be added only after the repository agrees the machine-readable format and runtime test harness.
 
 ## 11. Completion status
 
