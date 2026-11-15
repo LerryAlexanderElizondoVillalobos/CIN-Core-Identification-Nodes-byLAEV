@@ -1,4 +1,5 @@
 name: CIN Certificate Runner E2E
+# Cross-platform build gate and Linux end-to-end registration gate.
 
 on:
   pull_request:
