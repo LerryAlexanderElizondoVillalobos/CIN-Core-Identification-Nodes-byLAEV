@@ -7,11 +7,24 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[2]
 FOLDERS = [ROOT / "docs", ROOT / "specifications"]
-FILES = sorted(p for folder in FOLDERS if folder.exists() for p in folder.rglob("*.md"))
+FILES = sorted(
+    {p for folder in FOLDERS if folder.exists() for p in folder.rglob("*.md")}
+    | set(ROOT.glob("*.md"))
+)
 LINK = re.compile(r"(?<!!)\[[^\]]+\]\(([^)]+)\)")
 errors = []
 
-for required in [ROOT / "README.md", ROOT / "CONTRIBUTING.md", ROOT / "docs/project/PROJECT_STATUS_AND_ROADMAP.md"]:
+REQUIRED = [
+    ROOT / "README.md",
+    ROOT / "CONTRIBUTING.md",
+    ROOT / "docs/project/PROJECT_STATUS_AND_ROADMAP.md",
+    ROOT / "docs/architecture/CIN_ARCHITECTURE_BASELINE_V1.md",
+    ROOT / "docs/architecture/CIN_COMPONENT_DEPENDENCY_MAP.md",
+    ROOT / "docs/architecture/CIN_REPOSITORY_TECHNICAL_AUDIT.md",
+    ROOT / "specifications/CIN_NODE_LIFECYCLE_SPECIFICATION_V1.md",
+]
+
+for required in REQUIRED:
     if not required.is_file():
         errors.append(f"Missing required document: {required.relative_to(ROOT)}")
 

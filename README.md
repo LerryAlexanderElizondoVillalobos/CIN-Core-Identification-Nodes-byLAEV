@@ -122,7 +122,9 @@ The Package Origin Verification Engine and its v1 manifest profile are documente
 
 - [CIN Architecture Baseline v1](docs/architecture/CIN_ARCHITECTURE_BASELINE_V1.md) — first Main Lobby scope, component responsibilities, maturity gates and unresolved decisions.
 - [CIN Component Dependency Map](docs/architecture/CIN_COMPONENT_DEPENDENCY_MAP.md) — ordered dependencies from ZIP verification through persistent Main Lobby recovery.
+- [CIN Repository Technical Audit](docs/architecture/CIN_REPOSITORY_TECHNICAL_AUDIT.md) — current repository evidence and remaining portable-runtime audit work.
 - [CIN Architecture Decision Register](docs/decisions/README.md) — numbered architectural decisions and reserved identifiers.
+- [CIN Node Lifecycle Specification v1](specifications/CIN_NODE_LIFECYCLE_SPECIFICATION_V1.md) — proposed state and transition contract; implementation remains pending.
 
 The following documents establish the conceptual foundation and proposed node lifecycle. They describe intended architecture; they do not claim implementation.
 
@@ -132,7 +134,10 @@ The following documents establish the conceptual foundation and proposed node li
 - [Package Origin Verification Architecture](docs/architecture/PACKAGE_ORIGIN_VERIFICATION.md) — ZIP integrity, signed manifest verification, publisher trust, and extraction and execution gate.
 - [CIN Package Manifest Specification v1](specifications/PACKAGE_MANIFEST_SPECIFICATION_V1.md) — proposed versioned cryptographic package-manifest profile.
 - [Project Status and Development Roadmap](docs/project/PROJECT_STATUS_AND_ROADMAP.md) — maturity status, workstreams, and recommended implementation sequence.
+- [Development Backlog](docs/project/DEVELOPMENT_BACKLOG.md) — M0 Issues, dependencies, and phase-exit conditions.
+- [GitHub Development Workflow](docs/project/GITHUB_DEVELOPMENT_WORKFLOW.md) — branch, Issue, Pull Request, and CI process.
 - [ADR-0001: Genesis Manifest and Node Birth Separation](docs/decisions/0001-genesis-manifest-and-node-birth-separation.md) — records the architectural rationale for two distinct founding records.
+- [ADR-0002: Portable Runtime and ZIP Packaging](docs/decisions/0002-portable-runtime-and-zip-packaging-model.md) — preserves the required portable-folder execution model.
 - [Contributing to CIN](CONTRIBUTING.md) — contribution, documentation, implementation, and review expectations.
 - [Security Policy](SECURITY.md) — preliminary guidance for reporting security concerns.
 - [License and Project Rights](LICENSE.md) — project-specific rights, authorship declaration, and intended succession.
@@ -143,31 +148,45 @@ CIN distinguishes conceptual proposals, proposed architecture, published specifi
 
 ## 11. Repository Organization
 
-The repository progressively organizes documentation and development work using the following structure:
+The repository currently contains the following principal structure:
 
 ```text
 CIN-Core-Identification-Nodes-byLAEV/
+├── .github/
+│   ├── ISSUE_TEMPLATE/
+│   ├── PULL_REQUEST_TEMPLATE.md
+│   └── workflows/
+│       ├── ci.yml
+│       └── specification-validation.yml
 ├── README.md
-├── LICENSE.md
 ├── CONTRIBUTING.md
+├── LICENSE.md
+├── SECURITY.md
 ├── docs/
 │   ├── foundations/
 │   │   └── CIN_FOUNDATIONAL_PRINCIPLES.md
 │   ├── architecture/
-│   │   ├── PACKAGE_ORIGIN_VERIFICATION.md
+│   │   ├── CIN_ARCHITECTURE_BASELINE_V1.md
+│   │   ├── CIN_COMPONENT_DEPENDENCY_MAP.md
+│   │   ├── CIN_REPOSITORY_TECHNICAL_AUDIT.md
+│   │   ├── GENESIS_PREPARATION_ARCHITECTURE.md
 │   │   ├── NODE_LIFECYCLE_ARCHITECTURE.md
-│   │   └── GENESIS_PREPARATION_ARCHITECTURE.md
-│   ├── project/
-│   │   └── PROJECT_STATUS_AND_ROADMAP.md
-│   └── decisions/
-│       └── 0001-genesis-manifest-and-node-birth-separation.md
-├── CONTRIBUTING.md
-├── SECURITY.md
+│   │   └── PACKAGE_ORIGIN_VERIFICATION.md
+│   ├── decisions/
+│   │   ├── 0001-genesis-manifest-and-node-birth-separation.md
+│   │   ├── 0002-portable-runtime-and-zip-packaging-model.md
+│   │   └── README.md
+│   └── project/
+│       ├── DEVELOPMENT_BACKLOG.md
+│       ├── GITHUB_DEVELOPMENT_WORKFLOW.md
+│       └── PROJECT_STATUS_AND_ROADMAP.md
+├── scripts/
+│   └── ci/
+│       └── validate_repository.py
 └── specifications/
+    ├── CIN_NODE_LIFECYCLE_SPECIFICATION_V1.md
     └── PACKAGE_MANIFEST_SPECIFICATION_V1.md
 ```
-
-Additional directories should be introduced when their content and maintenance purpose are established.
 
 ## 12. Project Origin
 
