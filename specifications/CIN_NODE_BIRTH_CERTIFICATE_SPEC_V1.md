@@ -102,6 +102,10 @@ The canonical digest is the deterministic source for the node identifier profile
 
 JCS selection remains proposed until ADR-0003 is accepted and independent implementation vectors pass. A runtime must reject an unsupported canonicalization profile; it must not silently substitute a serializer.
 
+## 5.3 Identifier derivation decision candidate
+
+A reviewable but unapproved derivation proposal is maintained in [CIN Node Identifier Derivation Profile v1 — Decision Candidate](CIN_NODE_IDENTIFIER_DERIVATION_PROFILE_V1_CANDIDATE.md). It proposes exact domain labels, fixed-width digest framing, textual forms, conditional identifier behavior, and the required two-implementation vector evidence. It does not override this specification's open status or authorize production identifiers. The project owner must approve the proposal and ADR-0003 before implementation freezes the profile.
+
 ## 6. Identifier profile
 
 The initial catalogue is:
