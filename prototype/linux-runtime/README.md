@@ -30,13 +30,16 @@ Extract dist/CIN-Linux-Portable-x86_64.zip and run ./run-cin.sh.
 - GET / — local web interface.
 - GET /health — process health check.
 - GET /api/status — runtime and data-root status.
+- GET /api/lifecycle — process lifecycle state, selected browser and uptime.
+- POST /api/runtime/shutdown — requests graceful runtime shutdown.
 - POST /api/probe/write — writes and verifies the persistence probe.
 - GET /api/probe/read — reads the persisted probe.
 
 ## Scope and limitations
 - Linux x86_64 prototype.
 - Standard-library HTTP server; no third-party runtime dependency.
-- Browser auto-launch depends on xdg-open; the printed URL can be opened manually if unavailable.
+- Browser launch prefers Chromium (`CIN_BROWSER` can select an executable), then falls back to `xdg-open`; the printed URL can be opened manually if neither is available.
+- The Runtime Lifecycle Manager exposes `STARTING`, `READY`, `STOPPING` and `STOPPED` process states. `GET /api/lifecycle` returns the current state; `POST /api/runtime/shutdown` requests graceful shutdown.
 - The prototype package is unsigned and is not a production release.
 - The persistence probe is not the production CIN record store.
 - No USB signer, certificate engine, Genesis, node birth, personal registration or Main Lobby.
