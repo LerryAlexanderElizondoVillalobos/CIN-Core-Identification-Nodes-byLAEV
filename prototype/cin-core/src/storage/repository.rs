@@ -1,11 +1,20 @@
+use std::{
+    fmt, fs,
+    path::{Path, PathBuf},
+};
+
+#[cfg(test)]
 use crate::documents::{validate_document, DocumentEnvelope};
+#[cfg(test)]
 use serde_json;
-use std::fmt;
-use std::fs::{self, File, OpenOptions};
+#[cfg(test)]
+use std::fs::{File, OpenOptions};
+#[cfg(test)]
 use std::io::{Read, Write};
-use std::path::{Path, PathBuf};
+#[cfg(test)]
 use std::sync::atomic::{AtomicU64, Ordering};
 
+#[cfg(test)]
 static TEMP_SEQUENCE: AtomicU64 = AtomicU64::new(0);
 
 #[derive(Debug)]
@@ -14,6 +23,7 @@ pub enum StorageError {
     NotFound(String),
     Conflict(String),
     Serialization(String),
+    Integrity(String),
     Io(String),
 }
 
@@ -24,6 +34,7 @@ impl fmt::Display for StorageError {
             Self::NotFound(s) => write!(f, "document not found: {s}"),
             Self::Conflict(s) => write!(f, "document id conflict: {s}"),
             Self::Serialization(s) => write!(f, "serialization error: {s}"),
+            Self::Integrity(s) => write!(f, "storage integrity error: {s}"),
             Self::Io(s) => write!(f, "storage I/O error: {s}"),
         }
     }
@@ -32,22 +43,23 @@ impl std::error::Error for StorageError {}
 
 /// Filesystem repository. It owns the storage root, never the application's UI/runtime.
 #[derive(Debug, Clone)]
-pub struct DocumentRepository {
+pub(crate) struct DocumentRepository {
     root: PathBuf,
 }
 
 impl DocumentRepository {
-    pub fn open(root: impl Into<PathBuf>) -> Result<Self, StorageError> {
+    pub(crate) fn open(root: impl Into<PathBuf>) -> Result<Self, StorageError> {
         let root = root.into();
         fs::create_dir_all(root.join("documents")).map_err(io_error)?;
         Ok(Self { root })
     }
 
-    pub fn root(&self) -> &Path {
+    pub(crate) fn root(&self) -> &Path {
         &self.root
     }
 
-    pub fn put(&self, document: &DocumentEnvelope) -> Result<(), StorageError> {
+    #[cfg(test)]
+    pub(crate) fn put(&self, document: &DocumentEnvelope) -> Result<(), StorageError> {
         validate_document(document).map_err(|e| StorageError::InvalidDocument(e.to_string()))?;
         let target = self.document_path(&document.document_id);
         let bytes = serde_json::to_vec_pretty(document)
@@ -94,7 +106,8 @@ impl DocumentRepository {
         }
     }
 
-    pub fn get(&self, document_id: &str) -> Result<DocumentEnvelope, StorageError> {
+    #[cfg(test)]
+    pub(crate) fn get(&self, document_id: &str) -> Result<DocumentEnvelope, StorageError> {
         let path = self.document_path(document_id);
         let mut file = File::open(&path).map_err(|e| {
             if e.kind() == std::io::ErrorKind::NotFound {
@@ -114,10 +127,6 @@ impl DocumentRepository {
             ));
         }
         Ok(document)
-    }
-
-    pub fn contains(&self, document_id: &str) -> bool {
-        self.document_path(document_id).is_file()
     }
 
     pub(crate) fn document_path(&self, document_id: &str) -> PathBuf {
