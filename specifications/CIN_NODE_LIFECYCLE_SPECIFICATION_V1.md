@@ -76,7 +76,7 @@ A node cannot enter BORN solely because an authorization exists. The Node Birth 
 |---|---|---|---|
 | PERSONAL_ISSUANCE_PENDING | Personal issuance has been requested but not authorized | Born node and explicit person-node association request are available | Request/association proposal reference |
 | PERSONAL_ISSUANCE_AUTHORIZED | Personal issuance operation is authorized | Separate issuance authorization passes verification | Authorization record/reference |
-| PERSONAL_REGISTRATION_PENDING | Number allocation and registration are being committed | Authorized registration operation begins | Allocation attempt/status |
+| PERSONAL_REGISTRATION_PENDING | CIN automatically generates the personal number and commits its registration | Authorized registration operation begins; local duplicate check and allocation policy pass | Allocation attempt/status |
 | PERSONAL_REGISTERED_LOCAL | CIN Personal Number and registration record are committed locally; global uniqueness is not established | Local generation and duplicate checks pass | Local registration record with explicit allocation scope |
 | PERSONAL_NUMBER_RESERVED | A coordinating registry confirms reservation/uniqueness within its declared scope | Authenticated reservation response and record are verified | Reservation receipt and authority reference |
 | PERSONAL_CREDENTIAL_ISSUANCE_PENDING | Credential generation/signing is underway | Registration record and issuer profile are valid | Issuance transaction status |
@@ -85,7 +85,7 @@ A node cannot enter BORN solely because an authorization exists. The Node Birth 
 | PERSONAL_REGISTRATION_FAILED | Number/record commit failed or outcome uncertain | Allocation or storage failure | Failure/recovery status |
 | PERSONAL_CREDENTIAL_FAILED | Credential generation, signing, storage or verification failed | Credential operation fails | Failure report; prior valid node-birth and registration records remain |
 
-A locally generated CIN Personal Number must not be presented as globally unique unless a defined coordination mechanism has issued a verified reservation. The software must preserve the distinction between local registration and globally reserved status.
+A CIN Personal Number is generated automatically during the authorized personal-registration operation; a Bitcoin address, PGP key, nationality, email address or external evidence is not a prerequisite for number generation. A locally generated CIN Personal Number must not be presented as globally unique unless a defined coordination mechanism has issued a verified reservation. The software must preserve the distinction between local registration and globally reserved status.
 
 ### 3.5 Evidence, profile and Lobby states
 
@@ -123,7 +123,7 @@ Evidence may be associated while remaining unverified, pending, rejected or unav
 | BIRTH_AUTHORIZATION_PENDING | Verify authority response | Signature, issuer trust, scope, validity and references pass | BIRTH_AUTHORIZED or BIRTH_AUTHORIZATION_REJECTED | Authorization verification result |
 | BIRTH_AUTHORIZED | Execute birth | Idempotency key unique for this birth operation; Genesis and authorization references unchanged | BIRTH_CREATION_PENDING | Birth transaction reference |
 | BIRTH_CREATION_PENDING | Commit and verify | Node identifier and birth record schema valid; durable commit and read-back pass | BORN or BIRTH_CREATION_FAILED | Node Identifier and Node Birth Record |
-| BORN | Request personal issuance | Explicit person-node association and separate issuance request supplied | PERSONAL_ISSUANCE_PENDING | Association/issuance request |
+| BORN | Request personal issuance | Explicit person-node association event and separate issuance request supplied; external evidence is not required to generate the CIN Personal Number | PERSONAL_ISSUANCE_PENDING | Explicit association event record and issuance request |
 | PERSONAL_ISSUANCE_PENDING | Verify issuance authorization | Authorization is valid for the specific subject, issuer, operation and scope | PERSONAL_ISSUANCE_AUTHORIZED or PERSONAL_ISSUANCE_REJECTED | Authorization result |
 | PERSONAL_ISSUANCE_AUTHORIZED | Allocate and register number | Allocation policy and local duplicate check pass | PERSONAL_REGISTRATION_PENDING | Allocation transaction |
 | PERSONAL_REGISTRATION_PENDING | Commit registration | Atomic storage commit and read-back pass | PERSONAL_REGISTERED_LOCAL or PERSONAL_REGISTRATION_FAILED | Registration record and allocation status |
@@ -132,8 +132,9 @@ Evidence may be associated while remaining unverified, pending, rejected or unav
 | PERSONAL_CREDENTIAL_ISSUED | Associate evidence | Evidence source/reference and association permission are supplied | EVIDENCE_PENDING | Evidence operation |
 | EVIDENCE_PENDING | Commit association | Reference and provenance structure valid; verification status separately represented | EVIDENCE_ASSOCIATED | Evidence record |
 | EVIDENCE_ASSOCIATED | Run evidence-specific verifier | Verifier and evidence format supported | EVIDENCE_VERIFIED or EVIDENCE_REJECTED; unsupported/unavailable remains associated with that status | Verification report |
-| Evidence/profile inputs available | Initialize or update profile | Attribute assertions authorized; history append transaction available | PROFILE_INITIALIZED or PROFILE_INCOMPLETE | Profile version and history events |
-| PROFILE_INITIALIZED | Assemble Lobby header | Required source records resolve and their validation states are available | LOBBY_READY or PROFILE_INCOMPLETE | Profile assembly result |
+| PERSONAL_CREDENTIAL_ISSUED, EVIDENCE_ASSOCIATED or EVIDENCE_VERIFIED | Initialize profile | Required initial attribute assertions are available and authorized; evidence may be absent or retain any explicit verification status | PROFILE_INITIALIZED or PROFILE_INCOMPLETE | Initial profile version and history events |
+| PROFILE_INITIALIZED | Update personal attributes | New attribute assertions are authorized; next version and history append transaction are available | PROFILE_INITIALIZED or PROFILE_INCOMPLETE | New profile version and appended attribute history event(s) |
+| PROFILE_INITIALIZED | Assemble Main Lobby header | Required source records resolve and their validation states are available | LOBBY_READY or PROFILE_INCOMPLETE | Profile assembly result |
 | LOBBY_READY | Open Main Lobby | Local Main Lobby read model loaded | MAIN_LOBBY_OPEN | Display session |
 | GENESIS_LOBBY_OPEN | Close and relaunch before birth | Authoritative local storage remains available | RUNTIME_READY then GENESIS_LOBBY_OPEN after state reconstruction | Rebuilt preparation view from stored records |
 | MAIN_LOBBY_OPEN | Close and relaunch after profile initialization | Authoritative local storage remains available | RUNTIME_READY then LOBBY_READY after reconstruction | Rebuilt Main Lobby header from stored records |
@@ -214,7 +215,7 @@ The future executable test suite must include, at minimum:
 10. Unauthorized or out-of-scope birth does not create a record.
 11. Repeated birth operation does not create a second birth record or identifier.
 12. Born node remains born after personal credential failure.
-13. Personal issuance requires separate authorization and explicit association.
+13. Personal issuance requires separate authorization and explicit association; number generation does not require external evidence.
 14. Local personal number is not reported globally unique without reservation evidence.
 15. Evidence association without verifier success remains unverified.
 16. Attribute update preserves prior history and does not create another birth.
