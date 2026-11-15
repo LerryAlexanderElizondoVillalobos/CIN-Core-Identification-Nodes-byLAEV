@@ -186,10 +186,8 @@ mod tests {
     #[cfg(target_os = "windows")]
     #[test]
     fn appdata_is_the_windows_default() {
-        let root = DataRoot::resolve_with(None, &|key| {
-            env_value(key, &[("APPDATA", "C:/Users/test/AppData/Roaming")])
-        })
-        .unwrap();
+        let values = [("APPDATA", "C:/Users/test/AppData/Roaming")];
+        let root = DataRoot::resolve_with(None, &|key| env_value(key, &values)).unwrap();
 
         assert_eq!(
             root.path(),
