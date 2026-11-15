@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+set -euo pipefail
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+BIN="${1:-$ROOT/prototype/linux-runtime/target/release/cin-linux-prototype}"
+OUT="$ROOT/dist"
+STAGE="$OUT/CIN-Linux-Portable-x86_64"
+test -x "$BIN" || { echo "Executable not found: $BIN" >&2; exit 1; }
+rm -rf "$STAGE"
+mkdir -p "$STAGE"
+install -m 0755 "$BIN" "$STAGE/cin"
+cat > "$STAGE/run-cin.sh" <<'LAUNCH'
+#!/usr/bin/env bash
+set -euo pipefail
+HERE="$(cd "$(dirname "$0")" && pwd)"
+exec "$HERE/cin" "$@"
+LAUNCH
+chmod 0755 "$STAGE/run-cin.sh"
+cp "$ROOT/prototype/linux-runtime/README.md" "$STAGE/README.md"
+cat > "$STAGE/PACKAGE-MANIFEST.txt" <<'MANIFEST'
+CIN Linux Portable Runtime Prototype
+Version: 0.1.0
+Target: Linux x86_64
+Launch entry point: ./run-cin.sh
+Runtime: Tauri v2 / host WebKitGTK 4.1 dependency
+Data: outside package by default; see README.md
+Unsigned prototype; not a production CIN release.
+MANIFEST
+mkdir -p "$OUT"
+(cd "$OUT" && zip -qr "CIN-Linux-Portable-x86_64.zip" "CIN-Linux-Portable-x86_64")
+sha256sum "$OUT/CIN-Linux-Portable-x86_64.zip" > "$OUT/CIN-Linux-Portable-x86_64.zip.sha256"
+echo "Created $OUT/CIN-Linux-Portable-x86_64.zip"
