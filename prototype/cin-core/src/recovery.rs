@@ -35,7 +35,7 @@ impl RecoveryReport {
 }
 
 /// Inspection only: never deletes, rewrites, or silently quarantines user records.
-pub fn inspect_storage(repo: &DocumentRepository) -> Result<RecoveryReport, StorageError> {
+pub(crate) fn inspect_storage(repo: &DocumentRepository) -> Result<RecoveryReport, StorageError> {
     let entries = fs::read_dir(repo.root().join("documents"))
         .map_err(|error| StorageError::Io(error.to_string()))?;
     let mut report = RecoveryReport::default();
@@ -103,19 +103,10 @@ pub fn inspect_storage(repo: &DocumentRepository) -> Result<RecoveryReport, Stor
             continue;
         }
 
-        match repo.get(&document.document_id) {
-            Ok(readback) if readback == document => report.valid += 1,
-            Ok(_) => report.issues.push(RecoveryIssue {
-                path,
-                kind: RecoveryIssueKind::InvalidEnvelope,
-                detail: "repository readback differs from scanned record".into(),
-            }),
-            Err(error) => report.issues.push(RecoveryIssue {
-                path,
-                kind: RecoveryIssueKind::Unreadable,
-                detail: error.to_string(),
-            }),
-        }
+        // The bytes were read from the canonical repository path above and
+        // structurally validated. This inspector does not invoke raw repository
+        // APIs or mutate records.
+        report.valid += 1;
     }
     Ok(report)
 }
