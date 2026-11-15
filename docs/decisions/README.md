@@ -12,6 +12,7 @@ An ADR may be Proposed, Accepted, Superseded or Rejected. A proposed decision is
 | [ADR-0002](0002-portable-runtime-and-zip-packaging-model.md) | Portable ZIP runtime and packaging model | Proposed — portable-folder requirement established; runtime feasibility pending |
 | [ADR-0003](0003-document-serialization-and-signature-profile.md) | Common document serialization and signature profile | Proposed — interoperability evidence pending |
 | ADR-0004 | Application runtime and technology selection | Reserved — Issue #4; decision must follow repository inventory and feasibility evidence |
+| [ADR-0005](0005-zero-cost-node-operation.md) | Zero-Cost Node Operation | Proposed — owner approval and implementation evidence pending |
 
 ## Numbering and decision lifecycle
 
