@@ -308,4 +308,15 @@ The next implementation work is:
 
 ---
 
+## 16. Normative references
+
+- **RFC 8785 — JSON Canonicalization Scheme (JCS):** https://www.rfc-editor.org/rfc/rfc8785
+- **RFC 8032 — Edwards-Curve Digital Signature Algorithm (EdDSA):** https://www.rfc-editor.org/rfc/rfc8032
+- **RFC 4648 — Base-N Encodings:** https://www.rfc-editor.org/rfc/rfc4648
+- **FIPS 180-4 — Secure Hash Standard (SHA-256):** https://csrc.nist.gov/pubs/fips/180-4/upd1/final
+
+These references define the underlying serialization, signature, encoding, and digest primitives. The CIN-specific manifest structure, domain-separation string, key identifier, and verification workflow are defined by this document.
+
+---
+
 *End of specification.*
