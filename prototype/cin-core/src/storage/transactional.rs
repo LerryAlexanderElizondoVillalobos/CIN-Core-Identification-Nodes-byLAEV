@@ -235,7 +235,13 @@ impl TransactionalStore {
                 "commit marker metadata is invalid".into(),
             ));
         }
-        let metadata: TransactionMetadata = read_json(&self.journal_path(&marker.operation_id))?;
+        let journal_path = self.journal_path(&marker.operation_id);
+        if !journal_path.exists() {
+            return Err(StorageError::Integrity(
+                "commit marker has no matching transaction journal".into(),
+            ));
+        }
+        let metadata: TransactionMetadata = read_json(&journal_path)?;
         self.validate_marker_and_record(&metadata, &marker)?;
         let record_path = self.repository.document_path(document_id);
         let bytes = fs::read(record_path).map_err(io_error)?;
