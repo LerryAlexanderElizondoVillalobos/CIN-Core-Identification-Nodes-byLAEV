@@ -1,4 +1,7 @@
-use std::{fmt, fs, path::{Path, PathBuf}};
+use std::{
+    fmt, fs,
+    path::{Path, PathBuf},
+};
 
 #[cfg(test)]
 use crate::documents::{validate_document, DocumentEnvelope};
