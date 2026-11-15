@@ -6,6 +6,8 @@
 **Status:** M0 active; implementation now follows P0–P12 dependency gates.
 
 ## M0 — Architecture Baseline
+
+PR #25 was merged to main (squash commit `3ff5a3e8`). PR #26 continues with document and storage foundation.
 Existing Issues #2 and #3 are closed as architecture/specification work. Issues #4, #5, #6 and #17 remain open for runtime desktop acceptance, crypto interoperability and storage recovery. PRs #18 (Linux runtime prototype) and #19 (ADR-0005) are merged.
 
 ## Implementation phases
