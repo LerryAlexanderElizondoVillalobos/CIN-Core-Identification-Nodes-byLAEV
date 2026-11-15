@@ -127,6 +127,8 @@ The Package Origin Verification Engine and its v1 manifest profile are documente
 - [CIN Node Lifecycle Specification v1](specifications/CIN_NODE_LIFECYCLE_SPECIFICATION_V1.md) — proposed state and transition contract; implementation remains pending.
 - [CIN Common Document Model v1](specifications/CIN_COMMON_DOCUMENT_MODEL_V1.md) — shared envelope, document versioning and cryptographic binding rules.
 - [CIN Verification Result Model v1](specifications/CIN_VERIFICATION_RESULT_MODEL_V1.md) — separate schema, digest, signature, trust, authorization and reference outcomes.
+- [CIN Private Local Storage Specification v1](specifications/CIN_PRIVATE_STORAGE_SPECIFICATION_V1.md) — local record persistence, atomic commits, recovery and backup contract.
+- [CIN Record Storage Layout v1](docs/architecture/CIN_RECORD_STORAGE_LAYOUT.md) — proposed authoritative-record, transaction, index and projection directory layout.
 - [ADR-0003: Document Serialization and Signature Profile](docs/decisions/0003-document-serialization-and-signature-profile.md) — proposed serialization and signature direction; not yet accepted.
 
 The following documents establish the conceptual foundation and proposed node lifecycle. They describe intended architecture; they do not claim implementation.
@@ -173,6 +175,7 @@ CIN-Core-Identification-Nodes-byLAEV/
 │   │   ├── CIN_ARCHITECTURE_BASELINE_V1.md
 │   │   ├── CIN_COMPONENT_DEPENDENCY_MAP.md
 │   │   ├── CIN_REPOSITORY_TECHNICAL_AUDIT.md
+│   │   ├── CIN_RECORD_STORAGE_LAYOUT.md
 │   │   ├── GENESIS_PREPARATION_ARCHITECTURE.md
 │   │   ├── NODE_LIFECYCLE_ARCHITECTURE.md
 │   │   └── PACKAGE_ORIGIN_VERIFICATION.md
@@ -192,6 +195,7 @@ CIN-Core-Identification-Nodes-byLAEV/
 └── specifications/
     ├── CIN_COMMON_DOCUMENT_MODEL_V1.md
     ├── CIN_NODE_LIFECYCLE_SPECIFICATION_V1.md
+    ├── CIN_PRIVATE_STORAGE_SPECIFICATION_V1.md
     ├── CIN_VERIFICATION_RESULT_MODEL_V1.md
     ├── examples/
     │   ├── cin-common-document-v1.example.json
