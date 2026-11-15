@@ -1,0 +1,36 @@
+{
+  "document": {
+    "document_id": "urn:cin:example:genesis-manifest:0001",
+    "document_type": "cin.genesis-manifest",
+    "schema_version": "1.0.0",
+    "created_at": "2026-11-15T12:00:00Z",
+    "issuer": {
+      "issuer_id": "urn:cin:node:example-local"
+    },
+    "subject": {
+      "subject_type": "cin-node",
+      "subject_id": "urn:cin:node:example-local"
+    },
+    "references": [],
+    "payload": {
+      "example": true,
+      "environment_audit_reference": "urn:cin:example:audit:0001"
+    }
+  },
+  "integrity": {
+    "canonicalization": "RFC8785-JCS",
+    "digest_algorithm": "SHA-256",
+    "digest": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "proofs": [
+    {
+      "proof_id": "urn:cin:proof:example:0001",
+      "proof_type": "detached-signature",
+      "purpose": "document-issuance",
+      "signature_suite": "Ed25519-TEST-V1",
+      "verification_method": "urn:cin:key:development-only",
+      "created_at": "2026-11-15T12:00:01Z",
+      "signature_value": "AA=="
+    }
+  ]
+}

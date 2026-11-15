@@ -10,7 +10,7 @@ An ADR may be Proposed, Accepted, Superseded or Rejected. A proposed decision is
 |---|---|---|
 | [ADR-0001](0001-genesis-manifest-and-node-birth-separation.md) | Separation of Genesis Manifest and Node Birth Record | Proposed |
 | [ADR-0002](0002-portable-runtime-and-zip-packaging-model.md) | Portable ZIP runtime and packaging model | Proposed — portable-folder requirement established; runtime feasibility pending |
-| ADR-0003 | Common document serialization and signature profile | Reserved — Issue #5; not yet authored |
+| [ADR-0003](0003-document-serialization-and-signature-profile.md) | Common document serialization and signature profile | Proposed — interoperability evidence pending |
 | ADR-0004 | Application runtime and technology selection | Reserved — Issue #4; decision must follow repository inventory and feasibility evidence |
 
 ## Numbering and decision lifecycle

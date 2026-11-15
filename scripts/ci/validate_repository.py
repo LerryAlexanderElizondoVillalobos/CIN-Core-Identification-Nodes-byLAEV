@@ -22,6 +22,14 @@ REQUIRED = [
     ROOT / "docs/architecture/CIN_COMPONENT_DEPENDENCY_MAP.md",
     ROOT / "docs/architecture/CIN_REPOSITORY_TECHNICAL_AUDIT.md",
     ROOT / "specifications/CIN_NODE_LIFECYCLE_SPECIFICATION_V1.md",
+    ROOT / "specifications/CIN_COMMON_DOCUMENT_MODEL_V1.md",
+    ROOT / "specifications/CIN_VERIFICATION_RESULT_MODEL_V1.md",
+    ROOT / "specifications/schemas/cin-common-document-v1.schema.json",
+    ROOT / "specifications/schemas/cin-verification-result-v1.schema.json",
+    ROOT / "specifications/examples/cin-common-document-v1.example.json",
+    ROOT / "specifications/examples/cin-verification-result-v1.example.json",
+    ROOT / "scripts/ci/validate_schemas.py",
+    ROOT / "requirements-ci.txt",
 ]
 
 for required in REQUIRED:

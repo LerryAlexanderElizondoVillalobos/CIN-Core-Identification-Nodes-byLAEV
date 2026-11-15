@@ -1,0 +1,54 @@
+{
+  "report_id": "urn:cin:verification-report:example:0001",
+  "target_document_id": "urn:cin:example:genesis-manifest:0001",
+  "verifier_profile": "cin.document-verifier/1.0.0-draft",
+  "policy_id": "cin.development-policy/1",
+  "evaluated_at": "2026-11-15T12:00:02Z",
+  "decision": "defer",
+  "checks": {
+    "schema": {
+      "status": "pass"
+    },
+    "canonicalization": {
+      "status": "pass"
+    },
+    "digest": {
+      "status": "pass"
+    },
+    "signatures": [
+      {
+        "status": "pass",
+        "detail_code": "SIGNATURE_MATHEMATICALLY_VALID"
+      }
+    ],
+    "issuer_trust": {
+      "status": "unknown",
+      "detail_code": "DEVELOPMENT_KEY_NOT_IN_PRODUCTION_TRUST"
+    },
+    "authorization": {
+      "status": "not_applicable"
+    },
+    "validity": {
+      "status": "valid"
+    },
+    "revocation": {
+      "status": "unknown"
+    },
+    "references": {
+      "status": "resolved"
+    },
+    "policy": {
+      "status": "indeterminate"
+    }
+  },
+  "findings": [
+    {
+      "code": "ISSUER_TRUST_UNKNOWN",
+      "category": "trust",
+      "severity": "warning",
+      "message": "The signature is mathematically valid, but the issuer is not established as trusted under this policy."
+    }
+  ],
+  "verifier_software_version": "example-only",
+  "trust_profile_reference": "cin.trust-profile/development"
+}

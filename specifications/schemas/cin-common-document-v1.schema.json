@@ -1,0 +1,193 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cin.bylaev.org/schemas/cin-common-document-v1.schema.json",
+  "title": "CIN Common Document Envelope v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "document",
+    "integrity",
+    "proofs"
+  ],
+  "properties": {
+    "document": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "document_id",
+        "document_type",
+        "schema_version",
+        "created_at",
+        "issuer",
+        "payload"
+      ],
+      "properties": {
+        "document_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "document_type": {
+          "type": "string",
+          "pattern": "^cin\\.[a-z0-9][a-z0-9.-]*$"
+        },
+        "schema_version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(-[a-zA-Z0-9.-]+)?$"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "issued_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "valid_from": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "valid_until": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "issuer": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "issuer_id"
+          ],
+          "properties": {
+            "issuer_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "key_id": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "subject": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "subject_type",
+            "subject_id"
+          ],
+          "properties": {
+            "subject_type": {
+              "type": "string",
+              "minLength": 1
+            },
+            "subject_id": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "references": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "relation",
+              "document_id"
+            ],
+            "properties": {
+              "relation": {
+                "type": "string",
+                "minLength": 1
+              },
+              "document_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "digest_algorithm": {
+                "type": "string",
+                "minLength": 1
+              },
+              "digest": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        "payload": {
+          "type": "object"
+        }
+      }
+    },
+    "integrity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "canonicalization",
+        "digest_algorithm",
+        "digest"
+      ],
+      "properties": {
+        "canonicalization": {
+          "type": "string",
+          "minLength": 1
+        },
+        "digest_algorithm": {
+          "type": "string",
+          "minLength": 1
+        },
+        "digest": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "proofs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "proof_id",
+          "proof_type",
+          "purpose",
+          "signature_suite",
+          "verification_method",
+          "created_at",
+          "signature_value"
+        ],
+        "properties": {
+          "proof_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "proof_type": {
+            "type": "string",
+            "minLength": 1
+          },
+          "purpose": {
+            "type": "string",
+            "minLength": 1
+          },
+          "signature_suite": {
+            "type": "string",
+            "minLength": 1
+          },
+          "verification_method": {
+            "type": "string",
+            "minLength": 1
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "signature_value": {
+            "type": "string",
+            "contentEncoding": "base64",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  }
+}
