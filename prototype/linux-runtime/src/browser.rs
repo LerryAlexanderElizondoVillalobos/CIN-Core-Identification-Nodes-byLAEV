@@ -50,8 +50,22 @@ pub fn launch(url: &str) -> BrowserLaunch {
         return BrowserLaunch::Manual;
     }
     if let Some(executable) = chromium_executable() {
-        if Command::new(&executable).arg("--new-window").arg(url)
-            .stdout(Stdio::null()).stderr(Stdio::null()).spawn().is_ok() {
+        let mut command = Command::new(&executable);
+        if env::var("CIN_BROWSER_HEADLESS").as_deref() == Ok("1") {
+            command.args([
+                "--headless=new",
+                "--no-sandbox",
+                "--disable-gpu",
+                "--disable-dev-shm-usage",
+                "--no-zygote",
+                "--no-first-run",
+                "--no-default-browser-check",
+                "--dump-dom",
+            ]);
+        } else {
+            command.arg("--new-window");
+        }
+        if command.arg(url).stdout(Stdio::null()).stderr(Stdio::null()).spawn().is_ok() {
             return BrowserLaunch::Chromium(executable);
         }
     }
