@@ -35,7 +35,7 @@ The project aims to translate foundational architectural principles into documen
 - **Independent verification:** The ability to verify defined properties of records without relying exclusively on one central operator.
 - **Modularity:** Separation of foundational infrastructure from specialized applications and ledger implementations.
 - **Long-term continuity:** Consideration of record preservation, historical references, and the ability to verify records over time.
-- **Verifiable software distribution:** Software packages must be checked against authenticated origin metadata before they are admitted to the installation process.
+- **Verifiable software distribution:** Software packages must be checked against authenticated origin metadata before they are extracted and executed locally.
 
 ## 4. Core Identification Nodes
 
@@ -58,7 +58,7 @@ The architecture is expected to investigate and define:
 - Structured event registration and record references.
 - Institutional interoperability and application integration.
 - Data preservation, historical continuity, and auditability.
-- Software package provenance and pre-installation verification.
+- Software package provenance and pre-execution verification.
 - Governance boundaries and operational responsibilities.
 
 Specific mechanisms will be documented in their corresponding technical specifications as research and development progresses.
@@ -79,7 +79,7 @@ CIN is intended to evolve through independently specified components. Research a
 2. **Node structures:** Node roles, operational models, communication, and coordination.
 3. **Cryptographic layer:** Hashing, commitments, proofs, and verification procedures.
 4. **Merkle tree infrastructure:** Binary Merkle tree construction, proofs, and hierarchical record verification.
-5. **Package origin verification:** Independent verification of received ZIP archives against signed package manifests before installation.
+5. **Package origin verification:** Independent verification of received ZIP archives against signed package manifests before extraction and local execution.
 6. **Ledger architecture:** Core and specialized ledger models, registration, and record lifecycle.
 7. **Application integration:** Dedicated application ledgers and institutional interfaces.
 8. **Interoperability:** Common formats, interfaces, and cross-system verification.
@@ -91,13 +91,13 @@ Each component should have a defined purpose, interfaces, assumptions, and valid
 
 CIN proposes a **Package Origin Verification Engine** as part of its portable software architecture.
 
-Before a ZIP distribution is admitted to the installation process, the engine calculates the digest of the received archive, verifies the digital signature of its package manifest using independently trusted public-key material, and compares the calculated digest with the digest contained in that authenticated manifest.
+Before a ZIP distribution is admitted to the local execution process, the engine calculates the digest of the received archive, verifies the digital signature of its package manifest using independently trusted public-key material, and compares the calculated digest with the digest contained in that authenticated manifest.
 
 This separates:
 
 - **Integrity:** whether the received archive matches the signed digest reference;
 - **Publisher authenticity:** whether the manifest signature is valid under a key trusted by the configured trust policy;
-- **Installation authorization:** whether CIN's installation policy permits the package to proceed.
+- **Local execution authorization:** whether CIN's local execution policy permits the package to proceed.
 
 The verifier does not require publisher private keys inside the portable package. It does not replace ESMT: exact-file archive verification and Merkle proofs for structured ledger records are separate functions.
 
@@ -120,12 +120,16 @@ The Package Origin Verification Engine and its v1 manifest profile are documente
 
 ## 9. Foundational Documentation and Architecture
 
+- [CIN Architecture Baseline v1](docs/architecture/CIN_ARCHITECTURE_BASELINE_V1.md) — first-release scope, component responsibilities, maturity gates and unresolved decisions.
+- [CIN Component Dependency Map](docs/architecture/CIN_COMPONENT_DEPENDENCY_MAP.md) — ordered dependencies from ZIP verification through persistent Main Lobby recovery.
+- [CIN Architecture Decision Register](docs/decisions/README.md) — numbered architectural decisions and reserved identifiers.
+
 The following documents establish the conceptual foundation and proposed node lifecycle. They describe intended architecture; they do not claim implementation.
 
 - [CIN Foundational Principles](docs/foundations/CIN_FOUNDATIONAL_PRINCIPLES.md) — equality, human dignity, evidence, privacy, continuity, decentralization, and the distinction between a node and a person.
 - [CIN Node Lifecycle Architecture](docs/architecture/NODE_LIFECYCLE_ARCHITECTURE.md) — package verification, extraction, pre-birth preparation, Genesis Manifest, node birth, Lobby, and ecosystem setup.
 - [Genesis Preparation Architecture](docs/architecture/GENESIS_PREPARATION_ARCHITECTURE.md) — environment audit, provenance, manifest construction, operator review, and first logical local record.
-- [Package Origin Verification Architecture](docs/architecture/PACKAGE_ORIGIN_VERIFICATION.md) — ZIP integrity, signed manifest verification, publisher trust, and installation gate.
+- [Package Origin Verification Architecture](docs/architecture/PACKAGE_ORIGIN_VERIFICATION.md) — ZIP integrity, signed manifest verification, publisher trust, and extraction and execution gate.
 - [CIN Package Manifest Specification v1](specifications/PACKAGE_MANIFEST_SPECIFICATION_V1.md) — proposed versioned cryptographic package-manifest profile.
 - [Project Status and Development Roadmap](docs/project/PROJECT_STATUS_AND_ROADMAP.md) — maturity status, workstreams, and recommended implementation sequence.
 - [ADR-0001: Genesis Manifest and Node Birth Separation](docs/decisions/0001-genesis-manifest-and-node-birth-separation.md) — records the architectural rationale for two distinct founding records.
