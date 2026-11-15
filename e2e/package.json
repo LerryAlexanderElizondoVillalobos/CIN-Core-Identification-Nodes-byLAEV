@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "description": "End-to-end desktop acceptance tests for the CIN Linux portable prototype",
   "scripts": {
-    "test:desktop": "wdio run ./e2e/wdio.conf.cjs"
+    "test:desktop": "wdio run ./wdio.conf.cjs"
   },
   "devDependencies": {
     "@wdio/cli": "9.19.1",
