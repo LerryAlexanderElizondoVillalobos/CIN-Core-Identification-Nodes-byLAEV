@@ -79,7 +79,7 @@ The publisher's private signing key remains outside the portable package and out
 6. The verifier compares the locally calculated digest with the digest in the authenticated manifest.
 7. The verifier produces a structured result for the local execution policy and user interface.
 
-A package is eligible to proceed to extraction and local execution only when the signature is valid, the signing key is trusted for the relevant purpose, the manifest is valid and applicable, and the locally calculated archive digest matches the signed digest. The installation policy may impose additional requirements.
+A package is eligible to proceed to extraction and local execution only when the signature is valid, the signing key is trusted for the relevant purpose, the manifest is valid and applicable, and the locally calculated archive digest matches the signed digest. The local execution policy may impose additional requirements.
 
 ## 5. Result states
 
