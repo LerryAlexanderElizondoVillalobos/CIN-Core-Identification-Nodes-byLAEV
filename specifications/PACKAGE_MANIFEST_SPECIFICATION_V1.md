@@ -11,7 +11,7 @@
 
 ## 1. Scope
 
-This specification defines the release manifest used by CIN to describe a ZIP distribution and authenticate that description before installation.
+This specification defines the release manifest used by CIN to describe a ZIP distribution and authenticate that description before extraction and local execution.
 
 Version 1 defines:
 
@@ -231,7 +231,7 @@ A conforming verifier MUST:
 8. Compare the received ZIP filename, byte size, and calculated SHA-256 digest with the authenticated manifest values.
 9. Return separate machine-readable results for manifest validity, signature validity, key trust, metadata match, and archive digest match.
 
-The package is **verified for origin and byte integrity** only if all required checks succeed. Installation authorization remains a separate decision made by the installation policy.
+The package is **verified for origin and byte integrity** only if all required checks succeed. Installation authorization remains a separate decision made by the local execution policy.
 
 ## 11. Failure states
 
@@ -269,7 +269,7 @@ The Package Manifest Specification is consumed by the Package Origin Verificatio
 - ESMT provides Merkle commitments and proofs for structured records and ledger data;
 - the Certificate Engine manages certificate-related operations and trust material;
 - the Request & Permission Engine governs operations requiring authorization;
-- the Ledger Installation Engine consumes verification results and applies installation policy.
+- the Ledger Installation Engine consumes verification results and applies local execution policy.
 
 The verifier is not required to possess a private key. Publisher-side signing and verifier-side validation are separate operational roles.
 
