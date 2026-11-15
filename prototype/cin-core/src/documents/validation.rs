@@ -13,9 +13,13 @@ impl fmt::Display for DocumentValidationError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::EmptyField(field) => write!(f, "document field {field} must not be empty"),
-            Self::InvalidTimestamp => write!(f, "created_at must be an RFC3339 UTC timestamp ending in Z"),
+            Self::InvalidTimestamp => {
+                write!(f, "created_at must be an RFC3339 UTC timestamp ending in Z")
+            }
             Self::DuplicateReference(id) => write!(f, "duplicate document reference: {id}"),
-            Self::EmptyReferenceField => write!(f, "reference type and document id must not be empty"),
+            Self::EmptyReferenceField => {
+                write!(f, "reference type and document id must not be empty")
+            }
         }
     }
 }
@@ -52,7 +56,9 @@ pub fn validate_document(document: &DocumentEnvelope) -> Result<(), DocumentVali
             return Err(DocumentValidationError::EmptyReferenceField);
         }
         if !seen.insert(reference.document_id.as_str()) {
-            return Err(DocumentValidationError::DuplicateReference(reference.document_id.clone()));
+            return Err(DocumentValidationError::DuplicateReference(
+                reference.document_id.clone(),
+            ));
         }
     }
     if let Some(issuer) = &document.issuer {
@@ -87,16 +93,30 @@ mod tests {
     fn rejects_empty_document_type() {
         let mut doc = sample();
         doc.document_type.clear();
-        assert_eq!(validate_document(&doc), Err(DocumentValidationError::EmptyField("document_type")));
+        assert_eq!(
+            validate_document(&doc),
+            Err(DocumentValidationError::EmptyField("document_type"))
+        );
     }
 
     #[test]
     fn rejects_duplicate_references() {
         let mut doc = sample();
         doc.references = vec![
-            super::super::DocumentReference { reference_type: "birth".into(), document_id: "cin:birth:1".into() },
-            super::super::DocumentReference { reference_type: "profile".into(), document_id: "cin:birth:1".into() },
+            super::super::DocumentReference {
+                reference_type: "birth".into(),
+                document_id: "cin:birth:1".into(),
+            },
+            super::super::DocumentReference {
+                reference_type: "profile".into(),
+                document_id: "cin:birth:1".into(),
+            },
         ];
-        assert_eq!(validate_document(&doc), Err(DocumentValidationError::DuplicateReference("cin:birth:1".into())));
+        assert_eq!(
+            validate_document(&doc),
+            Err(DocumentValidationError::DuplicateReference(
+                "cin:birth:1".into()
+            ))
+        );
     }
 }
