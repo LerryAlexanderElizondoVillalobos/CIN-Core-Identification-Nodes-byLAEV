@@ -93,6 +93,10 @@ Statuses: proposed, specified, in_progress, implemented, testing, integrated, ac
 - No concurrent PRs changing root exports, schema registry, state enum or Cargo lock without coordination.
 - Squash merge; update status only after acceptance evidence. Release from accepted main.
 
+## 7.1 Existing isolated P1 foundation exception
+
+The initial Rust domain/lifecycle foundation may be developed as an isolated preparatory slice while M0/P0 remains open, provided it does not assume unresolved runtime, storage, cryptographic or trust decisions. This limited foundation does not close P0, does not authorize dependent engines to bypass their phase gates, and must not be represented as completion of full P1. Full P1 progression remains subject to the P0 contracts and exit evidence. This clarification reconciles the existing lifecycle foundation commits with the stated P1 dependency.
+
 ## 8. Immediate execution queue
 1. P0-01: verify CI/runtime and desktop acceptance; reconcile audit docs with current snapshot.
 2. P0-02: choose runtime/data-root through ADR, not prototype assumption.
