@@ -1,42 +1,47 @@
-# ADR-0001 — Application Stack for the CIN Portable Desktop Runtime
+# ADR-0001 — Runtime and Packaging Model for CIN
 
-- **Status:** Proposed — not accepted
+- **Status:** Proposed — portable ZIP model is a governing project requirement; implementation technology remains undecided
 - **Date:** 2026-11-15
-- **Decision owner:** CIN architecture maintainers
 - **Related:** M0 Issue #4; [Repository Technical Audit](../architecture/CIN_REPOSITORY_TECHNICAL_AUDIT.md)
 
 ## Context
 
-The reviewed repository baseline is architecture and specification material, not an established desktop application. No application language or framework should be inferred from the existing documentation.
+CIN is defined to be distributed as a ZIP package. The user verifies the package, extracts it into a directory and launches the application locally from that directory. CIN is not intended to require a conventional installation process.
 
-CIN's first local delivery requires a portable desktop shell, a Lobby UI, local persistence and restart recovery, a backend boundary for cryptographic and filesystem operations, offline operation for the local lifecycle, and a maintainable automated test strategy.
+The extracted directory is the operational package boundary. The application must support local operation and persistent recovery of user-generated records. Local workflows that do not require external authorities or services should not depend on permanent Internet connectivity.
 
-## Candidates
+## Governing decision
 
-1. **Tauri 2 + Rust backend + web frontend** — preferred feasibility candidate.
-2. **Electron + TypeScript/JavaScript** — fallback when bundled Chromium consistency or web ecosystem fit is more valuable than package footprint.
-3. **Qt 6 + PySide6** — alternative if a native-widget-first Lobby is selected.
+Preserve the **verified ZIP → extracted directory → local execution** delivery model.
 
-Detailed comparison and official references are in the linked technical audit.
+Do not introduce a mandatory installer, system-wide installation, app-store deployment or installation wizard as a replacement for this model.
 
-## Proposed decision
+## Technology decision remains open
 
-Run a constrained Tauri 2 proof-of-feasibility first. Do not yet establish Tauri as the final application stack.
+The ZIP delivery model does not predetermine the implementation language or framework. Tauri, Electron, Qt or another runtime may be evaluated only as implementation options. Any candidate must demonstrate that it can be packaged consistently with the extracted-folder execution model and the project's local persistence requirements.
 
-The prototype must launch, render a static Lobby, persist a harmless local test record, recover it after process restart, exercise one explicit UI-to-backend call, and build on the candidate CI runner. Record platform prerequisites, package output and build behavior.
+No framework is approved by this ADR.
+
+## Required feasibility evidence
+
+Before selecting the runtime:
+1. Complete the tracked-file, language, dependency and build inventory.
+2. Identify and preserve any existing usable implementation.
+3. Define the package directory layout and local launch entry point.
+4. Demonstrate extraction followed by launch without a conventional installation.
+5. Demonstrate local record write, close, relaunch and recovery.
+6. Document platform prerequisites, runtime inclusion strategy and reproducible package build.
+7. Review the result and record a separate accepted technology decision if needed.
 
 ## Consequences
 
-- Rust and the frontend toolchain become prototype dependencies only.
-- No production CIN engine or personal-registration component is authorized by this proposal.
-- Electron and PySide6 remain documented alternatives until prototype evidence is reviewed.
-- The final supported OS matrix remains open.
-- Physical external-signer compatibility remains a separate hardware test.
-
-## Acceptance conditions
-
-Change this ADR to **Accepted** only after the repository inventory is complete, the prototype passes its defined tests, platform targets and build prerequisites are recorded, and an architecture review approves the evidence.
+- Package design and CI must produce a portable ZIP, not an installer as the primary artifact.
+- Package verification is a prerequisite to extraction/execution in the defined user journey.
+- Application binaries, runtime dependencies and static assets must be organized for local execution.
+- User records and private data must have an explicit persistence location and recovery contract.
+- Production private keys must not be embedded in the package.
+- External signers remain separate components accessed through defined interfaces.
 
 ## Reconsideration
 
-Reopen this ADR if the prototype shows unacceptable platform constraints, if external signer integration requires a different native boundary, or if the Lobby's UI requirements materially favor a native-widget toolkit.
+The portable ZIP model may be changed only through an explicit architecture decision by the project owner. A framework preference or packaging convenience is not sufficient grounds to silently replace it.
