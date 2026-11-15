@@ -1,0 +1,21 @@
+{
+  "id": "/CIN-Core-Identification-Nodes-byLAEV/",
+  "name": "CIN Genesis Lobby byLAEV",
+  "short_name": "CIN Genesis",
+  "description": "Core Identification Nodes Genesis Environment Lobby",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#07111f",
+  "theme_color": "#07111f",
+  "categories": ["productivity", "utilities", "developer"],
+  "icons": [
+    {
+      "src": "./cin-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
