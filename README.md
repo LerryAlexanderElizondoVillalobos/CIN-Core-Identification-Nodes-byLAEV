@@ -128,8 +128,10 @@ The following documents establish the conceptual foundation and proposed node li
 - [Package Origin Verification Architecture](docs/architecture/PACKAGE_ORIGIN_VERIFICATION.md) — ZIP integrity, signed manifest verification, publisher trust, and installation gate.
 - [CIN Package Manifest Specification v1](specifications/PACKAGE_MANIFEST_SPECIFICATION_V1.md) — proposed versioned cryptographic package-manifest profile.
 - [Project Status and Development Roadmap](docs/project/PROJECT_STATUS_AND_ROADMAP.md) — maturity status, workstreams, and recommended implementation sequence.
+- [ADR-0001: Genesis Manifest and Node Birth Separation](docs/decisions/0001-genesis-manifest-and-node-birth-separation.md) — records the architectural rationale for two distinct founding records.
 - [Contributing to CIN](CONTRIBUTING.md) — contribution, documentation, implementation, and review expectations.
-- [License and Project Rights](LICENSE.md) — project-specific rights and authorship declaration.
+- [Security Policy](SECURITY.md) — preliminary guidance for reporting security concerns.
+- [License and Project Rights](LICENSE.md) — project-specific rights, authorship declaration, and intended succession.
 
 ## 10. Development Maturity
 
@@ -151,8 +153,12 @@ CIN-Core-Identification-Nodes-byLAEV/
 │   │   ├── PACKAGE_ORIGIN_VERIFICATION.md
 │   │   ├── NODE_LIFECYCLE_ARCHITECTURE.md
 │   │   └── GENESIS_PREPARATION_ARCHITECTURE.md
-│   └── project/
-│       └── PROJECT_STATUS_AND_ROADMAP.md
+│   ├── project/
+│   │   └── PROJECT_STATUS_AND_ROADMAP.md
+│   └── decisions/
+│       └── 0001-genesis-manifest-and-node-birth-separation.md
+├── CONTRIBUTING.md
+├── SECURITY.md
 └── specifications/
     └── PACKAGE_MANIFEST_SPECIFICATION_V1.md
 ```
