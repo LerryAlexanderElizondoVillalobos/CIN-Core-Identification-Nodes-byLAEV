@@ -207,9 +207,9 @@
   // CIN Node Birth Certificate — browser-local deterministic preview.
   const birthState={manifest:null,canonical:null,manifestHash:null,record:null};
   const birthLabels={
-    nid:"CIN\\0NODE\\0NID\\0v1\\0",
-    nsid:"CIN\\0NODE\\0NSID\\0v1\\0",
-    bid:"CIN\\0NODE\\0BID\\0v1\\0"
+    nid:"CIN\0NODE\0NID\0v1\0",
+    nsid:"CIN\0NODE\0NSID\0v1\0",
+    bid:"CIN\0NODE\0BID\0v1\0"
   };
   function canonicalizeJcs(value){
     if(value===null||typeof value==="boolean"||typeof value==="string")return JSON.stringify(value);
@@ -305,7 +305,7 @@
   });
   $("downloadBirthButton").addEventListener("click",()=>{
     if(!birthState.record)return;
-    const blob=new Blob([JSON.stringify(birthState.record,null,2)+"\\n"],{type:"application/json"});
+    const blob=new Blob([JSON.stringify(birthState.record,null,2)+"\n"],{type:"application/json"});
     const url=URL.createObjectURL(blob);const a=document.createElement("a");
     a.href=url;a.download="CIN-NODE-BIRTH-RECORD-"+(birthState.manifest?.node?.node_id||"NODE").replace(/[^a-z0-9_-]/gi,"-")+".json";a.click();
     setTimeout(()=>URL.revokeObjectURL(url),1000);
