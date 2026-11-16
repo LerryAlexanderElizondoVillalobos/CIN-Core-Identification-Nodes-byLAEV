@@ -208,13 +208,13 @@
   const birthLabels={nid:"CIN\0NODE\0NID\0v1\0",nsid:"CIN\0NODE\0NSID\0v1\0",bid:"CIN\0NODE\0BID\0v1\0"};
   function rejectDuplicateKeys(source){
     let i=0;
-    const ws=()=>{while(/\\s/.test(source[i]||"")&&i<source.length)i++;};
-    const string=()=>{const start=i++;while(i<source.length){if(source[i]==="\\\\"){i+=2;continue;}if(source[i++]==='"')break;}return JSON.parse(source.slice(start,i));};
+    const ws=()=>{while(/\s/.test(source[i]||"")&&i<source.length)i++;};
+    const string=()=>{const start=i++;while(i<source.length){if(source[i]==="\\"){i+=2;continue;}if(source[i++]==='"')break;}return JSON.parse(source.slice(start,i));};
     const value=()=>{ws();const ch=source[i];
       if(ch==="{"){i++;ws();const keys=new Set();if(source[i]==="}"){i++;return;}while(i<source.length){ws();if(source[i]!=='"')throw Error("Invalid JSON object key.");const key=string();if(keys.has(key))throw Error("Duplicate JSON key rejected: "+key);keys.add(key);ws();if(source[i++]!==":")throw Error("Invalid JSON object separator.");value();ws();if(source[i]==="}"){i++;return;}if(source[i++]!==",")throw Error("Invalid JSON object delimiter.");}}
       else if(ch==="["){i++;ws();if(source[i]==="]"){i++;return;}while(i<source.length){value();ws();if(source[i]==="]"){i++;return;}if(source[i++]!==",")throw Error("Invalid JSON array delimiter.");}}
       else if(ch==='"'){string();}
-      else{const m=source.slice(i).match(/^(true|false|null|-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?)/);if(!m)throw Error("Invalid JSON value near character "+i);i+=m[0].length;}
+      else{const m=source.slice(i).match(/^(true|false|null|-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\\d+)?)/);if(!m)throw Error("Invalid JSON value near character "+i);i+=m[0].length;}
     };
     value();ws();if(i!==source.length)throw Error("Unexpected trailing content in JSON.");
   }
