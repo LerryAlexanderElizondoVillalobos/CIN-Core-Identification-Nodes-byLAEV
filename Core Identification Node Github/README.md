@@ -10,6 +10,7 @@ Core Identification Node Github/
 ├── CIN Lobby.url
 ├── Install Genesis Manifest Certificate.url
 ├── CIN-GENESIS-ENVIRONMENT.cincert
+├── CIN-NODE-BIRTH.cincert
 └── CIN 001/
     └── README.md
 ```
@@ -27,6 +28,12 @@ The Lobby is a static GitHub Pages interface. It can publish and offer the certi
 `CIN-GENESIS-ENVIRONMENT.cincert` is the declarative Genesis certificate (v1.0.1). It defines the environment collection profile and contains **12 bibliographic references in APA 7th edition** under `bibliographic_references`. The manifest generator is expected to transfer this block into each generated Genesis Environment Manifest, separately from observed environment data.
 
 The declared collection profile includes operating system and architecture, allowlisted runtime configuration, supported hardware capabilities, a SHA-256 package file inventory, network interface names, digest capabilities, and storage-configuration presence. It excludes credentials, private keys, arbitrary environment variables, user file contents, network payloads, and absolute paths.
+
+## CIN Node Birth Certificate
+
+`CIN-NODE-BIRTH.cincert` is the declarative Node Birth Certificate (v1.0.0). It consumes the complete Genesis Environment Manifest and defines canonical SHA-256 fingerprinting, separate raw-byte provenance hashing, and deterministic derivation of CIN-NID, CIN-NSID and CIN-BID. The Lobby exposes this workflow directly below the Genesis interface: paste the full manifest, generate the cryptographic fingerprint, generate the birth-record manifest, download it, and optionally display its identifiers in the current browser's Lobby header.
+
+The current browser implementation marks generated records `PREVIEW_NOT_ISSUED`. The derivation profile is still a candidate; it is not a production-approved issuance profile. The browser does not sign, authorize, register, or persist a birth record to the CIN network. The header action stores identifiers only in the current browser's local storage and does not change the public page for other visitors.
 
 ## Pages deployment
 
