@@ -18,6 +18,16 @@
 #status{margin-top:18px;padding:13px 15px;border:1px solid var(--line);border-radius:12px;color:var(--muted);font-size:14px;display:none}#manifestPanel{display:none;margin-top:26px;background:#091625;border:1px solid #31506c;border-radius:16px;padding:20px}#manifestPanel h2{margin:0 0 10px}pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:520px;overflow:auto;background:#050d17;padding:16px;border-radius:10px;color:#c7e5ff;font-size:12px}#loadManifest{display:none}
 .footer{border-top:1px solid var(--line);margin-top:54px;padding-top:20px;color:var(--muted);font-size:13px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 @media(max-width:700px){.top{margin-bottom:45px}.grid{grid-template-columns:1fr}.lead{font-size:17px}.wrap{padding-inline:16px}}
+
+/* CIN Node Birth Certificate */
+.birth{margin-top:54px;padding:24px;background:linear-gradient(180deg,#102239,#091625);border:1px solid #31506c;border-radius:18px}
+.birth h2{font-size:clamp(26px,4vw,38px);margin:8px 0}.birth label{display:block;font-weight:700;margin:18px 0 8px}
+.birth textarea{width:100%;min-height:210px;background:#050d17;color:#d8edff;border:1px solid #31506c;border-radius:12px;padding:14px;font:12px/1.5 ui-monospace,monospace;resize:vertical}
+.birth .btn{margin:10px 8px 0 0}.birth .output{display:none;margin-top:18px;padding:16px;background:#050d17;border:1px solid #203b56;border-radius:12px;overflow-wrap:anywhere}
+.birth .hash{font:12px/1.6 ui-monospace,monospace;color:#8ce3ff;word-break:break-all}.birth .small{font-size:12px;color:var(--muted)}
+#birthHeaderIds{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.id-chip{font:11px ui-monospace,monospace;border:1px solid #31506c;border-radius:999px;padding:5px 9px;color:#8ce3ff;background:#0a1b2b}
+
 </style>
 </head>
 <body>
@@ -40,6 +50,31 @@
 <div id="manifestPanel"><h2>Genesis Environment Manifest</h2><p class="note" id="manifestMeta"></p><pre id="manifestOutput"></pre><button class="btn secondary" id="downloadButton">Download Manifest JSON</button></div>
 <p class="note">Android: install this Lobby as a web app from your browser menu (Add to Home screen / Install app). The PWA is an interface, not a native system scanner. Without an installed local companion, Android and desktop browsers expose only browser-limited data.</p>
 </section>
+
+<section class="birth" id="nodeBirth">
+  <div class="eyebrow">CIN Node Birth · Certificate 1.0.0</div>
+  <h2>Create CIN Node Birth Certificate</h2>
+  <p class="lead" style="font-size:16px">Paste the complete Genesis Environment Manifest. Every field in the root document participates in canonical hashing, including bibliographic references, limitations and generation metadata.</p>
+  <label for="genesisInput">Complete Genesis Environment Manifest (JSON)</label>
+  <textarea id="genesisInput" spellcheck="false" placeholder="Paste the complete cin.genesis-environment-manifest JSON here…"></textarea>
+  <div class="actions"><button class="btn primary" id="hashManifestButton">Generate Cryptographic Fingerprint (SHA-256)</button></div>
+  <div class="output" id="hashOutput" aria-live="polite">
+    <strong>Canonical Genesis SHA-256</strong><p class="hash" id="genesisHashValue"></p>
+    <strong>Original input SHA-256 (byte provenance)</strong><p class="hash" id="rawHashValue"></p>
+    <p class="small" id="hashMeta">RFC 8785 JCS · complete root JSON · SHA-256</p>
+    <button class="btn primary" id="createBirthButton">Generate CIN Node Birth Certificate</button>
+  </div>
+  <div class="output" id="birthOutput">
+    <strong>CIN Node Birth Record Manifest</strong>
+    <p class="small" id="birthStatus">Preview only; not signed, authorized or registered.</p>
+    <pre id="birthManifestText"></pre>
+    <button class="btn secondary" id="downloadBirthButton">Download Birth Manifest</button>
+    <button class="btn primary" id="addBirthIdsButton">Add identifiers to CIN Lobby header</button>
+  </div>
+  <p class="small">SHA-256 uses the browser Web Crypto API. The identifier derivation profile is a candidate and remains subject to approval and independent RFC 8785 interoperability tests. This browser workflow creates a local preview; it does not issue a signed or registered birth certificate.</p>
+  <div id="birthHeaderIds" aria-label="Current CIN node identifiers"></div>
+</section>
+
 <section class="grid" aria-label="Genesis workflow">
 <article class="card"><div class="num">01 / CERTIFICATE</div><h2>Load certificate</h2><p>Fetches the published Genesis Environment Certificate, including its embedded APA 7 references and collection profile.</p><div class="status"><span class="dot"></span> Certificate published</div></article>
 <article class="card"><div class="num">02 / ENVIRONMENT</div><h2>Collect available data</h2><p>The PWA can collect browser-visible metadata only. Full OS and hardware inventory requires the local Runner.</p><div class="status"><span class="dot"></span> Browser preview only</div></article>
@@ -167,6 +202,83 @@
     catch(e){status("Could not open manifest: "+e.message,true);}
     event.target.value="";
   });
+
+  // CIN Node Birth Certificate — local deterministic certificate workflow.
+  const birthState={manifest:null,canonical:null,manifestHash:null,rawHash:null,record:null};
+  const birthLabels={nid:"CIN\\0NODE\\0NID\\0v1\\0",nsid:"CIN\\0NODE\\0NSID\\0v1\\0",bid:"CIN\\0NODE\\0BID\\0v1\\0"};
+  function rejectDuplicateKeys(source){
+    let i=0;
+    const ws=()=>{while(/\\s/.test(source[i]||"")&&i<source.length)i++;};
+    const string=()=>{const start=i++;while(i<source.length){if(source[i]==="\\\\"){i+=2;continue;}if(source[i++]==='"')break;}return JSON.parse(source.slice(start,i));};
+    const value=()=>{ws();const ch=source[i];
+      if(ch==="{"){i++;ws();const keys=new Set();if(source[i]==="}"){i++;return;}while(i<source.length){ws();if(source[i]!=='"')throw Error("Invalid JSON object key.");const key=string();if(keys.has(key))throw Error("Duplicate JSON key rejected: "+key);keys.add(key);ws();if(source[i++]!==":")throw Error("Invalid JSON object separator.");value();ws();if(source[i]==="}"){i++;return;}if(source[i++]!==",")throw Error("Invalid JSON object delimiter.");}}
+      else if(ch==="["){i++;ws();if(source[i]==="]"){i++;return;}while(i<source.length){value();ws();if(source[i]==="]"){i++;return;}if(source[i++]!==",")throw Error("Invalid JSON array delimiter.");}}
+      else if(ch==='"'){string();}
+      else{const m=source.slice(i).match(/^(true|false|null|-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?)/);if(!m)throw Error("Invalid JSON value near character "+i);i+=m[0].length;}
+    };
+    value();ws();if(i!==source.length)throw Error("Unexpected trailing content in JSON.");
+  }
+  function canonicalizeJcs(value){
+    if(value===null||typeof value==="boolean"||typeof value==="string")return JSON.stringify(value);
+    if(typeof value==="number"){if(!Number.isFinite(value))throw Error("Non-finite JSON number.");return JSON.stringify(value);}
+    if(Array.isArray(value))return "["+value.map(canonicalizeJcs).join(",")+"]";
+    if(typeof value==="object"){const keys=Object.keys(value).sort();return "{"+keys.map(k=>JSON.stringify(k)+":"+canonicalizeJcs(value[k])).join(",")+"}";}
+    throw Error("Unsupported JSON value.");
+  }
+  async function hashBytes(bytes){const d=await crypto.subtle.digest("SHA-256",bytes);return Array.from(new Uint8Array(d),b=>b.toString(16).padStart(2,"0")).join("");}
+  function hexToBytes(hex){return Uint8Array.from(hex.match(/.{2}/g),x=>parseInt(x,16));}
+  function concatBytes(a,b){const out=new Uint8Array(a.length+b.length);out.set(a);out.set(b,a.length);return out;}
+  async function deriveBirthId(label,hash){return hashBytes(concatBytes(new TextEncoder().encode(label),hexToBytes(hash)));}
+  function birthStatus(message,error=false){const el=$("birthStatus");el.textContent=message;el.style.color=error?"#ffaaaa":"#91a7c2";}
+  $("hashManifestButton").addEventListener("click",async()=>{
+    try{
+      if(!window.crypto?.subtle)throw Error("Web Crypto SHA-256 is unavailable. Open the HTTPS GitHub Pages site.");
+      const source=$("genesisInput").value;if(!source.trim())throw Error("Paste the complete Genesis Environment Manifest first.");
+      rejectDuplicateKeys(source);
+      const parsed=JSON.parse(source);
+      if(parsed.document_type!=="cin.genesis-environment-manifest")throw Error("document_type must be cin.genesis-environment-manifest.");
+      if(!parsed.schema_version||!parsed.manifest_id||!parsed.node?.node_id)throw Error("Required fields are missing: schema_version, manifest_id or node.node_id.");
+      const canonical=canonicalizeJcs(parsed);
+      const encoder=new TextEncoder();
+      const [canonicalHash,rawHash]=await Promise.all([hashBytes(encoder.encode(canonical)),hashBytes(encoder.encode(source))]);
+      birthState.manifest=parsed;birthState.canonical=canonical;birthState.manifestHash=canonicalHash;birthState.rawHash=rawHash;birthState.record=null;
+      $("genesisHashValue").textContent=canonicalHash;$("rawHashValue").textContent=rawHash;
+      $("hashMeta").textContent="SHA-256 · RFC 8785 JCS candidate · "+encoder.encode(canonical).length+" canonical UTF-8 bytes · "+parsed.manifest_id;
+      $("hashOutput").style.display="block";$("birthOutput").style.display="none";
+    }catch(e){$("hashOutput").style.display="none";$("birthOutput").style.display="block";birthStatus(e.message,true);}
+  });
+  $("createBirthButton").addEventListener("click",async()=>{
+    try{
+      if(!birthState.manifestHash)throw Error("Generate the Genesis fingerprint first.");
+      const [nid,nsid,bid]=await Promise.all([deriveBirthId(birthLabels.nid,birthState.manifestHash),deriveBirthId(birthLabels.nsid,birthState.manifestHash),deriveBirthId(birthLabels.bid,birthState.manifestHash)]);
+      const m=birthState.manifest;
+      const record={
+        document_type:"cin.node-birth-record",schema_version:"1.0.0",record_status:"PREVIEW_NOT_ISSUED",
+        generated_at:new Date().toISOString(),
+        source_genesis:{document_type:m.document_type,schema_version:m.schema_version,manifest_id:m.manifest_id,canonicalization:"RFC8785_JCS_CANDIDATE",digest_algorithm:"SHA-256",manifest_sha256:birthState.manifestHash,raw_input_sha256:birthState.rawHash},
+        node:{source_node_label:m.node.node_id,cin_nid:"cin:nid:v1:"+nid,cin_nsid:"cin:nsid:v1:"+nsid,cin_bid:"cin:bid:v1:"+bid,cin_ref:nid.slice(0,16).toUpperCase()},
+        conditional_identifiers:{cin_enid:{status:"not_applicable",reason:"No validated ecosystem scope supplied."},cin_pvid:{status:"not_applicable",reason:"No validated parent reference supplied."}},
+        derivation:{profile_id:"cin.node-identifier-derivation/1.0.0",profile_status:"PROPOSED_CANDIDATE_NOT_APPROVED",formula:"SHA-256(ASCII(domain_label) || raw_32_byte_manifest_digest)",domain_labels:birthLabels},
+        authorization:{operation:"cin.node.birth",status:"NOT_REQUESTED_NOT_VERIFIED"},signature:{status:"NOT_SIGNED",proofs:[]},storage:{status:"NOT_REGISTERED"},
+        limitations:["Browser-generated preview only; not an official CIN birth certificate.","Derivation profile requires project approval and independent interoperability vectors.","No signature, authorization, durable storage commit, read-back or independent verification has occurred."]
+      };
+      birthState.record=record;$("birthManifestText").textContent=JSON.stringify(record,null,2);$("birthOutput").style.display="block";
+      birthStatus("Birth manifest generated. Status: PREVIEW_NOT_ISSUED.");$("birthOutput").scrollIntoView({behavior:"smooth",block:"nearest"});
+    }catch(e){birthStatus(e.message,true);}
+  });
+  $("downloadBirthButton").addEventListener("click",()=>{
+    if(!birthState.record)return;const blob=new Blob([JSON.stringify(birthState.record,null,2)+"\\n"],{type:"application/json"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="CIN-NODE-BIRTH-RECORD.json";a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  });
+  function renderBirthHeaderIds(){
+    const target=$("birthHeaderIds");if(!target)return;let saved=null;try{saved=JSON.parse(localStorage.getItem("cin.lobby.node-identifiers.v1")||"null");}catch{}
+    target.replaceChildren();if(!saved)return;["cin_nid","cin_nsid","cin_bid","cin_ref"].forEach(k=>{if(!saved[k])return;const chip=document.createElement("span");chip.className="id-chip";chip.textContent=k.toUpperCase()+": "+saved[k];target.appendChild(chip);});
+  }
+  $("addBirthIdsButton").addEventListener("click",()=>{
+    if(!birthState.record)return;const n=birthState.record.node;const saved={cin_nid:n.cin_nid,cin_nsid:n.cin_nsid,cin_bid:n.cin_bid,cin_ref:n.cin_ref,node_label:n.source_node_label};
+    localStorage.setItem("cin.lobby.node-identifiers.v1",JSON.stringify(saved));renderBirthHeaderIds();birthStatus("Identifiers added to this browser's Lobby header. This does not modify the shared GitHub Pages source for other visitors.");
+  });
+  renderBirthHeaderIds();
+
 })();
 </script>
 </body>
