@@ -205,7 +205,7 @@
 
   // CIN Node Birth Certificate — local deterministic certificate workflow.
   const birthState={manifest:null,canonical:null,manifestHash:null,rawHash:null,record:null};
-  const birthLabels={nid:"CIN\\0NODE\\0NID\\0v1\\0",nsid:"CIN\\0NODE\\0NSID\\0v1\\0",bid:"CIN\\0NODE\\0BID\\0v1\\0"};
+  const birthLabels={nid:"CIN\0NODE\0NID\0v1\0",nsid:"CIN\0NODE\0NSID\0v1\0",bid:"CIN\0NODE\0BID\0v1\0"};
   function rejectDuplicateKeys(source){
     let i=0;
     const ws=()=>{while(/\\s/.test(source[i]||"")&&i<source.length)i++;};
@@ -267,7 +267,7 @@
     }catch(e){birthStatus(e.message,true);}
   });
   $("downloadBirthButton").addEventListener("click",()=>{
-    if(!birthState.record)return;const blob=new Blob([JSON.stringify(birthState.record,null,2)+"\\n"],{type:"application/json"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="CIN-NODE-BIRTH-RECORD.json";a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+    if(!birthState.record)return;const blob=new Blob([JSON.stringify(birthState.record,null,2)+"\n"],{type:"application/json"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="CIN-NODE-BIRTH-RECORD.json";a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
   });
   function renderBirthHeaderIds(){
     const target=$("birthHeaderIds");if(!target)return;let saved=null;try{saved=JSON.parse(localStorage.getItem("cin.lobby.node-identifiers.v1")||"null");}catch{}
