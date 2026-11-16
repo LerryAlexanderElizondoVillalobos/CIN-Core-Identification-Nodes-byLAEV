@@ -18,6 +18,15 @@
 #status{margin-top:18px;padding:13px 15px;border:1px solid var(--line);border-radius:12px;color:var(--muted);font-size:14px;display:none}#manifestPanel{display:none;margin-top:26px;background:#091625;border:1px solid #31506c;border-radius:16px;padding:20px}#manifestPanel h2{margin:0 0 10px}pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:520px;overflow:auto;background:#050d17;padding:16px;border-radius:10px;color:#c7e5ff;font-size:12px}#loadManifest{display:none}
 .footer{border-top:1px solid var(--line);margin-top:54px;padding-top:20px;color:var(--muted);font-size:13px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 @media(max-width:700px){.top{margin-bottom:45px}.grid{grid-template-columns:1fr}.lead{font-size:17px}.wrap{padding-inline:16px}}
+
+.birth{margin-top:54px;padding:24px;background:linear-gradient(180deg,#102239,#091625);border:1px solid #31506c;border-radius:18px}
+.birth h2{font-size:clamp(26px,4vw,38px);margin:8px 0}.birth label{display:block;font-weight:700;margin:18px 0 8px}
+.birth textarea{width:100%;min-height:220px;background:#050d17;color:#d8edff;border:1px solid #31506c;border-radius:12px;padding:14px;font:12px/1.5 ui-monospace,monospace;resize:vertical}
+.birth .btn{margin:10px 8px 0 0}.birth .output{display:none;margin-top:18px;padding:16px;background:#050d17;border:1px solid #203b56;border-radius:12px;overflow-wrap:anywhere}
+.birth .hash{font:12px/1.6 ui-monospace,monospace;color:#8ce3ff;word-break:break-all}.birth .small{font-size:12px;color:var(--muted)}
+#birthHeaderIds{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.id-chip{font:11px ui-monospace,monospace;border:1px solid #31506c;border-radius:999px;padding:5px 9px;color:#8ce3ff;background:#0a1b2b}
+
 </style>
 </head>
 <body>
@@ -40,6 +49,33 @@
 <div id="manifestPanel"><h2>Genesis Environment Manifest</h2><p class="note" id="manifestMeta"></p><pre id="manifestOutput"></pre><button class="btn secondary" id="downloadButton">Download Manifest JSON</button></div>
 <p class="note">Android: install this Lobby as a web app from your browser menu (Add to Home screen / Install app). The PWA is an interface, not a native system scanner. Without an installed local companion, Android and desktop browsers expose only browser-limited data.</p>
 </section>
+
+<section class="birth" id="nodeBirth">
+  <div class="eyebrow">CIN Node Birth · Certificate</div>
+  <h2>Create CIN Node Birth Certificate</h2>
+  <p class="lead" style="font-size:16px">Paste the complete Genesis Environment Manifest. The Lobby canonicalizes the JSON, calculates its SHA-256 fingerprint, and uses that fingerprint to derive deterministic CIN node identifiers.</p>
+  <label for="genesisInput">Genesis Environment Manifest (JSON)</label>
+  <textarea id="genesisInput" spellcheck="false" placeholder="Paste the complete cin.genesis-environment-manifest JSON here…"></textarea>
+  <div class="actions">
+    <button class="btn primary" id="hashManifestButton">Generate Cryptographic Fingerprint (SHA-256)</button>
+  </div>
+  <div class="output" id="hashOutput" aria-live="polite">
+    <strong>Genesis Manifest SHA-256</strong>
+    <p class="hash" id="genesisHashValue"></p>
+    <p class="small" id="hashMeta">SHA-256 · RFC 8785 JCS-style canonical JSON · full root document</p>
+    <button class="btn primary" id="createBirthButton">Generate CIN Node Birth Certificate</button>
+  </div>
+  <div class="output" id="birthOutput">
+    <strong>CIN Node Birth Record Manifest</strong>
+    <p class="small" id="birthStatus">Deterministic local preview. Not a signed or registered birth.</p>
+    <pre id="birthManifestText"></pre>
+    <button class="btn secondary" id="downloadBirthButton">Download Birth Manifest</button>
+    <button class="btn primary" id="addBirthIdsButton">Add identifiers to CIN Lobby header</button>
+  </div>
+  <p class="small">Cryptographic profile: SHA-256 with domain-separated labels from the proposed CIN derivation profile. This profile remains a candidate and is not yet approved for production. Browser-local generation does not sign, authorize, register, or persist a birth record to the CIN network.</p>
+</section>
+<div id="birthHeaderIds" aria-label="Current CIN node identifiers"></div>
+
 <section class="grid" aria-label="Genesis workflow">
 <article class="card"><div class="num">01 / CERTIFICATE</div><h2>Load certificate</h2><p>Fetches the published Genesis Environment Certificate, including its embedded APA 7 references and collection profile.</p><div class="status"><span class="dot"></span> Certificate published</div></article>
 <article class="card"><div class="num">02 / ENVIRONMENT</div><h2>Collect available data</h2><p>The PWA can collect browser-visible metadata only. Full OS and hardware inventory requires the local Runner.</p><div class="status"><span class="dot"></span> Browser preview only</div></article>
@@ -167,6 +203,133 @@
     catch(e){status("Could not open manifest: "+e.message,true);}
     event.target.value="";
   });
+
+  // CIN Node Birth Certificate — browser-local deterministic preview.
+  const birthState={manifest:null,canonical:null,manifestHash:null,record:null};
+  const birthLabels={
+    nid:"CIN\\0NODE\\0NID\\0v1\\0",
+    nsid:"CIN\\0NODE\\0NSID\\0v1\\0",
+    bid:"CIN\\0NODE\\0BID\\0v1\\0"
+  };
+  function canonicalizeJcs(value){
+    if(value===null||typeof value==="boolean"||typeof value==="string")return JSON.stringify(value);
+    if(typeof value==="number"){
+      if(!Number.isFinite(value))throw new Error("JSON numbers must be finite.");
+      return JSON.stringify(value);
+    }
+    if(Array.isArray(value))return "["+value.map(canonicalizeJcs).join(",")+"]";
+    if(typeof value==="object"){
+      const keys=Object.keys(value).sort();
+      return "{"+keys.map(k=>JSON.stringify(k)+":"+canonicalizeJcs(value[k])).join(",")+"}";
+    }
+    throw new Error("Unsupported JSON value in manifest.");
+  }
+  async function digestHex(bytes){
+    const digest=await crypto.subtle.digest("SHA-256",bytes);
+    return Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,"0")).join("");
+  }
+  function hexBytes(hex){return Uint8Array.from(hex.match(/.{2}/g).map(x=>parseInt(x,16)));}
+  function concatBytes(a,b){const out=new Uint8Array(a.length+b.length);out.set(a);out.set(b,a.length);return out;}
+  async function deriveBirthId(label,manifestHash){return await digestHex(concatBytes(new TextEncoder().encode(label),hexBytes(manifestHash)));}
+  function showBirthStatus(message,error=false){
+    const el=$("birthStatus");el.textContent=message;el.style.color=error?"#ffaaaa":"#91a7c2";
+  }
+  $("hashManifestButton").addEventListener("click",async()=>{
+    try{
+      if(!window.crypto?.subtle)throw new Error("Web Crypto SHA-256 is unavailable. Open the HTTPS GitHub Pages site.");
+      const parsed=JSON.parse($("genesisInput").value);
+      if(parsed.document_type!=="cin.genesis-environment-manifest")throw new Error("document_type must be cin.genesis-environment-manifest.");
+      if(!parsed.manifest_id||!parsed.node?.node_id)throw new Error("The manifest must contain manifest_id and node.node_id.");
+      const canonical=canonicalizeJcs(parsed);
+      const hash=await digestHex(new TextEncoder().encode(canonical));
+      birthState.manifest=parsed;birthState.canonical=canonical;birthState.manifestHash=hash;birthState.record=null;
+      $("genesisHashValue").textContent=hash;
+      $("hashOutput").style.display="block";$("birthOutput").style.display="none";
+      $("hashMeta").textContent="SHA-256 · complete root JSON · "+new TextEncoder().encode(canonical).length+" canonical UTF-8 bytes · source "+parsed.manifest_id;
+    }catch(e){showBirthStatus(e.message,true);$("birthStatus").textContent=e.message;$("birthOutput").style.display="block";}
+  });
+  $("createBirthButton").addEventListener("click",async()=>{
+    try{
+      if(!birthState.manifestHash)throw new Error("Generate the Genesis fingerprint first.");
+      const [nid,nsid,bid]=await Promise.all([
+        deriveBirthId(birthLabels.nid,birthState.manifestHash),
+        deriveBirthId(birthLabels.nsid,birthState.manifestHash),
+        deriveBirthId(birthLabels.bid,birthState.manifestHash)
+      ]);
+      const record={
+        document_type:"cin.node-birth-record",
+        schema_version:"1.0.0",
+        record_status:"PREVIEW_NOT_ISSUED",
+        generated_at:new Date().toISOString(),
+        source_genesis:{
+          document_type:birthState.manifest.document_type,
+          schema_version:birthState.manifest.schema_version,
+          manifest_id:birthState.manifest.manifest_id,
+          canonicalization:"RFC8785_JCS_CANDIDATE",
+          digest_algorithm:"SHA-256",
+          manifest_sha256:birthState.manifestHash
+        },
+        node:{
+          source_node_label:birthState.manifest.node.node_id,
+          cin_nid:"cin:nid:v1:"+nid,
+          cin_nsid:"cin:nsid:v1:"+nsid,
+          cin_bid:"cin:bid:v1:"+bid,
+          cin_ref:nid.slice(0,16).toUpperCase()
+        },
+        conditional_identifiers:{
+          cin_enid:birthState.manifest.ecosystem_id?{status:"requires_approved_ecosystem_scope"}:{status:"not_applicable"},
+          cin_pvid:birthState.manifest.parent_node_id?{status:"requires_validated_parent_reference"}:{status:"not_applicable"}
+        },
+        derivation:{
+          profile_id:"cin.node-identifier-derivation/1.0.0",
+          profile_status:"PROPOSED_CANDIDATE_NOT_APPROVED",
+          formula:"SHA-256(ASCII(domain_label) || raw_32_byte_manifest_digest)",
+          domain_labels:birthLabels
+        },
+        authorization:{operation:"cin.node.birth",status:"NOT_REQUESTED_NOT_VERIFIED"},
+        signature:{status:"NOT_SIGNED",proofs:[]},
+        storage:{status:"NOT_REGISTERED"},
+        limitations:[
+          "Browser-generated preview only; not an official CIN birth certificate.",
+          "Identifier derivation profile is a proposal and requires approval and independent interoperability vectors.",
+          "Duplicate JSON keys cannot be reliably detected after native JSON.parse; use the authoritative parser in the validated runner.",
+          "No signature, authorization, durable storage commit, read-back, or independent verification has occurred."
+        ]
+      };
+      birthState.record=record;
+      $("birthManifestText").textContent=JSON.stringify(record,null,2);
+      $("birthOutput").style.display="block";
+      showBirthStatus("Birth manifest generated deterministically from the Genesis SHA-256 fingerprint. PREVIEW_NOT_ISSUED.");
+      $("birthOutput").scrollIntoView({behavior:"smooth",block:"nearest"});
+    }catch(e){showBirthStatus(e.message,true);}
+  });
+  $("downloadBirthButton").addEventListener("click",()=>{
+    if(!birthState.record)return;
+    const blob=new Blob([JSON.stringify(birthState.record,null,2)+"\\n"],{type:"application/json"});
+    const url=URL.createObjectURL(blob);const a=document.createElement("a");
+    a.href=url;a.download="CIN-NODE-BIRTH-RECORD-"+(birthState.manifest?.node?.node_id||"NODE").replace(/[^a-z0-9_-]/gi,"-")+".json";a.click();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+  });
+  $("addBirthIdsButton").addEventListener("click",()=>{
+    if(!birthState.record)return;
+    const ids=birthState.record.node;
+    const saved={cin_nid:ids.cin_nid,cin_nsid:ids.cin_nsid,cin_bid:ids.cin_bid,cin_ref:ids.cin_ref,node_label:ids.source_node_label};
+    localStorage.setItem("cin.lobby.node-identifiers.v1",JSON.stringify(saved));
+    renderBirthHeaderIds();
+    showBirthStatus("Identifiers added to this browser's CIN Lobby header. This does not modify the public GitHub repository or publish identifiers for other visitors.");
+  });
+  function renderBirthHeaderIds(){
+    const target=$("birthHeaderIds");if(!target)return;
+    let saved=null;try{saved=JSON.parse(localStorage.getItem("cin.lobby.node-identifiers.v1")||"null");}catch{}
+    target.innerHTML="";
+    if(!saved)return;
+    ["cin_nid","cin_nsid","cin_bid","cin_ref"].forEach(k=>{
+      if(!saved[k])return;const chip=document.createElement("span");chip.className="id-chip";
+      chip.textContent=k.toUpperCase()+": "+saved[k];target.appendChild(chip);
+    });
+  }
+  renderBirthHeaderIds();
+
 })();
 </script>
 </body>
