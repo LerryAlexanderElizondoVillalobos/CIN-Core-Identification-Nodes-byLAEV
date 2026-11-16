@@ -52,7 +52,7 @@
 </section>
 
 <section class="birth" id="nodeBirth">
-  <div class="eyebrow">CIN Node Birth · Certificate 1.0.0</div>
+  <div class="eyebrow">CIN Node Birth · Certificate 1.0.0</div>\n  <p class="small"><a href="./CIN-NODE-BIRTH.cincert" download>Download CIN Node Birth Certificate descriptor (.cincert)</a></p>
   <h2>Create CIN Node Birth Certificate</h2>
   <p class="lead" style="font-size:16px">Paste the complete Genesis Environment Manifest. Every field in the root document participates in canonical hashing, including bibliographic references, limitations and generation metadata.</p>
   <label for="genesisInput">Complete Genesis Environment Manifest (JSON)</label>
@@ -214,7 +214,7 @@
       if(ch==="{"){i++;ws();const keys=new Set();if(source[i]==="}"){i++;return;}while(i<source.length){ws();if(source[i]!=='"')throw Error("Invalid JSON object key.");const key=string();if(keys.has(key))throw Error("Duplicate JSON key rejected: "+key);keys.add(key);ws();if(source[i++]!==":")throw Error("Invalid JSON object separator.");value();ws();if(source[i]==="}"){i++;return;}if(source[i++]!==",")throw Error("Invalid JSON object delimiter.");}}
       else if(ch==="["){i++;ws();if(source[i]==="]"){i++;return;}while(i<source.length){value();ws();if(source[i]==="]"){i++;return;}if(source[i++]!==",")throw Error("Invalid JSON array delimiter.");}}
       else if(ch==='"'){string();}
-      else{const m=source.slice(i).match(/^(true|false|null|-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\\d+)?)/);if(!m)throw Error("Invalid JSON value near character "+i);i+=m[0].length;}
+      else{const m=source.slice(i).match(/^(true|false|null|-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?)/);if(!m)throw Error("Invalid JSON value near character "+i);i+=m[0].length;}
     };
     value();ws();if(i!==source.length)throw Error("Unexpected trailing content in JSON.");
   }
