@@ -1,0 +1,53 @@
+{
+  "certificate_id": "cin:certificate:node-birth:v1",
+  "certificate_type": "cin.node-birth",
+  "certificate_version": "1.0.0",
+  "title": "CIN Node Birth Certificate",
+  "status": "development-candidate",
+  "description": "Consumes the complete registered Genesis Environment Manifest, calculates its deterministic SHA-256 fingerprint, and derives the CIN node birth identifiers.",
+  "execution": {
+    "instruction": "RUN CERTIFICATE",
+    "runner": "cin-certificate-runner",
+    "action": "generate-cin-node-birth-record"
+  },
+  "input_profile": {
+    "document_type": "cin.genesis-environment-manifest",
+    "required": "Complete JSON root document; no root fields may be omitted.",
+    "canonicalization": "RFC 8785 JSON Canonicalization Scheme (JCS)",
+    "digest": "SHA-256 over canonical UTF-8 bytes",
+    "provenance_digest": "SHA-256 over exact uploaded UTF-8 bytes"
+  },
+  "identifier_derivation": {
+    "profile_id": "cin.node-identifier-derivation/1.0.0",
+    "status": "proposed-candidate-not-production-approved",
+    "formula": "SHA-256(ASCII(domain_label) || raw_32_byte_genesis_digest)",
+    "domain_labels": {
+      "cin_nid": "CIN\\0NODE\\0NID\\0v1\\0",
+      "cin_nsid": "CIN\\0NODE\\0NSID\\0v1\\0",
+      "cin_bid": "CIN\\0NODE\\0BID\\0v1\\0"
+    },
+    "output_encoding": "lowercase hexadecimal",
+    "cin_ref": "First 16 uppercase hexadecimal characters of CIN-NID; display reference only."
+  },
+  "output_profile": {
+    "document_type": "cin.node-birth-record",
+    "schema_version": "1.0.0",
+    "initial_status": "PREVIEW_NOT_ISSUED",
+    "identifiers": [
+      "cin_nid",
+      "cin_nsid",
+      "cin_bid",
+      "cin_ref"
+    ],
+    "conditional_identifiers": [
+      "cin_enid",
+      "cin_pvid"
+    ]
+  },
+  "operational_boundaries": [
+    "The browser certificate creates a deterministic local preview and downloadable JSON record.",
+    "It does not sign, authorize, register, or commit a node birth.",
+    "The proposed derivation profile requires project approval and independent interoperability vectors before production use.",
+    "The Genesis source manifest is included by digest and manifest reference; all of its root fields participate in canonical hashing."
+  ]
+}
