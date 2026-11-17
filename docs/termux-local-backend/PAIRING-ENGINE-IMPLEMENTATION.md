@@ -26,7 +26,9 @@ The runtime uses `src/local-state-manager.js` over `src/persistent-store.js` to 
 
 Override the directory with `CIN_DATA_DIR`. The containing directory is created with mode `0700`; the state file is written with mode `0600`. Writes use a temporary file followed by atomic rename so an interrupted write does not replace the previous complete snapshot.
 
-Snapshot schema version 2 adds named runtime domains while preserving the version-1 pairing arrays during migration. File contents are synchronized before atomic replacement. See [LOCAL-STATE-MANAGER.md](./LOCAL-STATE-MANAGER.md) for the state-domain contract.\n\nThe state file contains:
+Snapshot schema version 2 adds named runtime domains while preserving the version-1 pairing arrays during migration. File contents are synchronized before atomic replacement. See [LOCAL-STATE-MANAGER.md](./LOCAL-STATE-MANAGER.md) for the state-domain contract.
+
+The state file contains:
 - Pairing requests, their lifecycle states and polling secrets.
 - Session metadata, active session credentials, expiry and revocation state.
 - A bounded lifecycle event history (latest 2,000 events).
