@@ -14,11 +14,13 @@ This service connects the public CIN GitHub Pages Lobby to a Node.js process run
 
 ## Install in Termux
 
-Install Node.js 20 or later, then:
+Install Git and Node.js 20 or later, then clone the repository if needed:
 
 ```sh
 pkg update
-pkg install nodejs
+pkg install git nodejs
+cd ~
+git clone https://github.com/LerryAlexanderElizondoVillalobos/CIN-Core-Identification-Nodes-byLAEV.git
 cd ~/CIN-Core-Identification-Nodes-byLAEV/termux-cin
 cp .env.example .env
 nano .env
