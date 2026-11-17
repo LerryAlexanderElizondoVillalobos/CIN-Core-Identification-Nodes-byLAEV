@@ -17,7 +17,8 @@ export function createOAuthService(config, session) {
         client_secret: config.clientSecret,
         code,
         code_verifier,
-        redirect_uri: config.redirectUri
+        redirect_uri: config.redirectUri,
+        repository_id: config.repositoryId
       });
       const response = await fetch("https://github.com/login/oauth/access_token", {
         method: "POST",
