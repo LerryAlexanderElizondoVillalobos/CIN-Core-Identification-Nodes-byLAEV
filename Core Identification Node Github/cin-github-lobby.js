@@ -565,13 +565,14 @@
       rejectDuplicateKeys(genesisRaw);
       const manifest=JSON.parse(genesisRaw);
       if(manifest.document_type!=="cin.genesis-environment-manifest") throw new Error("Saved Genesis Manifest has the wrong document type.");
+      if(!manifest.environment_data || manifest.environment_data.collection_scope!=="github_repository_snapshot") throw new Error("The saved Genesis Manifest is not from the GitHub repository execution profile.");
       const canonical=canonicalizeJcs(manifest);
       const manifestHash=await sha256(utf8(canonical));
       const rawHash=await sha256(utf8(genesisRaw));
       const birthCertificateResponse=await fetch("./CIN-NODE-BIRTH.cincert",{cache:"no-store"});
       if(!birthCertificateResponse.ok) throw new Error("Could not load CIN Node Birth Certificate.");
       const birthCertificate=await birthCertificateResponse.json();
-      if(birthCertificate.certificate_type!=="cin.node-birth" || !birthCertificate.identifier_derivation || !birthCertificate.identifier_derivation.domain_labels) throw new Error("CIN Node Birth Certificate descriptor is incomplete.");
+      if(birthCertificate.certificate_type!=="cin.node-birth" || !birthCertificate.identifier_derivation || !birthCertificate.identifier_derivation.domain_labels || !birthCertificate.execution_profiles || !birthCertificate.execution_profiles.github_repository) throw new Error("CIN Node Birth Certificate descriptor is incomplete for the GitHub repository profile.");
       const labels=birthCertificate.identifier_derivation.domain_labels;
       const ids=await Promise.all([
         deriveIdentifier(labels.cin_nid,manifestHash),
@@ -583,6 +584,7 @@
         schema_version:birthCertificate.output_profile.schema_version,
         record_status:"PREVIEW_NOT_ISSUED",
         generated_at:new Date().toISOString(),
+        certificate:{certificate_id:birthCertificate.certificate_id,version:birthCertificate.certificate_version,execution_profile_id:birthCertificate.execution_profiles.github_repository.id,runner:birthCertificate.execution_profiles.github_repository.runner},
         source_genesis:{
           document_type:manifest.document_type,
           schema_version:manifest.schema_version,
