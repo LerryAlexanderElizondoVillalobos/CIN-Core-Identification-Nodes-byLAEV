@@ -413,7 +413,7 @@
             path:GENESIS_PATH,
             source_commit_sha:sourceRepo.source_commit_sha || null,
             saved_commit_sha:genesisGitCommit,
-            status:"REPOSITORY_MANIFEST_RECORDED",
+            status:"PUBLIC_REPOSITORY_MANIFEST_SAVED_PENDING_LOCAL_REGISTRATION",
             private_local_registration:false
           }});
         }
@@ -483,7 +483,7 @@
           path:GENESIS_PATH,
           source_commit_sha:snapshot.repository.source_commit_sha,
           saved_commit_sha:saved.commitSha,
-          status:"REPOSITORY_MANIFEST_RECORDED",
+          status:"PUBLIC_REPOSITORY_MANIFEST_SAVED_PENDING_LOCAL_REGISTRATION",
           private_local_registration:false
         }
       });
