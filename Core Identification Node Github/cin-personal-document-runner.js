@@ -162,7 +162,7 @@
       }
 
       const createdAt = new Date().toISOString();
-      const document = {
+      const personalDocument = {
         document_type: certificate.wallet_approval.output_document_type,
         schema_version: certificate.wallet_approval.schema_version,
         document_id: derived.documentId,
@@ -232,7 +232,7 @@
         ]
       };
 
-      const blob = new Blob([JSON.stringify(document, null, 2) + "\n"], { type: "application/json;charset=utf-8" });
+      const blob = new Blob([JSON.stringify(personalDocument, null, 2) + "\n"], { type: "application/json;charset=utf-8" });
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
@@ -244,16 +244,16 @@
 
       $("personalDocumentPreview").hidden = false;
       $("personalDocumentPreview").textContent = JSON.stringify({
-        document_id: document.document_id,
-        document_status: document.document_status,
-        cin_personal_number_candidate: document.personal_document.cin_personal_number_candidate,
+        document_id: personalDocument.document_id,
+        document_status: personalDocument.document_status,
+        cin_personal_number_candidate: personalDocument.personal_document.cin_personal_number_candidate,
         wallet_address: address,
         chain_id_at_approval: chainId,
         source_cin_bid: source.birth.node.cin_bid,
         source_birth_status: source.birth.candidate_status,
-        signature_status: document.authorization.status,
-        binding_status: document.node_binding.agreement_status,
-        storage: document.storage.mode
+        signature_status: personalDocument.authorization.status,
+        binding_status: personalDocument.node_binding.agreement_status,
+        storage: personalDocument.storage.mode
       }, null, 2);
       $("personalDocumentState").textContent = "Wallet approved · candidate downloaded";
       setStatus("MetaMask approval received. The CIN personal-document candidate and node-binding agreement have been generated and downloaded. The same wallet address produces the same document identifier; the approval signature is a separate, nonce-bound proof. No public GitHub record was created.", "ok");
