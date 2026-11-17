@@ -41,7 +41,7 @@ The intended first-node workflow is performed from the published Lobby:
 
 The page contains the GitHub connection control, OAuth callback processing, repository collector, SHA-256 file inventory, GitHub save/read-back workflow, progress record and registry-driven header.
 
-**GitHub linking is prepared but not yet active.** Before the button can complete authorization, the GitHub App must be registered and installed on this repository, the OAuth exchange Worker must be deployed, and `cin-github-config.js` must be populated with the public App Client ID and deployed Worker endpoint. Follow the [GitHub App and Worker setup instructions](../services/cin-github-oauth-worker/README.md).
+**GitHub linking uses the local Termux backend.** Before the button can complete authorization, install the GitHub App on this repository, configure its public Client ID in `cin-github-config.js`, and configure the matching Client ID, Client Secret and redirect URI in the Termux `.env` file. Start the Node.js backend on the same Android device before opening the Lobby. The OAuth Authorization Code + PKCE exchange runs locally in Termux; no Cloudflare Worker is required. Follow the [Termux backend setup instructions](../termux-cin/README.md).
 
 ## Certificate 1 — Genesis Environment Certificate
 
@@ -98,7 +98,7 @@ The future portable local CIN application is a separate execution profile. Its l
 - [Documentation index](Documentation/README.md)
 - [GitHub-linked node creation workflow specification](Documentation/Architecture/CIN_GITHUB_LINKED_NODE_CREATION_WORKFLOW_SPECIFICATION_v1.0.md)
 - [Configuration documentation](Documentation/Configuration/README.md)
-- [OAuth exchange Worker source and setup](../services/cin-github-oauth-worker/README.md)
+- [Termux local backend, OAuth exchange and workspace setup](../termux-cin/README.md)
 
 ## Pages deployment
 
