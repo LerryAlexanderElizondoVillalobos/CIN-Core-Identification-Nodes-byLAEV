@@ -22,7 +22,7 @@ Core Identification Node Github/
 
 ## Open the Lobby
 
-- **CIN Genesis Lobby:** https://lerryalexanderelizondo.github.io/CIN-Core-Identification-Nodes-byLAEV/
+- **CIN Genesis Lobby:** https://lerryalexanderelizondovillalobos.github.io/CIN-Core-Identification-Nodes-byLAEV/
 - **Local shortcut:** open `CIN Lobby.url`; it points to the published HTTPS Lobby.
 
 ## Creation sequence in the Lobby
