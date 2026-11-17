@@ -684,7 +684,7 @@
 
   const MARRIAGE_TYPES = {CINMarriageAgreement:[
     {name:"personalDocumentId",type:"string"},{name:"nodeBirthRecordSha256",type:"string"},
-    {name:"cinBid",type:"string"},{name:"subjectAddress",type:"address"},
+    {name:"cinNid",type:"string"},{name:"cinNsid",type:"string"},{name:"cinBid",type:"string"},{name:"cinRef",type:"string"},{name:"cinEnid",type:"string"},{name:"cinPvid",type:"string"},{name:"subjectAddress",type:"address"},
     {name:"agreementVersion",type:"string"},{name:"terms",type:"string"},{name:"termsSha256",type:"string"}
   ]};
 
@@ -738,7 +738,8 @@
     const personalDocumentId="cin:global-personal-document:v1:"+identifierDigest;
     const termsSha256=await sha256(utf8(agreementTerms));
     const domain={name:certificate.marriage_agreement.domain.name,version:certificate.marriage_agreement.domain.version,chainId:walletChainId};
-    const message={personalDocumentId,nodeBirthRecordSha256:birthDigest,cinBid,subjectAddress:walletAddress,agreementVersion:"1.0.0",terms:agreementTerms,termsSha256};
+    const nodeIdentifiers={cinNid:birth.node.cin_nid||"",cinNsid:birth.node.cin_nsid||"",cinBid,cinRef:birth.node.cin_ref||"",cinEnid:birth.node.cin_enid||"",cinPvid:birth.node.cin_pvid||""};
+    const message={personalDocumentId,nodeBirthRecordSha256:birthDigest,...nodeIdentifiers,subjectAddress:walletAddress,agreementVersion:"1.0.0",terms:agreementTerms,termsSha256};
     const walletPayload={
       domain,primaryType:"CINMarriageAgreement",
       types:{
@@ -762,7 +763,7 @@
         document_type:certificate.outputs.personal_document.document_type,schema_version:"1.0.0",document_id:personalDocumentId,certificate:{certificate_id:certificate.certificate_id,version:certificate.certificate_version},
         status:isCandidate?"PREVIEW_NOT_ISSUED":"SIGNED_PENDING_ISSUER_VERIFICATION",generated_at:signedAt,
         subject:{evm_address:walletAddress,evm_chain_id:walletChainId},
-        node_reference:{node_id:NODE,cin_bid:cinBid,cin_nid:birth.node&&birth.node.cin_nid||null,birth_document_type:birth.document_type,birth_document_path:BIRTH_PATH,birth_document_sha256:birthDigest,birth_document_status:isCandidate?"PREVIEW_NOT_ISSUED":"BORN"},
+        node_reference:{node_id:NODE,cin_nid:birth.node&&birth.node.cin_nid||null,cin_nsid:birth.node&&birth.node.cin_nsid||null,cin_bid:cinBid,cin_ref:birth.node&&birth.node.cin_ref||null,cin_enid:birth.node&&birth.node.cin_enid||null,cin_pvid:birth.node&&birth.node.cin_pvid||null,birth_document_type:birth.document_type,birth_document_path:BIRTH_PATH,birth_document_sha256:birthDigest,birth_document_status:isCandidate?"PREVIEW_NOT_ISSUED":"BORN"},
         identifier_derivation:{profile_id:"cin.global-personal-document.identifier/1.0.0",algorithm:"SHA-256",canonicalization:"RFC 8785 JCS",input:identifierInput,output:personalDocumentId,signature_bytes_excluded:true,signer_address_source:"EIP-712 signature recovery",verified_signer_address:recovered,determinism:"The identifier is recomputed from the address recovered from the EIP-712 signature and the immutable Node Birth digest. Same signer and same Node Birth document always produce the same identifier; signature bytes are not identifier entropy."},
         marriage_agreement_reference:MARRIAGE_PATH,
         issuance:{status:isCandidate?"PREVIEW_NOT_ISSUED":"PENDING_ISSUER_VERIFICATION",authoritative:false,reason:isCandidate?"The referenced Node Birth input is a non-authoritative browser candidate.":"Issuer authorization, authoritative storage and independent issuance verification remain separate steps."}
@@ -770,7 +771,7 @@
       const marriageAgreement={
         document_type:certificate.outputs.marriage_agreement.document_type,schema_version:"1.0.0",certificate:{certificate_id:certificate.certificate_id,version:certificate.certificate_version},
         agreement_id:"cin:node-personal-document-marriage:v1:"+identifierDigest,status:"SIGNED_CANDIDATE",signed_at:signedAt,
-        parties:{node:{node_id:NODE,cin_bid:cinBid,birth_document_sha256:birthDigest},personal_document:{document_id:personalDocumentId,subject_address:walletAddress}},
+        parties:{node:{node_id:NODE,cin_nid:birth.node.cin_nid||null,cin_nsid:birth.node.cin_nsid||null,cin_bid:cinBid,cin_ref:birth.node.cin_ref||null,cin_enid:birth.node.cin_enid||null,cin_pvid:birth.node.cin_pvid||null,birth_document_sha256:birthDigest},personal_document:{document_id:personalDocumentId,subject_address:walletAddress}},
         acceptance:{accepted:true,agreement_version:"1.0.0",terms:agreementTerms,terms_sha256:termsSha256},
         signature:{standard:"EIP-712",method:"eth_signTypedData_v4",domain,primary_type:"CINMarriageAgreement",message,signature,recovered_signer:recovered,verification_status:"VERIFIED",chain_id:walletChainId},
         lifecycle:{node_birth_status:isCandidate?"PREVIEW_NOT_ISSUED":"BORN",personal_document_status:personalDocument.status,marriage_status:"SIGNED_CANDIDATE_NOT_AUTHORITATIVE",authoritative_registration:false},
