@@ -124,10 +124,8 @@
   const sameOriginConfigured = () => location.origin === "https://lerryalexanderelizondovillalobos.github.io";
 
   function configReady() {
-    let workerIsHttps=false;
-    try { workerIsHttps=new URL(cfg.tokenExchangeEndpoint).protocol==="https:"; } catch {}
-    return !!(cfg.enabled && cfg.clientId && workerIsHttps && cfg.redirectUri &&
-      REPO.owner && REPO.name && REPO.id && REPO.branch && REPO.rootDirectory);
+    return !!(cfg.enabled && cfg.clientId && cfg.clientId !== "CONFIGURE_PUBLIC_GITHUB_APP_CLIENT_ID" &&
+      cfg.localBackendUrl && cfg.redirectUri && REPO.owner && REPO.name && REPO.id && REPO.branch && REPO.rootDirectory);
   }
 
   async function githubApi(path, options, authenticated) {
@@ -212,7 +210,7 @@
     $("generateBirthButton").disabled=!connected || !genesisManifest;
   }
 
-  function disconnect() {
+  function disconnect() {\n    fetch((cfg.localBackendUrl||"http://127.0.0.1:8787")+"/v1/session/disconnect",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"}).catch(()=>{});
     accessToken=null; tokenExpiresAt=0; operator=null;
     renderConnection();
     setStatus("githubStatus","Disconnected. No GitHub token is stored in browser storage.","info");
