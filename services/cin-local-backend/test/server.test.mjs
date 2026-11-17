@@ -80,7 +80,7 @@ test("Runtime Configuration Manager persists settings and applies Lobby origin c
     assert.equal(configuration.data.lobby_origin, "https://new-lobby.example");
     assert.equal(configuration.data.pairing_request_ttl_ms, 600000);
 
-    const oldOrigin = await fetch(base + "/api/v1/status", { headers: { Origin: "https://lerryalexanderelizondo.github.io" } });
+    const oldOrigin = await fetch(base + "/api/v1/status", { headers: { Origin: "https://lerryalexanderelizondovillalobos.github.io" } });
     assert.equal(oldOrigin.status, 403);
     const newOrigin = await fetch(base + "/api/v1/status", { headers: { Origin: "https://new-lobby.example" } });
     assert.equal(newOrigin.status, 200);
