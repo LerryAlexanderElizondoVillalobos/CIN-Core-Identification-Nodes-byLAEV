@@ -126,4 +126,6 @@ jobs:
           node-version: 20
       - name: Validate Termux backend modules
         working-directory: termux-cin
-        run: npm run check
+        run: |
+          npm run check
+          npm test
