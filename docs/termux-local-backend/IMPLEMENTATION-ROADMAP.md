@@ -24,6 +24,15 @@
 - Loopback-only server, status API and Manager dashboard.
 - Termux start/stop and diagnostics.
 
+## Phase 2.5 — Persistent state and runtime configuration
+- Shared Local State Manager with named state domains and schema migration.
+- Persistent configuration for Lobby origin, backend port, pairing/session TTLs and event retention.
+- Local-only configuration API and editable Backend Manager panel.
+- Immediate application of Lobby origin and lifecycle settings; persisted port changes apply after restart.
+- Automated Node.js 22 test workflow for the local backend.
+
+**Exit:** automated backend tests pass; configuration survives restart; target Termux/Android validation is recorded.
+
 ## Phase 3 — Pairing
 - Lobby pairing request and Manager approval.
 - Revocable local sessions.
@@ -54,7 +63,7 @@
 
 ## Branch strategy
 
-Current working branch: `feat/termux-local-backend`. All implementation remains on this branch. No changes are made to `main` and no PR is opened until the branch is ready and separately reviewed.
+Current implementation branch: `feat/pairing-engine-backend-manager`, based on `feat/termux-local-backend` and tracked in Pull Request #38. Changes remain isolated from `main` and CIN foundational engines until reviewed and merged.
 
 ## First-release exclusions
 
