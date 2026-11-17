@@ -27,7 +27,12 @@
         "endpoint": null,
         "backend_address": null
       },
-      "direct_host_filesystem_access": false
+      "direct_host_filesystem_access": false,
+      "oauth_exchange_service": {
+        "source": "services/cin-github-oauth-worker/",
+        "status": "not-deployed",
+        "endpoint": null
+      }
     },
     "local": {
       "profile_id": "cin.environment.local",
@@ -141,5 +146,21 @@
     "global_lobby": "independent-global-scope",
     "cin_nodes": "one-independent-configuration-scope-per-node",
     "shared_code_implies_shared_state": false
+  },
+  "operator_github_connection": {
+    "provider": "GitHub App user authorization",
+    "flow": "Authorization Code + PKCE",
+    "status": "source-prepared-app-and-worker-provisioning-pending",
+    "target_repository_id": "1458540194",
+    "requested_repository_permissions": {
+      "contents": "write",
+      "metadata": "read"
+    },
+    "oauth_exchange_worker_source": "services/cin-github-oauth-worker/",
+    "oauth_exchange_worker_deployed": false,
+    "public_configuration": "Core Identification Node Github/cin-github-config.js",
+    "enabled": false,
+    "token_storage": "page-memory-only",
+    "purpose": "Authenticate the operator for repository read/write progress operations only; not CIN document issuance authorization."
   }
 }
