@@ -20,6 +20,7 @@ test("runtime defaults to loopback and documented ports", () => {
   assert.equal(ALTERNATIVE_PORT, 1221);
   assert.equal(configuredPort({}), 2112);
   assert.equal(configuredPort({ CIN_LOCAL_BACKEND_PORT: "1221" }), 1221);
+  assert.equal(configuredPort({}, { backend_port: 3222 }), 3222);
   assert.throws(() => configuredPort({ CIN_LOCAL_BACKEND_PORT: "0" }));
 });
 
@@ -51,6 +52,45 @@ test("Manager is served from the local backend", async () => {
     assert.equal(response.status, 200); assert.match(html, /CIN Backend Manager/);
     assert.match(html, /Pairing requests/); assert.match(html, /Active sessions/);
     assert.match(html, /Local State Manager/);
+  }, dir); } finally { await rm(dir, { recursive: true, force: true }); }
+});
+
+
+test("Runtime Configuration Manager persists settings and applies Lobby origin changes", async () => {
+  const dir = await temporaryDirectory();
+  try { await withServer(async port => {
+    const base = "http://127.0.0.1:" + port;
+    const saved = await fetch(base + "/api/v1/configuration", {
+      method: "PUT", headers: { "Content-Type": "application/json", Origin: base },
+      body: JSON.stringify({
+        lobby_origin: "https://new-lobby.example",
+        backend_port: 3222,
+        pairing_request_ttl_ms: 10 * 60 * 1000,
+        pairing_session_ttl_ms: 48 * 60 * 60 * 1000,
+        event_history_limit: 500
+      })
+    });
+    assert.equal(saved.status, 200);
+    const savedBody = await saved.json();
+    assert.equal(savedBody.data.restart_required, true);
+    assert.equal(savedBody.data.configuration.backend_port, 3222);
+
+    const restored = await fetch(base + "/api/v1/configuration");
+    const configuration = await restored.json();
+    assert.equal(configuration.data.lobby_origin, "https://new-lobby.example");
+    assert.equal(configuration.data.pairing_request_ttl_ms, 600000);
+
+    const oldOrigin = await fetch(base + "/api/v1/status", { headers: { Origin: "https://lerryalexanderelizondo.github.io" } });
+    assert.equal(oldOrigin.status, 403);
+    const newOrigin = await fetch(base + "/api/v1/status", { headers: { Origin: "https://new-lobby.example" } });
+    assert.equal(newOrigin.status, 200);
+    assert.equal(newOrigin.headers.get("access-control-allow-origin"), "https://new-lobby.example");
+
+    const invalid = await fetch(base + "/api/v1/configuration", {
+      method: "PUT", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ backend_port: 70000 })
+    });
+    assert.equal(invalid.status, 400);
   }, dir); } finally { await rm(dir, { recursive: true, force: true }); }
 });
 
