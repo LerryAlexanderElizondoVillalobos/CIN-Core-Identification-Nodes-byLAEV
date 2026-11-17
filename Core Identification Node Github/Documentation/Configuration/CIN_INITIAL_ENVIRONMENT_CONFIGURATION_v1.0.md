@@ -113,7 +113,7 @@ The selected local address is dynamic. A local client must discover it from the 
 
 ### 4.1 Storage status
 
-The current filesystem persistence work belongs to the local Rust prototype and must not be interpreted as storage configured for GitHub Pages.
+The current filesystem persistence work belongs to the local Rust prototype and must not be interpreted as storage configured for GitHub Pages. No production storage provider is currently selected as the active provider for CIN.
 
 1. `prototype/cin-core/src/storage/` contains a filesystem document repository and a `TransactionalStore` prototype. The transactional implementation stores JSON documents, stages writes, calculates SHA-256 over serialized bytes, uses commit markers and supports read/recovery inspection.
 2. `prototype/linux-runtime/src/main.rs` contains a separate local runtime persistence probe that writes `runtime-probe.record` and reads it back.
@@ -122,7 +122,8 @@ These are prototype capabilities. The runtime probe is not the production CIN re
 
 | Setting | Current status |
 |---|---|
-| Local prototype provider | Local filesystem |
+| Active storage provider | None selected for the production CIN environment | Not configured |
+| Local prototype provider | Local filesystem | Prototype only |
 | Document format | JSON |
 | Core storage implementation | `prototype/cin-core/src/storage/TransactionalStore` |
 | Runtime probe | `runtime-probe.record` |
