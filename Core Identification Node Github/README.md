@@ -31,13 +31,21 @@ The Lobby is a static GitHub Pages interface. It can publish and offer the certi
 
 `CIN-GENESIS-ENVIRONMENT.cincert` is the declarative Genesis certificate (v1.1.0). It defines the environment collection profile and contains **12 bibliographic references in APA 7th edition** under `bibliographic_references`. The manifest generator is expected to transfer this block into each generated Genesis Environment Manifest, separately from observed environment data.
 
-The declared collection profile includes operating system and architecture, allowlisted runtime configuration, supported hardware capabilities, a SHA-256 package file inventory, network interface names, digest capabilities, and storage-configuration presence. It excludes credentials, private keys, arbitrary environment variables, user file contents, network payloads, and absolute paths.
+The certificate defines two separate execution profiles. The GitHub repository profile records repository metadata, source commit/tree and SHA-256 inventory beneath this publication root; it does not inspect the operator's local operating system, hardware or host network interfaces. The local package profile retains the local collection profile for the portable Certificate Runner. Both profiles exclude credentials and private keys.
 
 ## CIN Node Birth Certificate
 
-`CIN-NODE-BIRTH.cincert` is the declarative Node Birth Certificate (v1.0.0). It consumes the complete Genesis Environment Manifest and defines canonical SHA-256 fingerprinting, separate raw-byte provenance hashing, and deterministic derivation of CIN-NID, CIN-NSID and CIN-BID. The Lobby exposes this workflow directly below the Genesis interface: paste the full manifest, generate the cryptographic fingerprint, generate the birth-record manifest, download it, and optionally display its identifiers in the current browser's Lobby header.
+`CIN-NODE-BIRTH.cincert` is the declarative Node Birth Certificate (v1.0.0). It consumes the complete saved Genesis Environment Manifest, calculates the canonical SHA-256 digest and raw-byte provenance digest, and derives candidate CIN-NID, CIN-NSID, CIN-BID and CIN-REF values under the certificate's declared derivation profile.
 
-The current browser implementation marks generated records `PREVIEW_NOT_ISSUED`. The derivation profile is still a candidate; it is not a production-approved issuance profile. The browser does not sign, authorize, register, or persist a birth record to the CIN network. The header action stores identifiers only in the current browser's local storage and does not change the public page for other visitors.
+The GitHub Pages Lobby now loads the saved Genesis Manifest from the repository and generates a birth candidate from that exact document. It commits the candidate and updates the CIN 001 node profile so the Lobby header can reconstruct the candidate identifiers from GitHub after reload.
+
+The candidate remains `PREVIEW_NOT_ISSUED`. The derivation profile is not production-approved, and this GitHub repository commit does not supply birth authorization, issuer signature, authoritative private local storage registration or independent birth verification. The header shows candidate status and must not present CIN 001 as BORN.
+
+## CIN Personal Registration Certificate
+
+`CIN-PERSONAL-REGISTRATION.cincert` is the third certificate descriptor and remains a development candidate. It requires an authoritative verified Node Birth Record, an explicit person-to-node association event and a separate Personal Issuance Authorization. The linked GitHub account identifies the operator only; it does not register a person.
+
+The certificate defines the later CIN Personal Number and CIN Personal Credential flow. Full personal registration records and credentials are not written to this public repository by default.
 
 ## Pages deployment
 
