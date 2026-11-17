@@ -1,0 +1,160 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CIN Global Personal Document Candidate",
+  "type": "object",
+  "required": [
+    "document_type",
+    "schema_version",
+    "document_id",
+    "status",
+    "generated_at",
+    "subject",
+    "node_reference",
+    "identifier_derivation",
+    "marriage_agreement_reference",
+    "issuance"
+  ],
+  "properties": {
+    "document_type": {
+      "const": "cin.global-personal-document-candidate"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "document_id": {
+      "type": "string",
+      "pattern": "^cin:global-personal-document:v1:[0-9a-f]{64}$"
+    },
+    "status": {
+      "enum": [
+        "PREVIEW_NOT_ISSUED",
+        "SIGNED_PENDING_ISSUER_VERIFICATION"
+      ]
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "subject": {
+      "type": "object",
+      "required": [
+        "evm_address",
+        "evm_chain_id"
+      ],
+      "properties": {
+        "evm_address": {
+          "type": "string",
+          "pattern": "^0x[0-9a-fA-F]{40}$"
+        },
+        "evm_chain_id": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "node_reference": {
+      "type": "object",
+      "required": [
+        "node_id",
+        "cin_bid",
+        "birth_document_type",
+        "birth_document_path",
+        "birth_document_sha256",
+        "birth_document_status"
+      ],
+      "properties": {
+        "node_id": {
+          "type": "string"
+        },
+        "cin_bid": {
+          "type": "string"
+        },
+        "cin_nid": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "birth_document_type": {
+          "enum": [
+            "cin.node-birth-candidate",
+            "cin.node-birth-record"
+          ]
+        },
+        "birth_document_path": {
+          "type": "string"
+        },
+        "birth_document_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "birth_document_status": {
+          "enum": [
+            "PREVIEW_NOT_ISSUED",
+            "BORN"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "identifier_derivation": {
+      "type": "object",
+      "required": [
+        "profile_id",
+        "algorithm",
+        "canonicalization",
+        "input",
+        "output",
+        "signature_bytes_excluded",
+        "determinism"
+      ],
+      "properties": {
+        "profile_id": {
+          "type": "string"
+        },
+        "algorithm": {
+          "const": "SHA-256"
+        },
+        "canonicalization": {
+          "const": "RFC 8785 JCS"
+        },
+        "input": {
+          "type": "object"
+        },
+        "output": {
+          "type": "string"
+        },
+        "signature_bytes_excluded": {
+          "const": true
+        },
+        "determinism": {
+          "type": "string"
+        }
+      }
+    },
+    "marriage_agreement_reference": {
+      "type": "string"
+    },
+    "issuance": {
+      "type": "object",
+      "required": [
+        "status",
+        "authoritative",
+        "reason"
+      ],
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "authoritative": {
+          "const": false
+        },
+        "reason": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "additionalProperties": true
+}
