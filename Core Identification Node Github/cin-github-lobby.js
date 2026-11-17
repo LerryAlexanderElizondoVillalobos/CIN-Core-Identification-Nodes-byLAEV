@@ -565,7 +565,7 @@
       rejectDuplicateKeys(genesisRaw);
       const manifest=JSON.parse(genesisRaw);
       if(manifest.document_type!=="cin.genesis-environment-manifest") throw new Error("Saved Genesis Manifest has the wrong document type.");
-      if(!manifest.environment_data || manifest.environment_data.collection_scope!=="github_repository_snapshot") throw new Error("The saved Genesis Manifest is not from the GitHub repository execution profile.");
+      if(!manifest.environment_data || !manifest.environment_data.execution_environment || manifest.environment_data.execution_environment.collection_scope!=="github_repository_snapshot") throw new Error("The saved Genesis Manifest is not from the GitHub repository execution profile.");
       const canonical=canonicalizeJcs(manifest);
       const manifestHash=await sha256(utf8(canonical));
       const rawHash=await sha256(utf8(genesisRaw));
