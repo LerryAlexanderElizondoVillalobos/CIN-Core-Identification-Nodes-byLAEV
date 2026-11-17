@@ -1,6 +1,6 @@
 # API Specification
 
-**Version:** 1.3.0 · **Status:** Contract proposal; endpoints not implemented
+**Version:** 1.4.0 · **Status:** Runtime foundation and first pairing routes implemented; authentication and repository routes remain planned
 
 Base URL: `http://127.0.0.1:2112/api/v1/`
 
@@ -11,7 +11,7 @@ The current branch contains a read-only first runtime slice:
 - `GET /api/v1/status`
 - `GET /manager`
 
-These routes are a loopback proof-of-runtime foundation only. All pairing, authentication and repository endpoints below remain planned contracts and are not implemented.
+These routes provide the loopback runtime foundation. Pairing request, status, approval, rejection and revocation routes have an initial implementation on `feat/pairing-engine-backend-manager`. Authentication and repository endpoints remain planned.
 
 ## Conventions
 
@@ -31,7 +31,7 @@ These routes are a loopback proof-of-runtime foundation only. All pairing, authe
 | GET | `/api/v1/auth/status` | Safe GitHub connection status |
 | POST | `/api/v1/pairing/request` | Request Lobby pairing |
 | GET | `/api/v1/pairing/status` | Read pairing state |
-| POST | `/api/v1/pairing/approve` | Manager approval |
+| POST | `/api/v1/pairing/approve` | Manager approval |\n| POST | `/api/v1/pairing/reject` | Manager rejection |
 | POST | `/api/v1/pairing/revoke` | Revoke local session |
 | POST | `/api/v1/auth/device/start` | Start Device Flow |
 | GET | `/api/v1/auth/device/status` | Read safe flow status |
@@ -82,6 +82,6 @@ The backend derives the full repository path from its configured write root. The
 
 `BACKEND_NOT_READY`, `PAIRING_REQUIRED`, `PAIRING_EXPIRED`, `PAIRING_REVOKED`, `GITHUB_NOT_CONNECTED`, `GITHUB_AUTH_PENDING`, `GITHUB_AUTH_EXPIRED`, `GITHUB_PERMISSION_DENIED`, `REPOSITORY_PATH_DENIED`, `FILE_NOT_FOUND`, `FILE_ALREADY_EXISTS`, `REPOSITORY_CONFLICT`, `GITHUB_RATE_LIMITED`, `GITHUB_UNAVAILABLE`, `INVALID_REQUEST`.
 
-## Excluded from v1
+## Pairing implementation note\n\nThe first implementation uses in-memory request/session state. Requests expire after five minutes and sessions after 24 hours. A process restart clears both. The Lobby receives a session token by polling with its request ID and polling secret. The Manager lists metadata only. See [PAIRING-ENGINE-IMPLEMENTATION.md](./PAIRING-ENGINE-IMPLEMENTATION.md) for the lifecycle and validation requirements.\n\n## Excluded from v1
 
 File deletion, repository administration, arbitrary API proxying, Actions/Workflows management, branch protection changes, credential export and CIN lifecycle issuance/signing.
