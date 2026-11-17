@@ -4,6 +4,11 @@
   "private": true,
   "description": "Local Android/Termux integration backend for CIN",
   "type": "module",
-  "engines": { "node": ">=20" },
-  "scripts": { "start": "node src/server.js", "check": "node --check src/server.js && node --check src/github/oauth.js && node --check src/github/connector.js" }
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "check": "node --check src/server.js && node --check src/github/oauth.js && node --check src/github/connector.js && node --check src/authorization/permission-engine.js && node --check src/signatures/signature-interface.js"
+  }
 }
