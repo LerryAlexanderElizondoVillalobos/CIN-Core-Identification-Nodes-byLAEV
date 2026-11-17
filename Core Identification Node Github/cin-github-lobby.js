@@ -51,6 +51,55 @@
     const bytes=crypto.getRandomValues(new Uint8Array(size));
     return toBase64(bytes).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
   };
+  function rejectDuplicateKeys(source) {
+    let i=0;
+    const ws=()=>{while(i<source.length && /\s/.test(source[i])) i++;};
+    const readString=()=>{
+      const start=i++;
+      while(i<source.length) {
+        if(source[i]==="\\") { i+=2; continue; }
+        if(source[i++]==='"') break;
+      }
+      return JSON.parse(source.slice(start,i));
+    };
+    const readValue=()=>{
+      ws();
+      const ch=source[i];
+      if(ch==="{") {
+        i++; ws(); const keys=new Set();
+        if(source[i]==="}") { i++; return; }
+        while(i<source.length) {
+          ws();
+          if(source[i]!=='"') throw new Error("Invalid JSON object key.");
+          const key=readString();
+          if(keys.has(key)) throw new Error("Duplicate JSON key rejected: "+key);
+          keys.add(key); ws();
+          if(source[i++]!==":") throw new Error("Invalid JSON object separator.");
+          readValue(); ws();
+          if(source[i]==="}") { i++; return; }
+          if(source[i++]!==",") throw new Error("Invalid JSON object delimiter.");
+        }
+        throw new Error("Unterminated JSON object.");
+      }
+      if(ch==="[") {
+        i++; ws();
+        if(source[i]==="]") { i++; return; }
+        while(i<source.length) {
+          readValue(); ws();
+          if(source[i]==="]") { i++; return; }
+          if(source[i++]!==",") throw new Error("Invalid JSON array delimiter.");
+        }
+        throw new Error("Unterminated JSON array.");
+      }
+      if(ch==='"') { readString(); return; }
+      const match=source.slice(i).match(/^(true|false|null|-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?)/);
+      if(!match) throw new Error("Invalid JSON value near character "+i);
+      i+=match[0].length;
+    };
+    readValue(); ws();
+    if(i!==source.length) throw new Error("Unexpected trailing JSON content.");
+  }
+
   const canonicalizeJcs = value => {
     if(value===null || typeof value==="boolean" || typeof value==="string") return JSON.stringify(value);
     if(typeof value==="number") {
