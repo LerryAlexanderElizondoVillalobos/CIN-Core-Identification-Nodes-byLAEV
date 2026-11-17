@@ -15,6 +15,7 @@ Core Identification Node Github/
 ├── Install Genesis Manifest Certificate.url
 ├── CIN-GENESIS-ENVIRONMENT.cincert
 ├── CIN-NODE-BIRTH.cincert
+├── CIN-PERSONAL-REGISTRATION.cincert
 └── CIN 001/
     └── README.md
 ```
