@@ -64,13 +64,18 @@
     "signed_fields": [
       "personalDocumentId",
       "nodeBirthRecordSha256",
+      "cinNid",
+      "cinNsid",
       "cinBid",
+      "cinRef",
+      "cinEnid",
+      "cinPvid",
       "subjectAddress",
       "agreementVersion",
       "terms",
       "termsSha256"
     ],
-    "consent": "The wallet holder accepts the association between the CIN node referenced by the Node Birth document and the CIN Global Personal Document generated for the connected EVM address.",
+    "consent": "The wallet holder accepts the association between the CIN node and the CIN Global Personal Document, explicitly binding the complete available node identifier set (CIN-NID, CIN-NSID, CIN-BID, CIN-REF and conditional CIN-ENID/CIN-PVID) from the referenced Node Birth document.",
     "verification": "Recover the signer from the EIP-712 signature and require exact match with the connected wallet address.",
     "terms": "By signing this CIN Node-Personal Document Marriage Agreement, the holder of the connected EVM address confirms control of that address and accepts its association with the CIN Global Personal Document generated for that address and the referenced CIN node birth record. This is a cryptographic commitment to the stated node-document relationship. It does not by itself establish civil attributes, legal status, government recognition, global uniqueness, issuer authorization or the truth of personal claims."
   },
