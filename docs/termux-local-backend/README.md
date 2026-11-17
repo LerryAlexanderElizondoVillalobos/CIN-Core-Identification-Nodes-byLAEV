@@ -48,4 +48,4 @@ The backend is a local GitHub repository bridge for the Lobby. It is not the CIN
 
 ## Current maturity
 
-Documentation and specification CI only. No Termux server, Manager, local API, Device Flow client, repository adapter or Android browser bridge is implemented yet. Passing the new CI checks validates this specification package only, not runtime behavior.
+Documentation and specification CI only. A first read-only Termux runtime foundation now exists under `services/cin-local-backend/`: loopback HTTP server, `/health`, `/api/v1/status` and the local Manager page. GitHub Device Flow, pairing, repository adapter, write operations and Android browser compatibility remain unimplemented. Passing the new CI checks validates this specification package only, not runtime behavior.
