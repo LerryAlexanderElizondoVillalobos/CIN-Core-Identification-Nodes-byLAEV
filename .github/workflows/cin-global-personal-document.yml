@@ -29,16 +29,22 @@ jobs:
           node <<'NODE'
           const fs = require('node:fs');
           const assert = require('node:assert/strict');
+          const crypto = require('node:crypto');
           const root = 'Core Identification Node Github/';
           const readJson = path => JSON.parse(fs.readFileSync(root + path, 'utf8'));
           const certificate = readJson('CIN-GLOBAL-PERSONAL-DOCUMENT.cincert');
           const personalSchema = readJson('Documentation/Architecture/schemas/CIN-GLOBAL-PERSONAL-DOCUMENT.schema.json');
           const marriageSchema = readJson('Documentation/Architecture/schemas/CIN-NODE-PERSONAL-DOCUMENT-MARRIAGE.schema.json');
+          const laterCertificate = readJson('CIN-PERSONAL-REGISTRATION.cincert');
+          const vectors = readJson('Documentation/Architecture/examples/CIN-GLOBAL-PERSONAL-DOCUMENT-IDENTIFIER-TEST-VECTORS.json');
           const lobby = fs.readFileSync(root + 'cin-github-lobby.js', 'utf8');
           const html = fs.readFileSync(root + 'index.html', 'utf8');
           const serviceWorker = fs.readFileSync(root + 'service-worker.js', 'utf8');
 
           assert.equal(certificate.certificate_type, 'cin.global-personal-document-marriage');
+          assert.equal(laterCertificate.certificate_type, 'cin.personal-registration');
+          assert.equal(laterCertificate.certificate_version, '1.2.0');
+          assert.ok(laterCertificate.description.includes('CIN-GLOBAL-PERSONAL-DOCUMENT.cincert'));
           assert.equal(certificate.certificate_version, '1.0.0');
           assert.equal(certificate.execution.action, 'create-global-personal-document-and-sign-node-marriage');
           assert.equal(certificate.identifier_derivation.algorithm, 'SHA-256');
@@ -55,5 +61,10 @@ jobs:
           assert.ok(html.includes('ethers@6.13.5'));
           assert.ok(html.includes('createPersonalDocumentButton'));
           assert.ok(serviceWorker.includes('CIN-GLOBAL-PERSONAL-DOCUMENT.cincert'));
+          for (const vector of vectors.vectors) {
+            const digest = crypto.createHash('sha256').update(vector.jcs_canonical_utf8, 'utf8').digest('hex');
+            assert.equal(digest, vector.expected_sha256, vector.test_vector_id);
+            assert.equal('cin:global-personal-document:v1:' + digest, vector.expected_document_id);
+          }
           console.log('CIN Global Personal Document certificate, Lobby integration and schemas validated.');
           NODE
