@@ -72,6 +72,14 @@
   <div class="notice warning"><strong>Public repository notice.</strong> The target repository is public and the GitHub Pages workflow publishes the entire <code>Core Identification Node Github/</code> directory. Genesis manifests, node-birth candidate records, progress files and any profile fields committed there are publicly readable. Do not save access tokens, private keys, personal records or credential contents to public paths.</div>
 </section>
 
+<section class="panel" id="localWorkspacePanel">
+  <div class="panel-head"><div><div class="eyebrow">01B · Android local runtime</div><h2>Local Termux workspace</h2></div><span class="pill">Same-device access</span></div>
+  <p class="small">Connects to the Node.js backend running in Termux on this Android device and inspects the cloned local directory <code>Core Identification Node Github/</code>. This is separate from the GitHub repository connector.</p>
+  <div class="actions"><button class="btn secondary" id="inspectLocalWorkspaceButton" type="button">Inspect local CIN directory</button></div>
+  <div id="localWorkspaceStatus" class="status info">Start the CIN backend in Termux to access the local workspace.</div>
+  <pre id="localWorkspaceSummary" hidden></pre>
+</section>
+
 <section class="panel">
   <div class="panel-head"><div><div class="eyebrow">02 · Genesis certificate</div><h2>Inspect and record the ecosystem</h2></div><span class="pill" id="genesisState">Waiting for GitHub</span></div>
   <p class="small">The web profile inspects the selected GitHub repository, branch, commit, tree and complete file inventory beneath <code>Core Identification Node Github/</code>. It does not inspect the computer's local operating system or hardware.</p>
