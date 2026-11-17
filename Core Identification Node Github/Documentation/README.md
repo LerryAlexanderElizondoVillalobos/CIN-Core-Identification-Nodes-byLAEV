@@ -9,7 +9,7 @@ It is intentionally located beside the Global Lobby and CIN node directories so 
 | Directory | Purpose |
 |---|---|
 | [Architecture](Architecture/README.md) | Global Lobby, CIN Node Lobby, node boundaries and communication architecture |
-| [Configuration](Configuration/CIN_CONFIGURATION_ENGINE_EVOLUTION_SPECIFICATION_v1.0.md) | Configuration Engine design, configuration scopes and evolutionary configuration |
+| [Configuration](Configuration/README.md) | Environment baseline, Configuration Engine design, configuration scopes and evolutionary configuration |
 | [Implementation](Implementation/README.md) | Implementation plans, integration notes and development records |
 | [Decisions](Decisions/README.md) | Recorded architectural and technical decisions |
 | [Testing](Testing/README.md) | Test plans, acceptance criteria and verification records |
