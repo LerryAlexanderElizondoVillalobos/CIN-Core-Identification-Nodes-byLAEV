@@ -32,8 +32,9 @@ The intended first-node workflow is performed from the published Lobby:
 2. Inspect the repository snapshot beneath `Core Identification Node Github/` using Genesis Certificate 1.
 3. Save the complete GitHub repository Genesis Manifest and progress receipt.
 4. Consume the saved Manifest with Node Birth Certificate 2, generate the CIN identifier candidate and save the birth candidate.
-5. Reconstruct the CIN 001 header from the saved node profile and its record references.
-6. Continue to Personal Registration Certificate 3 only after the authoritative node birth, explicit person-to-node association and separate Personal Issuance Authorization are available.
+5. Run Personal Document and Node Marriage Certificate 3: connect MetaMask, derive the deterministic CIN Global Personal Document identifier from the wallet address and exact Node Birth document digest, then sign the EIP-712 marriage agreement.
+6. Reconstruct the CIN 001 header from the saved node profile and its record references.
+7. Continue to Personal Registration and Credential Certificate 4 only after authoritative node birth, the signed association and separate issuance authorization are available.
 
 ### Current implementation status
 
