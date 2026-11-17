@@ -48,7 +48,7 @@ The state file is private local application data, not a backup or synchronizatio
 | POST | `/api/v1/pairing/reject` | Operator rejects pending request |
 | POST | `/api/v1/pairing/revoke` | Operator revokes active session |
 
-## Current boundaries and limitations
+## Runtime configuration\n\nThe local Manager provides persistent configuration for the Lobby origin, backend port, pairing request TTL, session TTL and event-history retention. Lobby origin and lifecycle settings apply immediately to subsequent requests/new records; backend port changes require a restart. See [RUNTIME-CONFIGURATION-MANAGER.md](./RUNTIME-CONFIGURATION-MANAGER.md) and [API-SPECIFICATION.md](./API-SPECIFICATION.md).\n\n## Current boundaries and limitations
 
 - Backend remains bound to `127.0.0.1`.
 - Lobby origin defaults to `https://lerryalexanderelizondo.github.io` and can be overridden with `CIN_LOBBY_ORIGIN`.
