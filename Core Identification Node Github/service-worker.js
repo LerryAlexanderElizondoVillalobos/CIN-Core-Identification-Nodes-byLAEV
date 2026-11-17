@@ -1,4 +1,4 @@
-const CACHE_NAME = "cin-genesis-lobby-v6";
+const CACHE_NAME = "cin-genesis-lobby-v7";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -7,6 +7,7 @@ const APP_SHELL = [
   "./cin-github-config.js",
   "./cin-github-lobby.js",
   "./cin-local-runtime-test.js",
+  "./cin-personal-document-runner.js",
   "./CIN-GENESIS-ENVIRONMENT.cincert",
   "./CIN-NODE-BIRTH.cincert",
   "./CIN-PERSONAL-REGISTRATION.cincert"
@@ -17,6 +18,7 @@ const NETWORK_FIRST = new Set([
   "./cin-github-config.js",
   "./cin-github-lobby.js",
   "./cin-local-runtime-test.js",
+  "./cin-personal-document-runner.js",
   "./CIN-GENESIS-ENVIRONMENT.cincert",
   "./CIN-NODE-BIRTH.cincert",
   "./CIN-PERSONAL-REGISTRATION.cincert"
