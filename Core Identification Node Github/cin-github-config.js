@@ -10,7 +10,7 @@ window.CIN_GITHUB_CONFIG = Object.freeze({
   enabled: false,
   clientId: "",
   tokenExchangeEndpoint: "",
-  redirectUri: "https://lerryalexanderelizondo.github.io/CIN-Core-Identification-Nodes-byLAEV/",
+  redirectUri: "https://lerryalexanderelizondovillalobos.github.io/CIN-Core-Identification-Nodes-byLAEV/",
   repository: Object.freeze({
     owner: "LerryAlexanderElizondoVillalobos",
     name: "CIN-Core-Identification-Nodes-byLAEV",
