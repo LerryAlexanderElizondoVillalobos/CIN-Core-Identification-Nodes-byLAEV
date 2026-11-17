@@ -9,6 +9,7 @@
   },
   "scripts": {
     "start": "node src/server.js",
-    "test": "node --test"
+    "test": "node --test",
+    "check": "for file in src/*.js; do node --check \"$file\"; done"
   }
 }
