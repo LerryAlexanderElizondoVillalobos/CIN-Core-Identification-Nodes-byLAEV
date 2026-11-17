@@ -387,7 +387,44 @@
           collection_scope:genesisManifest.environment_data && genesisManifest.environment_data.collection_scope,
           source_commit_sha:genesisManifest.environment_data && genesisManifest.environment_data.repository && genesisManifest.environment_data.repository.source_commit_sha
         },null,2);
-        await loadNodeProfile(true); renderConnection(); return;
+        await loadNodeProfile(true);
+        const priorProgress=await readJson(PROGRESS_PATH,true);
+        const priorEvents=priorProgress && Array.isArray(priorProgress.value.events) ? priorProgress.value.events : [];
+        let genesisEvent=[...priorEvents].reverse().find(event=>event.event_type==="GENESIS_REPOSITORY_MANIFEST_SAVED");
+        if(!genesisGitCommit) {
+          const commits=await githubApi("/repos/"+encodeURIComponent(REPO.owner)+"/"+encodeURIComponent(REPO.name)+"/commits?path="+encodeURIComponent(GENESIS_PATH)+"&per_page=1");
+          if(Array.isArray(commits) && commits[0]) genesisGitCommit=commits[0].sha;
+        }
+        if(!genesisEvent) {
+          await recordProgress("GENESIS_REPOSITORY_MANIFEST_SAVED",{
+            manifest_id:genesisManifest.manifest_id,
+            path:GENESIS_PATH,
+            repository_commit_sha:genesisGitCommit,
+            source_commit_sha:genesisManifest.environment_data && genesisManifest.environment_data.repository && genesisManifest.environment_data.repository.source_commit_sha,
+            recovery:"progress receipt reconstructed from existing immutable Genesis Manifest"
+          });
+        }
+        if(!profile || !profile.genesis) {
+          const sourceRepo=genesisManifest.environment_data && genesisManifest.environment_data.repository || {};
+          await updateNodeProfile({genesis:{
+            manifest_id:genesisManifest.manifest_id,
+            path:GENESIS_PATH,
+            source_commit_sha:sourceRepo.source_commit_sha || null,
+            saved_commit_sha:genesisGitCommit,
+            status:"REPOSITORY_MANIFEST_RECORDED",
+            private_local_registration:false
+          }});
+        }
+        setStep("step2State","Genesis manifest recorded",true);
+        $("genesisSummary").hidden=false;
+        $("genesisSummary").textContent=JSON.stringify({
+          manifest_id:genesisManifest.manifest_id,
+          saved_path:GENESIS_PATH,
+          repository_commit_sha:genesisGitCommit,
+          collection_scope:genesisManifest.environment_data && genesisManifest.environment_data.collection_scope,
+          source_commit_sha:genesisManifest.environment_data && genesisManifest.environment_data.repository && genesisManifest.environment_data.repository.source_commit_sha
+        },null,2);
+        renderConnection(); return;
       }
       const certificate=await loadCertificate();
       const snapshot=await inspectRepositorySnapshot(certificate);
@@ -462,8 +499,15 @@
       $("birthState").textContent="Genesis Manifest ready";
       renderConnection();
     } catch(error) {
-      setPill("genesisState","Not saved");
-      setStatus("genesisStatus",error.message,"error");
+      const committed=await readJson(GENESIS_PATH,true).catch(()=>null);
+      if(committed) {
+        genesisManifest=committed.value; genesisRaw=committed.raw;
+        setPill("genesisState","Manifest exists · resume needed");
+        setStatus("genesisStatus","The Genesis Manifest exists in GitHub, but a later progress/profile step did not finish. Click this action again to resume without overwriting the founding manifest. Details: "+error.message,"error");
+      } else {
+        setPill("genesisState","Not saved");
+        setStatus("genesisStatus",error.message,"error");
+      }
     } finally {
       $("generateGenesisButton").disabled=!accessToken;
     }
@@ -487,7 +531,34 @@
       if(existing) {
         setStatus("birthStatus","A birth candidate already exists. It was loaded without overwriting the existing record.","ok");
         $("birthSummary").hidden=false; $("birthSummary").textContent=JSON.stringify(existing.value,null,2);
-        await loadNodeProfile(true); return;
+        await loadNodeProfile(true);
+        const priorProgress=await readJson(PROGRESS_PATH,true);
+        const priorEvents=priorProgress && Array.isArray(priorProgress.value.events) ? priorProgress.value.events : [];
+        const birthEvent=[...priorEvents].reverse().find(event=>event.event_type==="NODE_BIRTH_CANDIDATE_SAVED");
+        const savedRecord=existing.value;
+        if(!birthEvent) {
+          await recordProgress("NODE_BIRTH_CANDIDATE_SAVED",{
+            source_manifest_id:savedRecord.source_genesis && savedRecord.source_genesis.manifest_id,
+            path:BIRTH_PATH,
+            record_status:savedRecord.record_status,
+            recovery:"progress receipt reconstructed from existing birth candidate"
+          });
+        }
+        if(!profile || !profile.birth) {
+          await updateNodeProfile({
+            birth:{path:BIRTH_PATH,status:savedRecord.record_status||"PREVIEW_NOT_ISSUED",source_manifest_id:savedRecord.source_genesis && savedRecord.source_genesis.manifest_id},
+            identifiers:{
+              cin_nid:{value:savedRecord.node && savedRecord.node.cin_nid,status:"CANDIDATE_NOT_ISSUED"},
+              cin_nsid:{value:savedRecord.node && savedRecord.node.cin_nsid,status:"CANDIDATE_NOT_ISSUED"},
+              cin_bid:{value:savedRecord.node && savedRecord.node.cin_bid,status:"CANDIDATE_NOT_ISSUED"},
+              cin_ref:{value:savedRecord.node && savedRecord.node.cin_ref,status:"CANDIDATE_NOT_ISSUED"},
+              cin_personal_number:{value:null,status:"NOT_REGISTERED"}
+            }
+          });
+        }
+        setPill("birthState","Candidate recorded");
+        setStep("step3State","Birth candidate saved · not issued",true);
+        return;
       }
       rejectDuplicateKeys(genesisRaw);
       const manifest=JSON.parse(genesisRaw);
@@ -581,8 +652,15 @@
       setStep("step3State","Birth candidate saved · not issued",true);
       await loadNodeProfile(true);
     } catch(error) {
-      setPill("birthState","Not completed");
-      setStatus("birthStatus",error.message,"error");
+      const committed=await readJson(BIRTH_PATH,true).catch(()=>null);
+      if(committed) {
+        setPill("birthState","Candidate exists · resume needed");
+        $("birthSummary").hidden=false; $("birthSummary").textContent=JSON.stringify(committed.value,null,2);
+        setStatus("birthStatus","The birth candidate exists in GitHub, but a later progress/profile step did not finish. Click this action again to resume without overwriting the candidate. Details: "+error.message,"error");
+      } else {
+        setPill("birthState","Not completed");
+        setStatus("birthStatus",error.message,"error");
+      }
     } finally {
       $("generateBirthButton").disabled=!accessToken || !genesisManifest;
     }
