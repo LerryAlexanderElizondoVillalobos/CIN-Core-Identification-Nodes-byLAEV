@@ -29,7 +29,7 @@
 1. Select **Create document and sign marriage agreement**.
 2. Review the Lobby's confirmation describing the node-document association.
 3. Review the MetaMask typed-data prompt.
-4. Confirm the prompt contains the personal document identifier, Node Birth digest, CIN-BID, subject address, agreement version and complete readable agreement terms.
+4. Confirm the prompt contains the personal document identifier, Node Birth digest, CIN-NID, CIN-NSID, CIN-BID, CIN-REF, conditional CIN-ENID/CIN-PVID, subject address, agreement version and complete readable agreement terms.
 5. Approve the signature.
 6. Confirm the Lobby recovers the signer and reports an exact match with the connected address.
 
@@ -60,9 +60,9 @@
 Inspect the generated agreement JSON and confirm:
 
 - `document_type` is `cin.node-personal-document-marriage`.
-- The node party references CIN-BID and the exact Node Birth digest.
+- The node party references every available node identifier (CIN-NID, CIN-NSID, CIN-BID, CIN-REF and conditional CIN-ENID/CIN-PVID) and the exact Node Birth digest.
 - The personal-document party references the generated document ID and wallet address.
-- The EIP-712 message contains the same document ID, Node Birth digest, CIN-BID and subject address.
+- The EIP-712 message contains the same document ID, Node Birth digest, available CIN node identifiers and subject address.
 - The recovered signer equals the connected wallet address.
 - Signature verification is `VERIFIED`.
 
