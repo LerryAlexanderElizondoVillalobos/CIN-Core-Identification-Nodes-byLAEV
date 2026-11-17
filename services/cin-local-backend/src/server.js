@@ -39,8 +39,9 @@ function originHeaders(origin, lobbyOrigin) {
 }
 
 export function createAppServer({ dataDir } = {}) {
-  const store = createPersistentStore(dataDir ? { directory: dataDir } : {});
-  const pairing = createPairingEngine({ store });
+  const stateManager = createLocalStateManager(dataDir ? { directory: dataDir } : {});
+  const lobbyOrigin = stateManager.getDomain("configuration").lobby_origin;
+  const pairing = createPairingEngine({ store: stateManager });
   return http.createServer(async (request, response) => {
     const url = new URL(request.url ?? "/", "http://127.0.0.1");
     const origin = request.headers.origin;
