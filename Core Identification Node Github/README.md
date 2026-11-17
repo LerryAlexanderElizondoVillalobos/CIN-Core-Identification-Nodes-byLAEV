@@ -12,7 +12,8 @@ Core Identification Node Github/
 ├── service-worker.js
 ├── CIN-GENESIS-ENVIRONMENT.cincert
 ├── CIN-NODE-BIRTH.cincert
-├── CIN-GLOBAL-PERSONAL-DOCUMENT.cincert\n├── CIN-PERSONAL-REGISTRATION.cincert
+├── CIN-GLOBAL-PERSONAL-DOCUMENT.cincert
+├── CIN-PERSONAL-REGISTRATION.cincert
 ├── CIN Lobby.url
 ├── Documentation/
 └── CIN 001/
