@@ -548,7 +548,7 @@
         }
         if(!profile || !profile.birth) {
           await updateNodeProfile({
-            birth:{path:BIRTH_PATH,status:savedRecord.record_status||"PREVIEW_NOT_ISSUED",source_manifest_id:savedRecord.source_genesis && savedRecord.source_genesis.manifest_id},
+            birth:{path:BIRTH_PATH,status:savedRecord.candidate_status||"PREVIEW_NOT_ISSUED",source_manifest_id:savedRecord.source_genesis && savedRecord.source_genesis.manifest_id},
             identifiers:{
               cin_nid:{value:savedRecord.node && savedRecord.node.cin_nid,status:"CANDIDATE_NOT_ISSUED"},
               cin_nsid:{value:savedRecord.node && savedRecord.node.cin_nsid,status:"CANDIDATE_NOT_ISSUED"},
@@ -572,7 +572,7 @@
       const birthCertificateResponse=await fetch("./CIN-NODE-BIRTH.cincert",{cache:"no-store"});
       if(!birthCertificateResponse.ok) throw new Error("Could not load CIN Node Birth Certificate.");
       const birthCertificate=await birthCertificateResponse.json();
-      if(birthCertificate.certificate_type!=="cin.node-birth" || !birthCertificate.identifier_derivation || !birthCertificate.identifier_derivation.domain_labels || !birthCertificate.execution_profiles || !birthCertificate.execution_profiles.github_repository) throw new Error("CIN Node Birth Certificate descriptor is incomplete for the GitHub repository profile.");
+      if(birthCertificate.certificate_type!=="cin.node-birth" || !birthCertificate.identifier_derivation || !birthCertificate.identifier_derivation.domain_labels || !birthCertificate.execution_profiles || !birthCertificate.execution_profiles.github_repository || !birthCertificate.output_profiles || !birthCertificate.output_profiles.github_repository_candidate) throw new Error("CIN Node Birth Certificate descriptor is incomplete for the GitHub repository profile.");
       const labels=birthCertificate.identifier_derivation.domain_labels;
       const ids=await Promise.all([
         deriveIdentifier(labels.cin_nid,manifestHash),
@@ -580,9 +580,9 @@
         deriveIdentifier(labels.cin_bid,manifestHash)
       ]);
       const record={
-        document_type:birthCertificate.output_profile.document_type,
-        schema_version:birthCertificate.output_profile.schema_version,
-        record_status:"PREVIEW_NOT_ISSUED",
+        document_type:birthCertificate.output_profiles.github_repository_candidate.document_type,
+        schema_version:birthCertificate.output_profiles.github_repository_candidate.schema_version,
+        candidate_status:"PREVIEW_NOT_ISSUED",
         generated_at:new Date().toISOString(),
         certificate:{certificate_id:birthCertificate.certificate_id,version:birthCertificate.certificate_version,execution_profile_id:birthCertificate.execution_profiles.github_repository.id,runner:birthCertificate.execution_profiles.github_repository.runner},
         source_genesis:{
@@ -629,7 +629,7 @@
         source_manifest_id:manifest.manifest_id,
         path:BIRTH_PATH,
         repository_commit_sha:saved.commitSha,
-        record_status:record.record_status,
+        candidate_status:record.candidate_status,
         cin_nid:record.node.cin_nid,
         cin_nsid:record.node.cin_nsid,
         cin_bid:record.node.cin_bid,
