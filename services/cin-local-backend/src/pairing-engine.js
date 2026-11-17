@@ -10,7 +10,10 @@ function equalSecret(a, b) {
   return left.length === right.length && timingSafeEqual(left, right);
 }
 
-export function createPairingEngine({ now = () => Date.now(), store, configuration = {} } = {}) {\n  const requestTtlMs = configuration.pairing_request_ttl_ms ?? REQUEST_TTL_MS;\n  const sessionTtlMs = configuration.pairing_session_ttl_ms ?? SESSION_TTL_MS;\n  const eventHistoryLimit = configuration.event_history_limit ?? 2000;
+export function createPairingEngine({ now = () => Date.now(), store, configuration = {} } = {}) {
+  const requestTtlMs = configuration.pairing_request_ttl_ms ?? REQUEST_TTL_MS;
+  const sessionTtlMs = configuration.pairing_session_ttl_ms ?? SESSION_TTL_MS;
+  const eventHistoryLimit = configuration.event_history_limit ?? 2000;
   const initial = store?.load?.() ?? {};
   const requests = new Map((initial.requests ?? []).map(item => [item.id, item]));
   const sessions = new Map((initial.sessions ?? []).map(item => [item.id, item]));
