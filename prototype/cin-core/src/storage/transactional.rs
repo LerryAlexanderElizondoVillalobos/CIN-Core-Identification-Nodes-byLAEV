@@ -218,6 +218,22 @@ impl TransactionalStore {
         Ok(receipt(&metadata))
     }
 
+    /// Reports whether any authoritative document record has been committed.
+    pub fn has_records(&self) -> Result<bool, StorageError> {
+        let directory = self.repository.root().join("documents");
+        for entry in fs::read_dir(directory).map_err(io_error)? {
+            if entry
+                .map_err(io_error)?
+                .file_type()
+                .map_err(io_error)?
+                .is_file()
+            {
+                return Ok(true);
+            }
+        }
+        Ok(false)
+    }
+
     /// Normal reads expose only records with a valid commit marker and digest.
     pub fn read_record(&self, document_id: &str) -> Result<DocumentEnvelope, StorageError> {
         let marker_path = self.marker_path(document_id);

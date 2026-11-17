@@ -4,6 +4,7 @@
 pub mod data_root;
 pub mod documents;
 pub mod error;
+pub mod genesis;
 pub mod lifecycle;
 pub mod recovery;
 pub mod schema;
