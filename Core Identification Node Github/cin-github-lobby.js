@@ -286,7 +286,7 @@
         sha256:await sha256(bytes)
       };
     });
-    inventory.sort((a,b)=>a.repository_path.localeCompare(b.repository_path));
+    inventory.sort((a,b)=>a.repository_path < b.repository_path ? -1 : (a.repository_path > b.repository_path ? 1 : 0));
     const inventoryDigest=await jsonSha256(inventory);
     return {
       repository:{
@@ -440,6 +440,7 @@
         $("birthSummary").hidden=false; $("birthSummary").textContent=JSON.stringify(existing.value,null,2);
         await loadNodeProfile(true); return;
       }
+      rejectDuplicateKeys(genesisRaw);
       const manifest=JSON.parse(genesisRaw);
       if(manifest.document_type!=="cin.genesis-environment-manifest") throw new Error("Saved Genesis Manifest has the wrong document type.");
       const canonical=canonicalizeJcs(manifest);
@@ -451,9 +452,9 @@
       if(birthCertificate.certificate_type!=="cin.node-birth" || !birthCertificate.identifier_derivation || !birthCertificate.identifier_derivation.domain_labels) throw new Error("CIN Node Birth Certificate descriptor is incomplete.");
       const labels=birthCertificate.identifier_derivation.domain_labels;
       const ids=await Promise.all([
-        deriveIdentifier(labels.nid,manifestHash),
-        deriveIdentifier(labels.nsid,manifestHash),
-        deriveIdentifier(labels.bid,manifestHash)
+        deriveIdentifier(labels.cin_nid,manifestHash),
+        deriveIdentifier(labels.cin_nsid,manifestHash),
+        deriveIdentifier(labels.cin_bid,manifestHash)
       ]);
       const record={
         document_type:birthCertificate.output_profile.document_type,
@@ -615,6 +616,11 @@
         setStatus("profileStatus","No saved CIN 001 profile exists yet. It will be created during the first successful Genesis save.","info");
       }
       const savedGenesis=await readJson(GENESIS_PATH,authenticated!==false);
+      const savedProgress=await readJson(PROGRESS_PATH,authenticated!==false);
+      if(savedProgress && Array.isArray(savedProgress.value.events)) {
+        const genesisEvent=[...savedProgress.value.events].reverse().find(event=>event.event_type==="GENESIS_REPOSITORY_MANIFEST_SAVED");
+        if(genesisEvent && genesisEvent.repository_commit_sha) genesisGitCommit=genesisEvent.repository_commit_sha;
+      }
       if(savedGenesis) {
         genesisManifest=savedGenesis.value; genesisRaw=savedGenesis.raw;
         genesisGitCommit=savedGenesis.value.registration && savedGenesis.value.registration.repository_commit_sha || null;
