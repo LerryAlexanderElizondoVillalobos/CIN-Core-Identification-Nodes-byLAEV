@@ -49,5 +49,26 @@
     "It does not sign, authorize, register, or commit a node birth.",
     "The proposed derivation profile requires project approval and independent interoperability vectors before production use.",
     "The Genesis source manifest is included by digest and manifest reference; all of its root fields participate in canonical hashing."
-  ]
+  ],
+  "execution_profiles": {
+    "github_repository": {
+      "id": "cin.node-birth/github-repository/1.0.0",
+      "runner": "cin-github-lobby",
+      "source_profile": "cin.genesis-environment/github-repository/1.0.0",
+      "input_requirement": "Complete Genesis Environment Manifest saved as a public GitHub repository progress record.",
+      "output_status": "PREVIEW_NOT_ISSUED",
+      "authoritative_node_birth": false,
+      "description": "Generates a repository progress candidate only. It does not constitute private local registration, authorization, signature or BORN state."
+    },
+    "local_package": {
+      "id": "cin.node-birth/local-package/1.0.0",
+      "runner": "cin-certificate-runner",
+      "source_profile": "cin.genesis-environment/local-package/1.0.0",
+      "input_requirement": "Complete Genesis Environment Manifest registered in the private local DataRoot.",
+      "output_status": "PREVIEW_NOT_ISSUED",
+      "authoritative_node_birth": false,
+      "description": "Local runner context. Authoritative birth still requires separate authorization, issuer/signature policy, durable record commit and independent verification."
+    }
+  },
+  "default_execution_profile": "local_package"
 }
