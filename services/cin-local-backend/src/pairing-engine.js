@@ -3,43 +3,56 @@ import { randomBytes, randomUUID, timingSafeEqual } from "node:crypto";
 const REQUEST_TTL_MS = 5 * 60 * 1000;
 const SESSION_TTL_MS = 24 * 60 * 60 * 1000;
 
-function token(bytes = 32) {
-  return randomBytes(bytes).toString("base64url");
-}
+function token(bytes = 32) { return randomBytes(bytes).toString("base64url"); }
 function equalSecret(a, b) {
   if (typeof a !== "string" || typeof b !== "string") return false;
-  const left = Buffer.from(a);
-  const right = Buffer.from(b);
+  const left = Buffer.from(a), right = Buffer.from(b);
   return left.length === right.length && timingSafeEqual(left, right);
 }
 
-export function createPairingEngine({ now = () => Date.now() } = {}) {
-  const requests = new Map();
-  const sessions = new Map();
+export function createPairingEngine({ now = () => Date.now(), store } = {}) {
+  const initial = store?.load?.() ?? {};
+  const requests = new Map((initial.requests ?? []).map(item => [item.id, item]));
+  const sessions = new Map((initial.sessions ?? []).map(item => [item.id, item]));
+  const events = Array.isArray(initial.events) ? initial.events : [];
 
+  function record(type, details = {}) {
+    events.push({ event_id: randomUUID(), type, at: new Date(now()).toISOString(), ...details });
+    if (events.length > 2000) events.splice(0, events.length - 2000);
+  }
+  function persist() {
+    store?.save?.({
+      requests: [...requests.values()],
+      sessions: [...sessions.values()],
+      events
+    });
+  }
   function expire() {
     const time = now();
-    for (const [id, item] of requests) {
-      if (item.state === "PENDING" && item.expiresAt <= time) item.state = "EXPIRED";
-    }
-    for (const [id, item] of sessions) {
-      if (item.expiresAt <= time) {
-        item.state = "EXPIRED";
-        sessions.delete(id);
+    let changed = false;
+    for (const item of requests.values()) {
+      if (item.state === "PENDING" && item.expiresAt <= time) {
+        item.state = "EXPIRED"; record("PAIRING_REQUEST_EXPIRED", { request_id: item.id }); changed = true;
       }
     }
+    for (const item of sessions.values()) {
+      if (item.state === "ACTIVE" && item.expiresAt <= time) {
+        item.state = "EXPIRED"; item.secret = null;
+        record("SESSION_EXPIRED", { session_id: item.id }); changed = true;
+      }
+    }
+    if (changed) persist();
   }
 
   function request({ origin, label = "CIN Genesis Lobby" } = {}) {
     expire();
-    const id = randomUUID();
-    const pollSecret = token();
-    const createdAt = now();
+    const id = randomUUID(), pollSecret = token(), createdAt = now();
     requests.set(id, {
       id, origin, label: String(label).slice(0, 100), pollSecret,
-      state: "PENDING", createdAt, expiresAt: createdAt + REQUEST_TTL_MS,
-      sessionId: null
+      state: "PENDING", createdAt, expiresAt: createdAt + REQUEST_TTL_MS, sessionId: null
     });
+    record("PAIRING_REQUEST_CREATED", { request_id: id, origin });
+    persist();
     return { request_id: id, poll_secret: pollSecret, state: "PENDING", expires_at: new Date(createdAt + REQUEST_TTL_MS).toISOString() };
   }
 
@@ -47,15 +60,12 @@ export function createPairingEngine({ now = () => Date.now() } = {}) {
     expire();
     return {
       requests: [...requests.values()].map(({ id, origin, label, state, createdAt, expiresAt }) => ({
-        request_id: id, origin, label, state,
-        created_at: new Date(createdAt).toISOString(),
-        expires_at: new Date(expiresAt).toISOString()
-      })),
+        request_id: id, origin, label, state, created_at: new Date(createdAt).toISOString(), expires_at: new Date(expiresAt).toISOString()
+      })).sort((a,b) => b.created_at.localeCompare(a.created_at)),
       sessions: [...sessions.values()].map(({ id, origin, label, state, createdAt, expiresAt }) => ({
-        session_id: id, origin, label, state,
-        created_at: new Date(createdAt).toISOString(),
-        expires_at: new Date(expiresAt).toISOString()
-      }))
+        session_id: id, origin, label, state, created_at: new Date(createdAt).toISOString(), expires_at: new Date(expiresAt).toISOString()
+      })).sort((a,b) => b.created_at.localeCompare(a.created_at)),
+      events: events.slice(-100).reverse()
     };
   }
 
@@ -65,9 +75,7 @@ export function createPairingEngine({ now = () => Date.now() } = {}) {
     if (!item || !equalSecret(item.pollSecret, secret)) return { state: "NOT_FOUND" };
     if (item.state === "APPROVED") {
       const session = sessions.get(item.sessionId);
-      if (!session) return { state: "EXPIRED" };
-      if (item.delivered) return { state: "ACTIVE" };
-      item.delivered = true;
+      if (!session || session.state !== "ACTIVE") return { state: session?.state ?? "EXPIRED" };
       return { state: "ACTIVE", session_id: session.id, session_token: session.secret, expires_at: new Date(session.expiresAt).toISOString() };
     }
     return { state: item.state };
@@ -78,30 +86,38 @@ export function createPairingEngine({ now = () => Date.now() } = {}) {
     const item = requests.get(id);
     if (!item || item.state !== "PENDING") return null;
     const createdAt = now();
-    const session = {
-      id: randomUUID(), secret: token(), origin: item.origin, label: item.label,
-      state: "ACTIVE", createdAt, expiresAt: createdAt + SESSION_TTL_MS
-    };
+    const session = { id: randomUUID(), secret: token(), origin: item.origin, label: item.label, state: "ACTIVE", createdAt, expiresAt: createdAt + SESSION_TTL_MS };
     sessions.set(session.id, session);
-    item.state = "APPROVED";
-    item.sessionId = session.id;
+    item.state = "APPROVED"; item.sessionId = session.id;
+    record("PAIRING_REQUEST_APPROVED", { request_id: id, session_id: session.id });
+    persist();
     return { session_id: session.id, state: "ACTIVE", expires_at: new Date(session.expiresAt).toISOString() };
   }
 
-  function reject(id) {\n    const item = requests.get(id);\n    if (!item || item.state !== "PENDING") return false;\n    item.state = "REJECTED";\n    return true;\n  }\n\n  function revoke(id) {
+  function reject(id) {
+    const item = requests.get(id);
+    if (!item || item.state !== "PENDING") return false;
+    item.state = "REJECTED";
+    record("PAIRING_REQUEST_REJECTED", { request_id: id });
+    persist();
+    return true;
+  }
+
+  function revoke(id) {
     const session = sessions.get(id);
-    if (!session) return false;
-    session.state = "REVOKED";
-    sessions.delete(id);
+    if (!session || session.state !== "ACTIVE") return false;
+    session.state = "REVOKED"; session.secret = null;
+    record("SESSION_REVOKED", { session_id: id });
+    persist();
     return true;
   }
 
   function authorize(id, secret, origin) {
     expire();
     const session = sessions.get(id);
-    return Boolean(session && session.state === "ACTIVE" &&
-      equalSecret(session.secret, secret) && session.origin === origin);
+    return Boolean(session && session.state === "ACTIVE" && equalSecret(session.secret, secret) && session.origin === origin);
   }
 
-  return { request, list, poll, approve, reject, revoke, authorize };
+  expire();
+  return { request, list, poll, approve, reject, revoke, authorize, persist };
 }
