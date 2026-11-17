@@ -56,6 +56,8 @@ test("all required specification documents exist", async () => {
 test("specification records current implementation maturity honestly", async () => {
   const spec = JSON.parse(await read("SPECIFICATION.json"));
   assert.equal(spec.maturity.specification, true);
+  assert.equal(spec.maturity.runtimeFoundation, true);
+  assert.equal(spec.maturity.managerPrototype, true);
   assert.equal(spec.maturity.runtimeImplemented, false);
   assert.equal(spec.maturity.androidBrowserCompatibilityVerified, false);
 });
