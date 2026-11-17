@@ -23,6 +23,26 @@
   <span class="tag">GLOBAL GENESIS LOBBY</span>
 </header>
 
+<section class="panel" id="nodeHeaderPanel">
+  <div class="panel-head"><div><div class="eyebrow">CIN node profile</div><h2 id="nodeTitle">CIN 001 · Pending initialization</h2></div><span class="pill" id="nodeLifecycleBadge">Not born</span></div>
+  <p class="small">This header is a read model. Its values are loaded from the node profile saved in GitHub, not from browser-only local storage.</p>
+  <div class="profile-grid" id="nodeIdentifiers">
+    <div class="field"><label>GENESIS MANIFEST</label><div class="value empty">Not recorded</div></div>
+    <div class="field"><label>CIN-NID</label><div class="value empty">Pending</div></div>
+    <div class="field"><label>CIN-NSID</label><div class="value empty">Pending</div></div>
+    <div class="field"><label>CIN-BID</label><div class="value empty">Pending</div></div>
+    <div class="field"><label>CIN-ENID · CONDITIONAL</label><div class="value empty">Not derived</div></div>
+    <div class="field"><label>CIN-PVID · CONDITIONAL</label><div class="value empty">Not derived</div></div>
+    <div class="field"><label>CIN-REF</label><div class="value empty">Pending</div></div>
+    <div class="field"><label>CIN PERSONAL NUMBER</label><div class="value empty">Not registered</div></div>
+  </div>
+  <div class="header-status" id="headerRecordLinks"></div>
+  <div class="actions"><button class="btn secondary" id="refreshProfileButton">Refresh saved node profile</button></div>
+  <div id="profileStatus" class="status"></div>
+</section>
+
+
+
 <section class="hero">
   <div class="eyebrow">CIN · Ecosystem initialization</div>
   <h1>Prepare the ecosystem.<br><span>Establish CIN 001.</span></h1>
@@ -70,23 +90,7 @@
   <div class="notice">A CIN Personal Number generated locally must not be described as globally reserved without a verified reservation from a defined coordinating registry. Full personal records and credentials must not be published in this public repository by default.</div>
 </section>
 
-<section class="panel" id="nodeHeaderPanel">
-  <div class="panel-head"><div><div class="eyebrow">CIN node profile</div><h2 id="nodeTitle">CIN 001 · Pending initialization</h2></div><span class="pill" id="nodeLifecycleBadge">Not born</span></div>
-  <p class="small">This header is a read model. Its values are loaded from the node profile saved in GitHub, not from browser-only local storage.</p>
-  <div class="profile-grid" id="nodeIdentifiers">
-    <div class="field"><label>GENESIS MANIFEST</label><div class="value empty">Not recorded</div></div>
-    <div class="field"><label>CIN-NID</label><div class="value empty">Pending</div></div>
-    <div class="field"><label>CIN-NSID</label><div class="value empty">Pending</div></div>
-    <div class="field"><label>CIN-BID</label><div class="value empty">Pending</div></div>
-    <div class="field"><label>CIN-ENID · CONDITIONAL</label><div class="value empty">Not derived</div></div>
-    <div class="field"><label>CIN-PVID · CONDITIONAL</label><div class="value empty">Not derived</div></div>
-    <div class="field"><label>CIN-REF</label><div class="value empty">Pending</div></div>
-    <div class="field"><label>CIN PERSONAL NUMBER</label><div class="value empty">Not registered</div></div>
-  </div>
-  <div class="header-status" id="headerRecordLinks"></div>
-  <div class="actions"><button class="btn secondary" id="refreshProfileButton">Refresh saved node profile</button></div>
-  <div id="profileStatus" class="status"></div>
-</section>
+
 
 <section class="grid" aria-label="Node creation sequence">
   <article class="step"><div class="n">01 / OPERATOR</div><h3>Link GitHub</h3><p>Authorize repository read/write access through the CIN GitHub App.</p><div class="step-state" id="step1State">Pending</div></article>
