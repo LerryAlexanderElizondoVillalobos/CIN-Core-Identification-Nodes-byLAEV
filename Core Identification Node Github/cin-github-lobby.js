@@ -747,13 +747,16 @@
       const signature=await window.ethereum.request({method:"eth_signTypedData_v4",params:[walletAddress,JSON.stringify(walletPayload)]});
       const recovered=window.ethers.getAddress(window.ethers.verifyTypedData(domain,MARRIAGE_TYPES,message,signature));
       if(recovered.toLowerCase()!==walletAddress.toLowerCase()) throw new Error("EIP-712 signature verification failed: recovered signer differs from the connected wallet.");
+      const verifiedIdentifierInput=Object.assign({},identifierInput,{subject_address:recovered.toLowerCase()});
+      const verifiedIdentifierDigest=await jsonSha256(verifiedIdentifierInput);
+      if("cin:global-personal-document:v1:"+verifiedIdentifierDigest!==personalDocumentId) throw new Error("The signature-recovered signer does not reproduce the proposed deterministic document identifier.");
       const signedAt=new Date().toISOString();
       const personalDocument={
         document_type:certificate.outputs.personal_document.document_type,schema_version:"1.0.0",document_id:personalDocumentId,certificate:{certificate_id:certificate.certificate_id,version:certificate.certificate_version},
         status:isCandidate?"PREVIEW_NOT_ISSUED":"SIGNED_PENDING_ISSUER_VERIFICATION",generated_at:signedAt,
         subject:{evm_address:walletAddress,evm_chain_id:walletChainId},
         node_reference:{node_id:NODE,cin_bid:cinBid,cin_nid:birth.node&&birth.node.cin_nid||null,birth_document_type:birth.document_type,birth_document_path:BIRTH_PATH,birth_document_sha256:birthDigest,birth_document_status:isCandidate?"PREVIEW_NOT_ISSUED":"BORN"},
-        identifier_derivation:{profile_id:"cin.global-personal-document.identifier/1.0.0",algorithm:"SHA-256",canonicalization:"RFC 8785 JCS",input:identifierInput,output:personalDocumentId,signature_bytes_excluded:true,determinism:"Same EVM address and same immutable Node Birth document produce the same identifier. Signature bytes are proof of control and consent, not identifier entropy."},
+        identifier_derivation:{profile_id:"cin.global-personal-document.identifier/1.0.0",algorithm:"SHA-256",canonicalization:"RFC 8785 JCS",input:identifierInput,output:personalDocumentId,signature_bytes_excluded:true,signer_address_source:"EIP-712 signature recovery",verified_signer_address:recovered,determinism:"The identifier is recomputed from the address recovered from the EIP-712 signature and the immutable Node Birth digest. Same signer and same Node Birth document always produce the same identifier; signature bytes are not identifier entropy."},
         marriage_agreement_reference:MARRIAGE_PATH,
         issuance:{status:isCandidate?"PREVIEW_NOT_ISSUED":"PENDING_ISSUER_VERIFICATION",authoritative:false,reason:isCandidate?"The referenced Node Birth input is a non-authoritative browser candidate.":"Issuer authorization, authoritative storage and independent issuance verification remain separate steps."}
       };
