@@ -256,7 +256,7 @@
   async function readJson(path, authenticated) {
     const item=await getRepoFile(path,authenticated);
     if(!item) return null;
-    try { return {value:JSON.parse(item.raw),raw:item.raw,sha:item.sha}; }
+    try { rejectDuplicateKeys(item.raw); return {value:JSON.parse(item.raw),raw:item.raw,sha:item.sha}; }
     catch(error) { throw new Error("Saved JSON is invalid at "+path+": "+error.message); }
   }
 
@@ -396,7 +396,7 @@
             recovery:"progress receipt reconstructed from existing immutable Genesis Manifest"
           });
         }
-        if(!profile || !profile.genesis) {
+        {
           const sourceRepo=genesisManifest.environment_data && genesisManifest.environment_data.repository || {};
           await updateNodeProfile({genesis:{
             manifest_id:genesisManifest.manifest_id,
@@ -537,7 +537,7 @@
             recovery:"progress receipt reconstructed from existing birth candidate"
           });
         }
-        if(!profile || !profile.birth) {
+        {
           await updateNodeProfile({
             birth:{path:BIRTH_PATH,status:savedRecord.candidate_status||"PREVIEW_NOT_ISSUED",source_manifest_id:savedRecord.source_genesis && savedRecord.source_genesis.manifest_id},
             identifiers:{
@@ -697,7 +697,9 @@
   }
 
   async function createPersonalDocument(){
-    if(!walletAddress||!walletChainId) throw new Error("Connect MetaMask before creating the CIN personal document.");
+    const signingAddress=signingAddress;
+    const signingChainId=signingChainId;
+    if(!signingAddress||!signingChainId) throw new Error("Connect MetaMask before creating the CIN personal document.");
     const certificateResponse=await fetch("./CIN-GLOBAL-PERSONAL-DOCUMENT.cincert",{cache:"no-store"});
     if(!certificateResponse.ok) throw new Error("Certificate 3 could not be loaded from the Lobby.");
     const certificate=await certificateResponse.json();
@@ -718,14 +720,14 @@
     if(!isCandidate&&!isBorn) throw new Error("Unsupported Node Birth document type or lifecycle status.");
     const cinBid=birth.node&&birth.node.cin_bid;
     if(typeof cinBid!=="string"||!cinBid) throw new Error("The Node Birth document does not contain CIN-BID.");
-    const birthDigest=await jsonSha256(birth),subject=walletAddress.toLowerCase();
+    const birthDigest=await jsonSha256(birth),subject=signingAddress.toLowerCase();
     const identifierInput={domain:certificate.identifier_derivation.domain,version:certificate.identifier_derivation.version,subject_address:subject,node_birth_record_sha256:birthDigest};
     const identifierDigest=await jsonSha256(identifierInput);
     const personalDocumentId="cin:global-personal-document:v1:"+identifierDigest;
     const termsSha256=await sha256(utf8(agreementTerms));
-    const domain={name:certificate.marriage_agreement.domain.name,version:certificate.marriage_agreement.domain.version,chainId:walletChainId};
+    const domain={name:certificate.marriage_agreement.domain.name,version:certificate.marriage_agreement.domain.version,chainId:signingChainId};
     const nodeIdentifiers={cinNid:birth.node.cin_nid||"",cinNsid:birth.node.cin_nsid||"",cinBid,cinRef:birth.node.cin_ref||"",cinEnid:birth.node.cin_enid||"",cinPvid:birth.node.cin_pvid||""};
-    const message={personalDocumentId,nodeBirthRecordSha256:birthDigest,...nodeIdentifiers,subjectAddress:walletAddress,agreementVersion:"1.0.0",terms:agreementTerms,termsSha256};
+    const message={personalDocumentId,nodeBirthRecordSha256:birthDigest,...nodeIdentifiers,subjectAddress:signingAddress,agreementVersion:"1.0.0",terms:agreementTerms,termsSha256};
     const walletPayload={
       domain,primaryType:"CINMarriageAgreement",
       types:{
@@ -738,9 +740,9 @@
     setPill("personalDocumentState","Awaiting wallet signature");
     setStatus("personalDocumentStatus","Review the CIN Node-Personal Document Marriage Agreement in MetaMask. No transaction or gas payment is requested.","info");
     try{
-      const signature=await window.ethereum.request({method:"eth_signTypedData_v4",params:[walletAddress,JSON.stringify(walletPayload)]});
+      const signature=await window.ethereum.request({method:"eth_signTypedData_v4",params:[signingAddress,JSON.stringify(walletPayload)]});
       const recovered=window.ethers.getAddress(window.ethers.verifyTypedData(domain,MARRIAGE_TYPES,message,signature));
-      if(recovered.toLowerCase()!==walletAddress.toLowerCase()) throw new Error("EIP-712 signature verification failed: recovered signer differs from the connected wallet.");
+      if(recovered.toLowerCase()!==signingAddress.toLowerCase()) throw new Error("EIP-712 signature verification failed: recovered signer differs from the connected wallet.");
       const verifiedIdentifierInput=Object.assign({},identifierInput,{subject_address:recovered.toLowerCase()});
       const verifiedIdentifierDigest=await jsonSha256(verifiedIdentifierInput);
       if("cin:global-personal-document:v1:"+verifiedIdentifierDigest!==personalDocumentId) throw new Error("The signature-recovered signer does not reproduce the proposed deterministic document identifier.");
@@ -748,7 +750,7 @@
       const personalDocument={
         document_type:certificate.outputs.personal_document.document_type,schema_version:"1.0.0",document_id:personalDocumentId,certificate:{certificate_id:certificate.certificate_id,version:certificate.certificate_version},
         status:isCandidate?"PREVIEW_NOT_ISSUED":"SIGNED_PENDING_ISSUER_VERIFICATION",generated_at:signedAt,
-        subject:{evm_address:walletAddress,evm_chain_id:walletChainId},
+        subject:{evm_address:signingAddress,evm_chain_id:signingChainId},
         node_reference:{node_id:NODE,cin_nid:birth.node&&birth.node.cin_nid||null,cin_nsid:birth.node&&birth.node.cin_nsid||null,cin_bid:cinBid,cin_ref:birth.node&&birth.node.cin_ref||null,cin_enid:birth.node&&birth.node.cin_enid||null,cin_pvid:birth.node&&birth.node.cin_pvid||null,birth_document_type:birth.document_type,birth_document_path:BIRTH_PATH,birth_document_sha256:birthDigest,birth_document_status:isCandidate?"PREVIEW_NOT_ISSUED":"BORN"},
         identifier_derivation:{profile_id:"cin.global-personal-document.identifier/1.0.0",algorithm:"SHA-256",canonicalization:"RFC 8785 JCS",input:identifierInput,output:personalDocumentId,signature_bytes_excluded:true,signer_address_source:"EIP-712 signature recovery",verified_signer_address:recovered,determinism:"The identifier is recomputed from the address recovered from the EIP-712 signature and the immutable Node Birth digest. Same signer and same Node Birth document always produce the same identifier; signature bytes are not identifier entropy."},
         marriage_agreement_reference:MARRIAGE_PATH,
@@ -757,9 +759,9 @@
       const marriageAgreement={
         document_type:certificate.outputs.marriage_agreement.document_type,schema_version:"1.0.0",certificate:{certificate_id:certificate.certificate_id,version:certificate.certificate_version},
         agreement_id:"cin:node-personal-document-marriage:v1:"+identifierDigest,status:"SIGNED_CANDIDATE",signed_at:signedAt,
-        parties:{node:{node_id:NODE,cin_nid:birth.node.cin_nid||null,cin_nsid:birth.node.cin_nsid||null,cin_bid:cinBid,cin_ref:birth.node.cin_ref||null,cin_enid:birth.node.cin_enid||null,cin_pvid:birth.node.cin_pvid||null,birth_document_sha256:birthDigest},personal_document:{document_id:personalDocumentId,subject_address:walletAddress}},
+        parties:{node:{node_id:NODE,cin_nid:birth.node.cin_nid||null,cin_nsid:birth.node.cin_nsid||null,cin_bid:cinBid,cin_ref:birth.node.cin_ref||null,cin_enid:birth.node.cin_enid||null,cin_pvid:birth.node.cin_pvid||null,birth_document_sha256:birthDigest},personal_document:{document_id:personalDocumentId,subject_address:signingAddress}},
         acceptance:{accepted:true,agreement_version:"1.0.0",terms:agreementTerms,terms_sha256:termsSha256},
-        signature:{standard:"EIP-712",method:"eth_signTypedData_v4",domain,primary_type:"CINMarriageAgreement",message,signature,recovered_signer:recovered,verification_status:"VERIFIED",chain_id:walletChainId},
+        signature:{standard:"EIP-712",method:"eth_signTypedData_v4",domain,primary_type:"CINMarriageAgreement",message,signature,recovered_signer:recovered,verification_status:"VERIFIED",chain_id:signingChainId},
         lifecycle:{node_birth_status:isCandidate?"PREVIEW_NOT_ISSUED":"BORN",personal_document_status:personalDocument.status,marriage_status:"SIGNED_CANDIDATE_NOT_AUTHORITATIVE",authoritative_registration:false},
         interpretation:"The signature is the holder's cryptographic acceptance of the specific node-to-document association. It is not a blockchain transaction, government registration, proof of civil attributes or issuer certification."
       };
@@ -770,20 +772,20 @@
         const marriageSaved=await saveJson(MARRIAGE_PATH,marriageAgreement,"CIN 001: record signed node-personal document marriage agreement",true);
         if(marriageSaved.existing&&JSON.parse(marriageSaved.raw).agreement_id!==marriageAgreement.agreement_id) throw new Error("A different marriage agreement exists at the target path; no record was overwritten.");
         persistence="PUBLIC_GITHUB_RECORDS_SAVED";
-        await recordProgress("CIN_GLOBAL_PERSONAL_DOCUMENT_MARRIAGE_SIGNED",{document_id:personalDocumentId,agreement_id:marriageAgreement.agreement_id,subject_address:walletAddress,node_birth_record_sha256:birthDigest,signature_verification:"VERIFIED",persistence});
-        await updateNodeProfile({personal_document:{document_id:personalDocumentId,agreement_id:marriageAgreement.agreement_id,status:personalDocument.status,marriage_status:marriageAgreement.status,path:PERSONAL_DOCUMENT_PATH,agreement_path:MARRIAGE_PATH,subject_address:walletAddress},identifiers:{cin_global_personal_document_id:{value:personalDocumentId,status:personalDocument.status},cin_personal_document_address:{value:walletAddress,status:"PUBLIC_WALLET_ADDRESS"}}});
+        await recordProgress("CIN_GLOBAL_PERSONAL_DOCUMENT_MARRIAGE_SIGNED",{document_id:personalDocumentId,agreement_id:marriageAgreement.agreement_id,subject_address:signingAddress,node_birth_record_sha256:birthDigest,signature_verification:"VERIFIED",persistence});
+        await updateNodeProfile({personal_document:{document_id:personalDocumentId,agreement_id:marriageAgreement.agreement_id,status:personalDocument.status,marriage_status:marriageAgreement.status,path:PERSONAL_DOCUMENT_PATH,agreement_path:MARRIAGE_PATH,subject_address:signingAddress},identifiers:{cin_global_personal_document_id:{value:personalDocumentId,status:personalDocument.status},cin_personal_document_address:{value:signingAddress,status:"PUBLIC_WALLET_ADDRESS"}}});
         await loadNodeProfile(true);
       }else{
         downloadJsonFile("CIN-001-GLOBAL-PERSONAL-DOCUMENT-CANDIDATE.json",personalDocument);
         downloadJsonFile("CIN-001-NODE-PERSONAL-DOCUMENT-MARRIAGE.json",marriageAgreement);
       }
       $("personalDocumentSummary").hidden=false;
-      $("personalDocumentSummary").textContent=JSON.stringify({document_id:personalDocumentId,agreement_id:marriageAgreement.agreement_id,subject_address:walletAddress,chain_id:walletChainId,node_birth_record_sha256:birthDigest,recovered_signer:recovered,signature_verification:"VERIFIED",persistence,personal_document_status:personalDocument.status,marriage_status:marriageAgreement.status},null,2);
+      $("personalDocumentSummary").textContent=JSON.stringify({document_id:personalDocumentId,agreement_id:marriageAgreement.agreement_id,subject_address:signingAddress,chain_id:signingChainId,node_birth_record_sha256:birthDigest,recovered_signer:recovered,signature_verification:"VERIFIED",persistence,personal_document_status:personalDocument.status,marriage_status:marriageAgreement.status},null,2);
       setPill("personalDocumentState",persistence==="PUBLIC_GITHUB_RECORDS_SAVED"?"Signed and saved":"Signed · local files");
       setStatus("personalDocumentStatus","MetaMask signature verified. The same address and same Node Birth document produce the same personal-document identifier. "+(persistence==="PUBLIC_GITHUB_RECORDS_SAVED"?"Both records were saved and read back from GitHub.":"JSON files were downloaded locally; connect GitHub to publish repository progress."),"ok");
       setStep("step4State","Personal document signed · candidate",true);
     }catch(error){setPill("personalDocumentState","Not completed");setStatus("personalDocumentStatus",error.message,"error");}
-    finally{$("createPersonalDocumentButton").disabled=!walletAddress;}
+    finally{$("createPersonalDocumentButton").disabled=!walletAddress||!walletChainId;}
   }
 
   function watchWalletChanges(){
@@ -829,7 +831,11 @@
     if(patch.birth) value.birth=Object.assign({},value.birth||{},patch.birth);
     if(patch.personal_document) value.personal_document=Object.assign({},value.personal_document||{},patch.personal_document);
     if(patch.identifiers) value.identifiers=Object.assign({},value.identifiers||{},patch.identifiers);
-    value.lifecycle_status=value.birth ? "BIRTH_CANDIDATE_NOT_ISSUED" : "GENESIS_REPOSITORY_SNAPSHOT_RECORDED";
+    const birthStatus=value.birth && (value.birth.status || value.birth.candidate_status);
+    if(birthStatus==="BORN") value.lifecycle_status="BORN";
+    else if(birthStatus==="PREVIEW_NOT_ISSUED" || birthStatus==="BIRTH_CANDIDATE_NOT_ISSUED") value.lifecycle_status="BIRTH_CANDIDATE_NOT_ISSUED";
+    else if(value.birth) value.lifecycle_status=birthStatus || "NODE_BIRTH_STATUS_PENDING";
+    else value.lifecycle_status=value.genesis ? "GENESIS_REPOSITORY_SNAPSHOT_RECORDED" : "GENESIS_NOT_STARTED";
     value.updated_at=new Date().toISOString();
     const saved=await saveJson(PROFILE_PATH,value,"CIN 001: update node profile projection",false);
     profile=value;
@@ -887,7 +893,7 @@
     if(response.status===404) return null;
     if(!response.ok) throw new Error("Could not load public node file "+path+" (HTTP "+response.status+").");
     const raw=await response.text();
-    try { return {value:JSON.parse(raw),raw,sha:null}; }
+    try { rejectDuplicateKeys(raw); return {value:JSON.parse(raw),raw,sha:null}; }
     catch(error) { throw new Error("Saved public JSON is invalid at "+path+": "+error.message); }
   }
 
@@ -993,7 +999,8 @@
 
   async function uploadLocalFile() {
     const file=$("localUploadFile").files[0];
-    if(!file) { setStatus("localWorkspaceStatus","Choose a file to upload first.","error"); return; }\n    if(file.size > 2_000_000) { setStatus("localWorkspaceStatus","The current local upload limit is 2 MB per file.","error"); return; }
+    if(!file) { setStatus("localWorkspaceStatus","Choose a file to upload first.","error"); return; }
+    if(file.size > 2_000_000) { setStatus("localWorkspaceStatus","The current local upload limit is 2 MB per file.","error"); return; }
     const path=$("localFilePath").value.trim() || file.name;
     if(!window.confirm("Upload "+file.name+" to the local Termux workspace as "+path+"? This does not publish it to GitHub.")) return;
     try {
