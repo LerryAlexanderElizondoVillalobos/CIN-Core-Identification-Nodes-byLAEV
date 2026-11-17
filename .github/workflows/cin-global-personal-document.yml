@@ -59,6 +59,7 @@ assert.ok(lobby.includes('terms:agreementTerms'));
           assert.equal(marriageSchema.properties.document_type.const, certificate.outputs.marriage_agreement.document_type);
           assert.ok(lobby.includes('eth_signTypedData_v4'));
           assert.ok(lobby.includes('verifyTypedData'));
+          for (const field of ['cinNid', 'cinNsid', 'cinBid', 'cinRef', 'cinEnid', 'cinPvid']) assert.ok(lobby.includes(field));
           assert.ok(lobby.includes('PREVIEW_NOT_ISSUED'));
           assert.ok(html.includes('ethers@6.13.5'));
           assert.ok(html.includes('createPersonalDocumentButton'));
