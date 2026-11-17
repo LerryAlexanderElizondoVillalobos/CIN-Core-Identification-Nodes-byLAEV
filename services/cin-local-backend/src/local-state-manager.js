@@ -1,7 +1,8 @@
 import { createPersistentStore } from "./persistent-store.js";
 
 const DEFAULT_CONFIGURATION = Object.freeze({
-  lobby_origin: process.env.CIN_LOBBY_ORIGIN ?? "https://lerryalexanderelizondo.github.io",\n  backend_port: 2112,
+  lobby_origin: process.env.CIN_LOBBY_ORIGIN ?? "https://lerryalexanderelizondo.github.io",
+  backend_port: 2112,
   pairing_request_ttl_ms: 5 * 60 * 1000,
   pairing_session_ttl_ms: 24 * 60 * 60 * 1000,
   event_history_limit: 2000
@@ -84,7 +85,10 @@ export function createLocalStateManager(options = {}) {
     if (!["http:", "https:"].includes(parsedOrigin.protocol) || parsedOrigin.origin !== next.lobby_origin) {
       throw new TypeError("lobby_origin must contain only an HTTP(S) origin.");
     }
-    if (!Number.isInteger(next.backend_port) || next.backend_port < 1 || next.backend_port > 65535) {\n      throw new TypeError("backend_port must be an integer between 1 and 65535.");\n    }\n    for (const key of ["pairing_request_ttl_ms", "pairing_session_ttl_ms", "event_history_limit"]) {
+    if (!Number.isInteger(next.backend_port) || next.backend_port < 1 || next.backend_port > 65535) {
+      throw new TypeError("backend_port must be an integer between 1 and 65535.");
+    }
+    for (const key of ["pairing_request_ttl_ms", "pairing_session_ttl_ms", "event_history_limit"]) {
       if (!Number.isSafeInteger(next[key]) || next[key] < 1) {
         throw new TypeError(key + " must be a positive integer.");
       }
