@@ -97,6 +97,8 @@ jobs:
           assert "1458540194" in config
           assert "CIN_GITHUB_APP_CLIENT_SECRET" in worker
           assert "cin-github-lobby.js" in service_worker
+          assert 'const ENDPOINT = BASE_URL + "/health"' in (root / "cin-local-runtime-test.js").read_text()
+          assert "cin-termux-local-backend" in (root / "cin-local-runtime-test.js").read_text()
           assert "PREVIEW_NOT_ISSUED" in lobby_js
           assert "cin.node-birth-candidate" not in lobby_js  # the output type is loaded from Certificate 2
 
