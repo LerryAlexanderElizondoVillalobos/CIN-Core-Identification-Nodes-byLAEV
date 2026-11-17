@@ -120,7 +120,9 @@
   const sameOriginConfigured = () => location.origin === "https://lerryalexanderelizondo.github.io";
 
   function configReady() {
-    return !!(cfg.enabled && cfg.clientId && cfg.tokenExchangeEndpoint && cfg.redirectUri &&
+    let workerIsHttps=false;
+    try { workerIsHttps=new URL(cfg.tokenExchangeEndpoint).protocol==="https:"; } catch {}
+    return !!(cfg.enabled && cfg.clientId && workerIsHttps && cfg.redirectUri &&
       REPO.owner && REPO.name && REPO.id && REPO.branch && REPO.rootDirectory);
   }
 
@@ -201,7 +203,7 @@
     const me=await githubApi("/user");
     const repository=await githubApi("/repos/"+encodeURIComponent(REPO.owner)+"/"+encodeURIComponent(REPO.name));
     if(String(repository.id)!==String(REPO.id)) throw new Error("The connected repository ID does not match the configured CIN repository.");
-    if(repository.permissions && repository.permissions.push!==true) throw new Error("The connected GitHub account does not have write access to the CIN repository.");
+    if(!repository.permissions || repository.permissions.push!==true) throw new Error("GitHub did not confirm write access to the CIN repository for this account and App installation.");
     operator=me;
     renderConnection();
     setStatus("githubStatus","Connected as @"+me.login+". Repository identity and write access verified.","ok");
@@ -733,17 +735,28 @@
     if(hasBirth) setStep("step3State","Birth candidate saved · not issued",true);
   }
 
+  async function readPublicJson(path) {
+    const rawPath=path.split("/").map(encodeURIComponent).join("/");
+    const url="https://raw.githubusercontent.com/"+encodeURIComponent(REPO.owner)+"/"+encodeURIComponent(REPO.name)+"/"+encodeURIComponent(REPO.branch)+"/"+rawPath;
+    const response=await fetch(url,{cache:"no-store"});
+    if(response.status===404) return null;
+    if(!response.ok) throw new Error("Could not load public node file "+path+" (HTTP "+response.status+").");
+    const raw=await response.text();
+    try { return {value:JSON.parse(raw),raw,sha:null}; }
+    catch(error) { throw new Error("Saved public JSON is invalid at "+path+": "+error.message); }
+  }
+
   async function loadNodeProfile(authenticated) {
     try {
-      const result=await readJson(PROFILE_PATH,authenticated!==false);
+      const result=authenticated===false ? await readPublicJson(PROFILE_PATH) : await readJson(PROFILE_PATH,true);
       if(result) {
         renderProfile(result.value);
         setStatus("profileStatus","Node profile loaded from the GitHub repository.","ok");
       } else {
         setStatus("profileStatus","No saved CIN 001 profile exists yet. It will be created during the first successful Genesis save.","info");
       }
-      const savedGenesis=await readJson(GENESIS_PATH,authenticated!==false);
-      const savedProgress=await readJson(PROGRESS_PATH,authenticated!==false);
+      const savedGenesis=authenticated===false ? await readPublicJson(GENESIS_PATH) : await readJson(GENESIS_PATH,true);
+      const savedProgress=authenticated===false ? await readPublicJson(PROGRESS_PATH) : await readJson(PROGRESS_PATH,true);
       if(savedProgress && Array.isArray(savedProgress.value.events)) {
         const genesisEvent=[...savedProgress.value.events].reverse().find(event=>event.event_type==="GENESIS_REPOSITORY_MANIFEST_SAVED");
         if(genesisEvent && genesisEvent.repository_commit_sha) genesisGitCommit=genesisEvent.repository_commit_sha;
