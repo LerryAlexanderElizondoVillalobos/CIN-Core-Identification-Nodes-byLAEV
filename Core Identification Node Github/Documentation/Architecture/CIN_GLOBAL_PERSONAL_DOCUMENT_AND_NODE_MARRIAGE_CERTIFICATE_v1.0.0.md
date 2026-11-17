@@ -70,3 +70,7 @@ The CIN repository is public. Before saving, the Lobby discloses that the wallet
 ## 9. Deterministic identifier test vector
 
 The canonical input and expected SHA-256 result are published in `examples/CIN-GLOBAL-PERSONAL-DOCUMENT-IDENTIFIER-TEST-VECTORS.json`. Implementations must reproduce the exact expected document ID before wallet signing is enabled.
+
+## 10. Manual MetaMask acceptance
+
+The browser and wallet acceptance procedure is maintained in `../Testing/CIN_GLOBAL_PERSONAL_DOCUMENT_METAMASK_ACCEPTANCE_v1.0.md`. Real MetaMask interaction remains a release gate; static CI cannot prove the wallet prompt or device behavior.
