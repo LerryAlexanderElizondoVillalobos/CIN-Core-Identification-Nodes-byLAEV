@@ -112,7 +112,8 @@ const server = http.createServer(async (req, res) => {
     if (req.method === "PUT" && url.pathname === "/v1/local/file") {
       const input = await readJson(req);
       const encoding = input.encoding === "base64" ? "base64" : "utf8";
-      const content = encoding === "base64" ? input.content_base64 : input.content;\n      const saved = await workspace.write(input.path, content, encoding);
+      const content = encoding === "base64" ? input.content_base64 : input.content;
+      const saved = await workspace.write(input.path, content, encoding);
       return send(res, 200, saved, origin);
     }
     if (req.method === "POST" && url.pathname === "/v1/permissions/requests") {
