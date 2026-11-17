@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>CIN Backend Manager</title>
+  <style>
+    :root { font-family: system-ui, sans-serif; color-scheme: light dark; }
+    body { margin: 0; padding: 1.25rem; max-width: 48rem; margin-inline: auto; line-height: 1.5; }
+    main { border: 1px solid #8886; border-radius: 1rem; padding: 1.25rem; }
+    h1 { margin-top: 0; }
+    .status { padding: .75rem; border-radius: .6rem; background: #8882; }
+    button { padding: .7rem 1rem; border-radius: .5rem; border: 1px solid #8888; font: inherit; }
+    code { overflow-wrap: anywhere; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>CIN Backend Manager</h1>
+    <p class="status" id="service-state" role="status">Checking local backend…</p>
+    <dl>
+      <dt>Service</dt><dd>CIN Local Backend</dd>
+      <dt>Endpoint</dt><dd><code id="endpoint">http://127.0.0.1:2112</code></dd>
+      <dt>GitHub</dt><dd id="github-state">Not connected</dd>
+      <dt>Repository</dt><dd id="repository-state">Not configured</dd>
+    </dl>
+    <button id="refresh" type="button">Refresh status</button>
+    <p>This initial Manager build is a local runtime monitor. GitHub Device Flow, pairing and repository operations are not implemented yet.</p>
+  </main>
+  <script>
+    const state = document.getElementById("service-state");
+    document.getElementById("refresh").addEventListener("click", loadStatus);
+    async function loadStatus() {
+      try {
+        const response = await fetch("/api/v1/status", { cache: "no-store" });
+        if (!response.ok) throw new Error("HTTP " + response.status);
+        const result = await response.json();
+        const data = result.data;
+        state.textContent = "Backend running";
+        document.getElementById("endpoint").textContent = "http://" + data.bind_address + ":" + data.port;
+        document.getElementById("github-state").textContent = data.github;
+        document.getElementById("repository-state").textContent = data.repository;
+      } catch (error) {
+        state.textContent = "Backend status unavailable: " + error.message;
+      }
+    }
+    loadStatus();
+  </script>
+</body>
+</html>
