@@ -78,6 +78,11 @@
   <div class="actions"><button class="btn secondary" id="inspectLocalWorkspaceButton" type="button">Inspect local CIN directory</button></div>
   <div id="localWorkspaceStatus" class="status info">Start the CIN backend in Termux to access the local workspace.</div>
   <pre id="localWorkspaceSummary" hidden></pre>
+  <div class="profile-grid">
+    <div class="field"><label>LOCAL FILE PATH · RELATIVE TO CORE IDENTIFICATION NODE GITHUB/</label><input id="localFilePath" type="text" placeholder="CIN 001/state/example.json" style="width:100%;padding:10px;background:#071522;color:var(--text);border:1px solid var(--line);border-radius:8px"></div>
+    <div class="field"><label>LOCAL FILE CONTENT · UTF-8 TEXT</label><textarea id="localFileContent" rows="8" placeholder="Read a file or enter content to save" style="width:100%;padding:10px;background:#071522;color:var(--text);border:1px solid var(--line);border-radius:8px"></textarea></div>
+  </div>
+  <div class="actions"><button class="btn secondary" id="readLocalFileButton" type="button">Read local file</button><button class="btn primary" id="saveLocalFileButton" type="button">Save local file</button></div>
 </section>
 
 <section class="panel">
