@@ -105,7 +105,7 @@ The initial public repository paths are:
         │   ├── genesis/
         │   │   └── CIN-001-GENESIS-ENVIRONMENT-MANIFEST.json
         │   ├── birth/
-        │   │   └── CIN-001-NODE-BIRTH-RECORD.json
+        │   │   └── CIN-001-NODE-BIRTH-CANDIDATE.json
         │   └── personal-registration/
         │       └── CIN-001-PUBLIC-PERSONAL-REGISTRATION.json
         ├── state/
@@ -165,3 +165,19 @@ The third certificate is a development candidate. Its descriptor does not replac
 ---
 
 *End of document.*
+
+## 10. Current Lobby implementation
+
+The public Genesis Lobby now contains:
+- GitHub App authorization control and OAuth callback processing using PKCE.
+- Repository ID and write-permission verification after linking.
+- Repository tree inspection and SHA-256 inventory for the selected publication root.
+- A Genesis Manifest save workflow with GitHub read-back verification.
+- A birth-candidate workflow that consumes the saved Genesis Manifest and the domain labels from the published Node Birth Certificate.
+- GitHub progress and node-profile projections.
+- A header reconstructed from the saved CIN 001 node profile.
+- A separate, gated Personal Registration certificate stage.
+
+The connection control remains in a setup-required state until the GitHub App is registered/installed and the OAuth exchange Worker is deployed and configured. The user-facing connection flow must not be reported as operational until that external setup and an end-to-end save test succeed.
+
+The browser-generated birth result remains `PREVIEW_NOT_ISSUED`. The public GitHub commit is a progress record, not proof of private local storage registration, authorization, signature or independent authoritative verification.
