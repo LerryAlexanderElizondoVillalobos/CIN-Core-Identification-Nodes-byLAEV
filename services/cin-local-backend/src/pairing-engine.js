@@ -10,7 +10,7 @@ function equalSecret(a, b) {
   return left.length === right.length && timingSafeEqual(left, right);
 }
 
-export function createPairingEngine({ now = () => Date.now(), store } = {}) {
+export function createPairingEngine({ now = () => Date.now(), store, configuration = {} } = {}) {\n  const requestTtlMs = configuration.pairing_request_ttl_ms ?? REQUEST_TTL_MS;\n  const sessionTtlMs = configuration.pairing_session_ttl_ms ?? SESSION_TTL_MS;\n  const eventHistoryLimit = configuration.event_history_limit ?? 2000;
   const initial = store?.load?.() ?? {};
   const requests = new Map((initial.requests ?? []).map(item => [item.id, item]));
   const sessions = new Map((initial.sessions ?? []).map(item => [item.id, item]));
@@ -18,7 +18,7 @@ export function createPairingEngine({ now = () => Date.now(), store } = {}) {
 
   function record(type, details = {}) {
     events.push({ event_id: randomUUID(), type, at: new Date(now()).toISOString(), ...details });
-    if (events.length > 2000) events.splice(0, events.length - 2000);
+    if (events.length > eventHistoryLimit) events.splice(0, events.length - eventHistoryLimit);
   }
   function persist() {
     store?.save?.({
@@ -49,7 +49,7 @@ export function createPairingEngine({ now = () => Date.now(), store } = {}) {
     const id = randomUUID(), pollSecret = token(), createdAt = now();
     requests.set(id, {
       id, origin, label: String(label).slice(0, 100), pollSecret,
-      state: "PENDING", createdAt, expiresAt: createdAt + REQUEST_TTL_MS, sessionId: null
+      state: "PENDING", createdAt, expiresAt: createdAt + requestTtlMs, sessionId: null
     });
     record("PAIRING_REQUEST_CREATED", { request_id: id, origin });
     persist();
@@ -86,7 +86,7 @@ export function createPairingEngine({ now = () => Date.now(), store } = {}) {
     const item = requests.get(id);
     if (!item || item.state !== "PENDING") return null;
     const createdAt = now();
-    const session = { id: randomUUID(), secret: token(), origin: item.origin, label: item.label, state: "ACTIVE", createdAt, expiresAt: createdAt + SESSION_TTL_MS };
+    const session = { id: randomUUID(), secret: token(), origin: item.origin, label: item.label, state: "ACTIVE", createdAt, expiresAt: createdAt + sessionTtlMs };
     sessions.set(session.id, session);
     item.state = "APPROVED"; item.sessionId = session.id;
     record("PAIRING_REQUEST_APPROVED", { request_id: id, session_id: session.id });
