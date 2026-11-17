@@ -82,7 +82,9 @@
     <div class="field"><label>LOCAL FILE PATH · RELATIVE TO CORE IDENTIFICATION NODE GITHUB/</label><input id="localFilePath" type="text" placeholder="CIN 001/state/example.json" style="width:100%;padding:10px;background:#071522;color:var(--text);border:1px solid var(--line);border-radius:8px"></div>
     <div class="field"><label>LOCAL FILE CONTENT · UTF-8 TEXT</label><textarea id="localFileContent" rows="8" placeholder="Read a file or enter content to save" style="width:100%;padding:10px;background:#071522;color:var(--text);border:1px solid var(--line);border-radius:8px"></textarea></div>
   </div>
-  <div class="actions"><button class="btn secondary" id="readLocalFileButton" type="button">Read local file</button><button class="btn primary" id="saveLocalFileButton" type="button">Save local file</button></div>
+  <div class="actions"><button class="btn secondary" id="readLocalFileButton" type="button">Read text file</button><button class="btn primary" id="saveLocalFileButton" type="button">Save text file</button><button class="btn secondary" id="downloadLocalFileButton" type="button">Download file</button><button class="btn secondary" id="createLocalDirectoryButton" type="button">Create directory</button></div>
+  <div class="profile-grid"><div class="field"><label>UPLOAD FILE · BINARY OR TEXT</label><input id="localUploadFile" type="file" style="width:100%;padding:10px;background:#071522;color:var(--text);border:1px solid var(--line);border-radius:8px"></div><div class="field"><label>UPLOAD DESTINATION · RELATIVE PATH</label><p class="small">Set the path above. If empty, the original filename is used.</p></div></div>
+  <div class="actions"><button class="btn primary" id="uploadLocalFileButton" type="button">Upload selected file</button></div>
 </section>
 
 <section class="panel">
