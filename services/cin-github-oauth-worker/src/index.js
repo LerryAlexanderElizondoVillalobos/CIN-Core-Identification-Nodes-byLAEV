@@ -116,8 +116,6 @@ export default {
       token_type: token.token_type || "bearer",
       scope: token.scope || "",
       expires_in: token.expires_in || null,
-      refresh_token: token.refresh_token || null,
-      refresh_token_expires_in: token.refresh_token_expires_in || null
     }, 200, allowedOrigin);
   }
 };
