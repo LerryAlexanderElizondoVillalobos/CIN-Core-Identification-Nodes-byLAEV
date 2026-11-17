@@ -5,6 +5,7 @@ import { dirname, resolve } from "node:path";
 import { createOAuthService } from "./github/oauth.js";
 import { createGitHubConnector } from "./github/connector.js";
 import { createPermissionEngine } from "./authorization/permission-engine.js";
+import { createLocalWorkspace } from "./workspace/local-directory.js";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const envPath = resolve(here, "../.env");
@@ -35,6 +36,7 @@ const session = {
 const oauth = createOAuthService(config, session);
 const github = createGitHubConnector(config, session);
 const permissions = createPermissionEngine();
+const workspace = createLocalWorkspace(process.env.CIN_LOCAL_WORKSPACE_ROOT || resolve(here, "../../Core Identification Node Github"));
 
 function send(res, status, value, origin) {
   res.writeHead(status, {
@@ -93,6 +95,19 @@ const server = http.createServer(async (req, res) => {
       if (!config.clientId || !config.clientSecret || !config.redirectUri) return send(res, 503, { error: "github_app_not_configured_in_termux_env" }, origin);
       const result = await oauth.exchange(await readJson(req));
       return send(res, 200, result, origin);
+    }
+    if (req.method === "GET" && url.pathname === "/v1/local/tree") {
+      const entries = await workspace.list(url.searchParams.get("path") || "");
+      return send(res, 200, { root: "Core Identification Node Github", entries }, origin);
+    }
+    if (req.method === "GET" && url.pathname === "/v1/local/file") {
+      const file = await workspace.read(url.searchParams.get("path") || "");
+      return send(res, 200, file, origin);
+    }
+    if (req.method === "PUT" && url.pathname === "/v1/local/file") {
+      const input = await readJson(req);
+      const saved = await workspace.write(input.path, input.content);
+      return send(res, 200, saved, origin);
     }
     if (req.method === "POST" && url.pathname === "/v1/permissions/requests") {
       const item = permissions.request(await readJson(req));
