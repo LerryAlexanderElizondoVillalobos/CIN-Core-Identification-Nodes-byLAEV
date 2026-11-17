@@ -248,7 +248,7 @@
   async function saveRepoFile(path, raw, message, createOnly) {
     const existing=await getRepoFile(path,true);
     if(existing && createOnly) {
-      return {created:false,existing:true,raw:existing.raw,sha:existing.sha,commitSha:null};
+      return {created:false,existing:true,raw:existing.raw,value:JSON.parse(existing.raw),sha:existing.sha,commitSha:null};
     }
     const body={message,content:toBase64(utf8(raw)),branch:REPO.branch};
     if(existing && existing.sha) body.sha=existing.sha;
