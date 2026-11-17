@@ -85,6 +85,10 @@ const server = http.createServer(async (req, res) => {
     if (req.method === "GET" && url.pathname === "/v1/status") {
       return send(res, 200, { service: "cin-termux-local-backend", github_connected: !!session.get(), repository: config.owner + "/" + config.repository, repository_id: config.repositoryId }, origin);
     }
+    if (req.method === "POST" && url.pathname === "/v1/session/disconnect") {
+      session.clear();
+      return send(res, 200, { disconnected: true }, origin);
+    }
     if (req.method === "POST" && url.pathname === "/oauth/exchange") {
       if (!config.clientId || !config.clientSecret || !config.redirectUri) return send(res, 503, { error: "github_app_not_configured_in_termux_env" }, origin);
       const result = await oauth.exchange(await readJson(req));
