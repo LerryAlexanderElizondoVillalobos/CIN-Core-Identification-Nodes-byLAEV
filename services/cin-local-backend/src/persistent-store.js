@@ -1,4 +1,4 @@
-import { mkdirSync, readFileSync, renameSync, writeFileSync, chmodSync } from "node:fs";
+import { mkdirSync, readFileSync, renameSync, writeFileSync, chmodSync, openSync, fsyncSync, closeSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { homedir } from "node:os";
 import { randomUUID } from "node:crypto";
@@ -14,7 +14,7 @@ export function createPersistentStore({
   function load() {
     try {
       const parsed = JSON.parse(readFileSync(file, "utf8"));
-      if (parsed?.schema_version !== 1) throw new Error("Unsupported runtime state schema.");
+      if (![1, 2].includes(parsed?.schema_version)) throw new Error("Unsupported runtime state schema.");
       return parsed;
     } catch (error) {
       if (error.code === "ENOENT") return { schema_version: 1, requests: [], sessions: [], events: [] };
