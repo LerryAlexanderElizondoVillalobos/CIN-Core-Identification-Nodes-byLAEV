@@ -51,7 +51,7 @@ The state file is private local application data, not a backup or synchronizatio
 ## Runtime configuration\n\nThe local Manager provides persistent configuration for the Lobby origin, backend port, pairing request TTL, session TTL and event-history retention. Lobby origin and lifecycle settings apply immediately to subsequent requests/new records; backend port changes require a restart. See [RUNTIME-CONFIGURATION-MANAGER.md](./RUNTIME-CONFIGURATION-MANAGER.md) and [API-SPECIFICATION.md](./API-SPECIFICATION.md).\n\n## Current boundaries and limitations
 
 - Backend remains bound to `127.0.0.1`.
-- Lobby origin defaults to `https://lerryalexanderelizondo.github.io` and can be overridden with `CIN_LOBBY_ORIGIN`.
+- Lobby origin defaults to `https://lerryalexanderelizondovillalobos.github.io` and can be overridden with `CIN_LOBBY_ORIGIN`.
 - Local Manager requests are same-origin loopback requests.
 - Session authorization helper exists, but no repository operations are implemented or protected yet.
 - Persistence is synchronous JSON snapshot storage; suitable for the current single-process local runtime, not concurrent multi-process writers.
