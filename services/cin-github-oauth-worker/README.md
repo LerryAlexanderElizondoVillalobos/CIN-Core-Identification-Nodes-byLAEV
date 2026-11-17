@@ -19,8 +19,8 @@ Configure these Worker variables:
 | CIN_GITHUB_APP_CLIENT_ID | Variable | Client ID from the GitHub App registration |
 | CIN_GITHUB_APP_CLIENT_SECRET | Secret | Client secret from the GitHub App registration |
 | CIN_TARGET_REPOSITORY_ID | Variable | 1458540194 |
-| CIN_ALLOWED_ORIGIN | Variable | https://lerryalexanderelizondo.github.io |
-| CIN_OAUTH_REDIRECT_URI | Variable | https://lerryalexanderelizondo.github.io/CIN-Core-Identification-Nodes-byLAEV/ |
+| CIN_ALLOWED_ORIGIN | Variable | https://lerryalexanderelizondovillalobos.github.io |
+| CIN_OAUTH_REDIRECT_URI | Variable | https://lerryalexanderelizondovillalobos.github.io/CIN-Core-Identification-Nodes-byLAEV/ |
 
 Expose GET /health and POST /oauth/exchange.
 
