@@ -771,7 +771,8 @@
       }
       if(savedGenesis) {
         genesisManifest=savedGenesis.value; genesisRaw=savedGenesis.raw;
-        genesisGitCommit=savedGenesis.value.registration && savedGenesis.value.registration.repository_commit_sha || null;
+        const manifestCommit=savedGenesis.value.registration && savedGenesis.value.registration.repository_commit_sha;
+        if(manifestCommit) genesisGitCommit=manifestCommit;
         $("generateBirthButton").disabled=!accessToken;
       }
       return result;
