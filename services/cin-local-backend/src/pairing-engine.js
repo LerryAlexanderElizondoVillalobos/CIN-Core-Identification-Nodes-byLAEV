@@ -11,9 +11,17 @@ function equalSecret(a, b) {
 }
 
 export function createPairingEngine({ now = () => Date.now(), store, configuration = {} } = {}) {
-  const requestTtlMs = configuration.pairing_request_ttl_ms ?? REQUEST_TTL_MS;
-  const sessionTtlMs = configuration.pairing_session_ttl_ms ?? SESSION_TTL_MS;
-  const eventHistoryLimit = configuration.event_history_limit ?? 2000;
+  let requestTtlMs = configuration.pairing_request_ttl_ms ?? REQUEST_TTL_MS;
+  let sessionTtlMs = configuration.pairing_session_ttl_ms ?? SESSION_TTL_MS;
+  let eventHistoryLimit = configuration.event_history_limit ?? 2000;
+
+  function configure(next = {}) {
+    requestTtlMs = next.pairing_request_ttl_ms ?? requestTtlMs;
+    sessionTtlMs = next.pairing_session_ttl_ms ?? sessionTtlMs;
+    eventHistoryLimit = next.event_history_limit ?? eventHistoryLimit;
+    if (events.length > eventHistoryLimit) events.splice(0, events.length - eventHistoryLimit);
+    persist();
+  }
   const initial = store?.load?.() ?? {};
   const requests = new Map((initial.requests ?? []).map(item => [item.id, item]));
   const sessions = new Map((initial.sessions ?? []).map(item => [item.id, item]));
@@ -56,7 +64,7 @@ export function createPairingEngine({ now = () => Date.now(), store, configurati
     });
     record("PAIRING_REQUEST_CREATED", { request_id: id, origin });
     persist();
-    return { request_id: id, poll_secret: pollSecret, state: "PENDING", expires_at: new Date(createdAt + REQUEST_TTL_MS).toISOString() };
+    return { request_id: id, poll_secret: pollSecret, state: "PENDING", expires_at: new Date(createdAt + requestTtlMs).toISOString() };
   }
 
   function list() {
@@ -122,5 +130,5 @@ export function createPairingEngine({ now = () => Date.now(), store, configurati
   }
 
   expire();
-  return { request, list, poll, approve, reject, revoke, authorize, persist };
+  return { request, list, poll, approve, reject, revoke, authorize, persist, configure };
 }
