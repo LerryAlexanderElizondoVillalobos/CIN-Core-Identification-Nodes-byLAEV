@@ -1,9 +1,9 @@
 # CIN Local Backend — Termux
 
-**Version:** 1.3.0  
-**Status:** Specification and CI contract baseline; runtime not implemented  
+**Version:** 1.5.0  
+**Status:** Pairing lifecycle, persistent state and Runtime Configuration Manager implemented; Android end-to-end validation pending  
 **Repository:** LerryAlexanderElizondoVillalobos/CIN-Core-Identification-Nodes-byLAEV  
-**Branch:** feat/termux-local-backend
+**Branch:** feat/pairing-engine-backend-manager
 
 ## Purpose
 
@@ -37,6 +37,9 @@ This proposal introduces a new Termux Device Flow path. It is a migration, not a
 - [API specification](API-SPECIFICATION.md)
 - [Authentication](AUTHENTICATION.md)
 - [Permissions and storage](PERMISSIONS-AND-STORAGE.md)
+- [Local State Manager](LOCAL-STATE-MANAGER.md)
+- [Runtime Configuration Manager](RUNTIME-CONFIGURATION-MANAGER.md)
+- [Pairing Engine implementation](PAIRING-ENGINE-IMPLEMENTATION.md)
 - [Termux installation and Manager](TERMUX-INSTALLATION.md)
 - [Test plan](TEST-PLAN.md)
 - [GitHub Actions](GITHUB-ACTIONS.md)
@@ -48,4 +51,4 @@ The backend is a local GitHub repository bridge for the Lobby. It is not the CIN
 
 ## Current maturity
 
-Documentation and specification CI only. A first read-only Termux runtime foundation now exists under `services/cin-local-backend/`: loopback HTTP server, `/health`, `/api/v1/status` and the local Manager page. GitHub Device Flow, pairing, repository adapter, write operations and Android browser compatibility remain unimplemented. Passing the new CI checks validates this specification package only, not runtime behavior.
+The Termux runtime now includes a loopback HTTP server, pairing request/approval/session routes, durable local state, a local Backend Manager and an editable Runtime Configuration Manager. Configuration can be read and changed from the local Manager; Lobby origin and pairing/event settings apply immediately, while a port change is saved for the next restart. GitHub Device Flow, repository adapter and write operations remain out of scope. A dedicated Node.js 22 workflow runs the backend test suite for relevant pull requests. Android browser compatibility and actual Termux acceptance remain pending.

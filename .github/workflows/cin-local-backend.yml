@@ -1,0 +1,39 @@
+name: CIN Local Backend Tests
+
+on:
+  pull_request:
+    branches: [feat/termux-local-backend, main]
+    paths:
+      - "services/cin-local-backend/**"
+      - "docs/termux-local-backend/**"
+      - ".github/workflows/cin-local-backend.yml"
+  push:
+    branches: [feat/pairing-engine-backend-manager]
+    paths:
+      - "services/cin-local-backend/**"
+      - ".github/workflows/cin-local-backend.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cin-local-backend-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Node.js runtime and Manager tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22
+      - name: Run Local Backend test suite
+        working-directory: services/cin-local-backend
+        run: npm test

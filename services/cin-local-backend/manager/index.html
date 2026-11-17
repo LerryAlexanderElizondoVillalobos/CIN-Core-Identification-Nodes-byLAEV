@@ -1,51 +1,67 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="light dark">
-  <title>CIN Backend Manager</title>
-  <style>
-    :root { font-family: system-ui, sans-serif; color-scheme: light dark; }
-    body { margin: 0; padding: 1.25rem; max-width: 48rem; margin-inline: auto; line-height: 1.5; }
-    main { border: 1px solid #8886; border-radius: 1rem; padding: 1.25rem; }
-    h1 { margin-top: 0; }
-    .status { padding: .75rem; border-radius: .6rem; background: #8882; }
-    button { padding: .7rem 1rem; border-radius: .5rem; border: 1px solid #8888; font: inherit; }
-    code { overflow-wrap: anywhere; }
-  </style>
-</head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark">
+<title>CIN Backend Manager</title>
+<style>
+:root{font-family:Inter,ui-sans-serif,system-ui,sans-serif;color:#e8edf5;background:#0b1020;font-synthesis:none}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 20% 0%,#172747 0,transparent 42%),#0b1020}
+header{display:flex;align-items:center;justify-content:space-between;padding:22px clamp(18px,4vw,56px);border-bottom:1px solid #ffffff16}
+.brand{display:flex;gap:12px;align-items:center;font-weight:700;letter-spacing:.02em}.mark{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,#6d9cff,#7c5cff);display:grid;place-items:center;font-weight:900;color:white}
+main{max-width:1120px;margin:auto;padding:34px clamp(18px,4vw,56px) 64px}.eyebrow{color:#8fa9d4;font-size:12px;text-transform:uppercase;letter-spacing:.14em;font-weight:700}
+h1{font-size:clamp(28px,4vw,42px);margin:8px 0}.muted{color:#91a0b9}.topline{display:flex;justify-content:space-between;gap:18px;align-items:end;flex-wrap:wrap}
+.pill{border:1px solid #284a3c;background:#112b25;color:#79e0b0;padding:8px 12px;border-radius:999px;font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:28px 0}.card,.panel{background:#111a2c;border:1px solid #ffffff14;border-radius:16px;padding:19px;box-shadow:0 12px 35px #0002}
+.metric{font-size:28px;font-weight:750;margin-top:9px}.label{color:#9aa9c0;font-size:13px}.panel{margin-top:18px}.panel-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}h2{font-size:17px;margin:0 0 5px}
+input{width:100%;margin-top:7px;padding:10px 11px;border:1px solid #ffffff24;border-radius:9px;background:#0b1424;color:#e8edf5;font:inherit}label{display:block;color:#9aa9c0;font-size:13px} .config-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:16px}.config-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:16px}button{font:inherit;cursor:pointer;border:1px solid #ffffff22;border-radius:9px;padding:9px 13px;background:#1c2a42;color:#eaf0fa}button.primary{background:#526fe6;border-color:#526fe6}button.danger{background:#48212b;border-color:#753342}.list{display:grid;gap:10px;margin-top:16px}.item{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px;border:1px solid #ffffff12;border-radius:12px;background:#0d1525}.item strong{display:block;font-size:14px}.item small{display:block;color:#8fa0ba;margin-top:5px;overflow-wrap:anywhere}.actions{display:flex;gap:8px;flex-wrap:wrap}.empty{color:#7f8ea6;padding:20px 0;text-align:center}.tag{font-size:11px;border-radius:999px;padding:4px 8px;background:#24344e;color:#b9c9e5}
+footer{color:#73829b;font-size:12px;margin-top:28px;line-height:1.7}
+@media(max-width:700px){.config-grid{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.item{align-items:flex-start;flex-direction:column}.actions{width:100%}.actions button{flex:1}}
+</style></head>
 <body>
-  <main>
-    <h1>CIN Backend Manager</h1>
-    <p class="status" id="service-state" role="status">Checking local backend…</p>
-    <dl>
-      <dt>Service</dt><dd>CIN Local Backend</dd>
-      <dt>Endpoint</dt><dd><code id="endpoint">http://127.0.0.1:2112</code></dd>
-      <dt>GitHub</dt><dd id="github-state">Not connected</dd>
-      <dt>Repository</dt><dd id="repository-state">Not configured</dd>
-    </dl>
-    <button id="refresh" type="button">Refresh status</button>
-    <p>This initial Manager build is a local runtime monitor. GitHub Device Flow, pairing and repository operations are not implemented yet.</p>
-  </main>
-  <script>
-    const state = document.getElementById("service-state");
-    document.getElementById("refresh").addEventListener("click", loadStatus);
-    async function loadStatus() {
-      try {
-        const response = await fetch("/api/v1/status", { cache: "no-store" });
-        if (!response.ok) throw new Error("HTTP " + response.status);
-        const result = await response.json();
-        const data = result.data;
-        state.textContent = "Backend running";
-        document.getElementById("endpoint").textContent = "http://" + data.bind_address + ":" + data.port;
-        document.getElementById("github-state").textContent = data.github;
-        document.getElementById("repository-state").textContent = data.repository;
-      } catch (error) {
-        state.textContent = "Backend status unavailable: " + error.message;
-      }
-    }
-    loadStatus();
-  </script>
-</body>
-</html>
+<header><div class="brand"><div class="mark">C</div><div>CIN <span class="muted">/ Backend Manager</span></div></div><span class="pill" id="runtime-state">● Checking runtime</span></header>
+<main>
+<div class="topline"><div><div class="eyebrow">Local runtime control plane</div><h1>Backend overview</h1><div class="muted">Manage Lobby pairing requests and local sessions.</div></div><button id="refresh">↻ Refresh data</button></div>
+<section class="grid">
+<div class="card"><div class="label">Runtime endpoint</div><div class="metric" style="font-size:19px" id="endpoint">127.0.0.1:2112</div><div class="label">Loopback only</div></div>
+<div class="card"><div class="label">Pending requests</div><div class="metric" id="pending-count">—</div><div class="label">Awaiting operator decision</div></div>
+<div class="card"><div class="label">Active sessions</div><div class="metric" id="session-count">—</div><div class="label">Revocable local sessions</div></div>
+</section>
+<section class="panel"><div class="panel-head"><div><h2>Local State Manager</h2><div class="label">Persistent runtime domains restored on startup.</div></div><span class="tag" id="state-schema">Schema —</span></div><div class="list" id="state-summary"><div class="empty">Loading persistent state…</div></div></section>
+<section class="panel"><div class="panel-head"><div><h2>Runtime Configuration</h2><div class="label">Persistent settings applied to the local runtime.</div></div><span class="tag">Local operator controls</span></div>
+<div class="config-grid">
+<label>Lobby origin<input id="cfg-lobby-origin" type="url" autocomplete="url"></label>
+<label>Backend port<input id="cfg-backend-port" type="number" min="1" max="65535" step="1"></label>
+<label>Pairing request expiry (minutes)<input id="cfg-request-ttl" type="number" min="1" step="1"></label>
+<label>Session expiry (hours)<input id="cfg-session-ttl" type="number" min="1" step="1"></label>
+<label>Lifecycle event history limit<input id="cfg-event-limit" type="number" min="1" step="1"></label>
+</div><div class="config-actions"><button class="primary" id="save-config">Save configuration</button><span class="label" id="config-message">Loading saved configuration…</span></div>
+<div class="label" style="margin-top:12px">Port changes are saved immediately but require a backend restart. Other changes apply to new pairing requests and sessions immediately; existing expiry timestamps are not rewritten.</div></section>
+<section class="panel"><div class="panel-head"><div><h2>Pairing requests</h2><div class="label">Review each Lobby connection before establishing trust.</div></div><span class="tag">Operator approval required</span></div><div class="list" id="requests"><div class="empty">Loading requests…</div></div></section>
+<section class="panel"><div class="panel-head"><div><h2>Active sessions</h2><div class="label">Inspect and revoke established local sessions.</div></div></div><div class="list" id="sessions"><div class="empty">Loading sessions…</div></div></section>
+<section class="panel"><div class="panel-head"><div><h2>Persistent event history</h2><div class="label">Recent pairing and session lifecycle events retained on this device.</div></div><span class="tag" id="storage-state">Local persistence</span></div><div class="list" id="events"><div class="empty">Loading event history…</div></div></section>
+<footer>Pairing is separate from GitHub authentication and repository permissions. This release does not enable GitHub OAuth, Device Flow or repository writes. Runtime configuration, pairing requests, session state and lifecycle events are stored in private local Termux storage and restored when the backend restarts. Active sessions retain their original expiry and revoked sessions remain in the event history.</footer>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+async function api(path,options={}){const r=await fetch(path,{cache:"no-store",headers:{"Content-Type":"application/json"},...options});const j=await r.json();if(!r.ok)throw new Error(j.error?.message||"HTTP "+r.status);return j.data}
+function el(tag,cls,text){const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n}
+async function refresh(){
+ try{
+ const status=await api("/api/v1/status");$("runtime-state").textContent="● Runtime online";$("endpoint").textContent=status.bind_address+":"+status.port;
+ const data=await api("/api/v1/pairing/status");const pending=data.requests.filter(x=>x.state==="PENDING");const active=data.sessions.filter(x=>x.state==="ACTIVE");$("storage-state").textContent=status.persistence?.enabled?"● Persistent storage enabled · "+status.persistence.domains.length+" state domains":"Storage unavailable";
+ $("pending-count").textContent=pending.length;$("session-count").textContent=active.length;
+ renderState(status.persistence);renderRequests(pending);renderSessions(active);renderEvents(data.events||[]);
+ }catch(e){$("runtime-state").textContent="● Runtime unavailable";$("requests").replaceChildren(el("div","empty",e.message))}
+}
+async function loadConfiguration(){try{const c=await api("/api/v1/configuration");$("cfg-lobby-origin").value=c.lobby_origin;$("cfg-backend-port").value=c.backend_port;$("cfg-request-ttl").value=Math.round(c.pairing_request_ttl_ms/60000);$("cfg-session-ttl").value=Math.round(c.pairing_session_ttl_ms/3600000);$("cfg-event-limit").value=c.event_history_limit;$("config-message").textContent="Saved configuration loaded"}catch(e){$("config-message").textContent=e.message}}
+$("save-config").addEventListener("click",async()=>{const button=$("save-config");button.disabled=true;$("config-message").textContent="Saving…";try{const result=await api("/api/v1/configuration",{method:"PUT",body:JSON.stringify({lobby_origin:$("cfg-lobby-origin").value.trim(),backend_port:Number($("cfg-backend-port").value),pairing_request_ttl_ms:Number($("cfg-request-ttl").value)*60000,pairing_session_ttl_ms:Number($("cfg-session-ttl").value)*3600000,event_history_limit:Number($("cfg-event-limit").value)})});$("config-message").textContent=result.restart_required?"Saved. Restart backend to apply the new port.":"Configuration saved and applied to new pairing activity."}catch(e){$("config-message").textContent="Not saved: "+e.message}finally{button.disabled=false}});
+function renderState(state){const root=$("state-summary");root.replaceChildren();if(!state?.enabled){root.append(el("div","empty","Persistent state is unavailable."));return}$("state-schema").textContent="Schema v"+state.schema_version;const details=[["Storage file",state.storage_path],["State domains",(state.domains||[]).join(" · ")],["Pairing requests",String(state.pairing_requests)],["Sessions",String(state.sessions)],["Lifecycle events",String(state.lifecycle_events)]];for(const [name,value] of details){const row=el("div","item"),info=el("div");info.append(el("strong",null,name),el("small",null,value));row.append(info);root.append(row)}}
+function renderRequests(items){const root=$("requests");root.replaceChildren();if(!items.length){root.append(el("div","empty","No pending pairing requests."));return}
+ for(const item of items){const row=el("div","item"),info=el("div"),title=el("strong",null,item.label),meta=el("small",null,item.origin+" · expires "+new Date(item.expires_at).toLocaleTimeString());info.append(title,meta);const actions=el("div","actions"),approve=el("button","primary","Approve"),reject=el("button",null,"Reject");approve.onclick=async()=>{try{await api("/api/v1/pairing/approve",{method:"POST",body:JSON.stringify({request_id:item.request_id})});await refresh()}catch(e){alert(e.message)}};reject.onclick=async()=>{try{await api("/api/v1/pairing/reject",{method:"POST",body:JSON.stringify({request_id:item.request_id})});await refresh()}catch(e){alert(e.message)}};actions.append(approve,reject);row.append(info,actions);root.append(row)}
+}
+function renderEvents(items){const root=$("events");root.replaceChildren();if(!items.length){root.append(el("div","empty","No recorded events yet."));return}for(const item of items){const row=el("div","item"),info=el("div");info.append(el("strong",null,item.type.replaceAll("_"," ")),el("small",null,new Date(item.at).toLocaleString()+" · "+(item.request_id||item.session_id||"runtime")));row.append(info);root.append(row)}}
+function renderSessions(items){const root=$("sessions");root.replaceChildren();if(!items.length){root.append(el("div","empty","No active sessions."));return}
+ for(const item of items){const row=el("div","item"),info=el("div");info.append(el("strong",null,item.label),el("small",null,item.origin+" · "+item.session_id),el("small",null,"Expires "+new Date(item.expires_at).toLocaleString()));const revoke=el("button","danger","Revoke session");revoke.onclick=async()=>{if(!confirm("Revoke this local session?"))return;try{await api("/api/v1/pairing/revoke",{method:"POST",body:JSON.stringify({session_id:item.session_id})});await refresh()}catch(e){alert(e.message)}};row.append(info,revoke);root.append(row)}
+}
+$("refresh").addEventListener("click",refresh);loadConfiguration();refresh();setInterval(refresh,5000);
+</script></body></html>
