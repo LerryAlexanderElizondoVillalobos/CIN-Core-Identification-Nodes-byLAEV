@@ -963,7 +963,8 @@
     try { await loadNodeProfile(false); } catch {}
   }
 
-  $("inspectLocalWorkspaceButton").addEventListener("click",inspectLocalWorkspace);\n  $("connectGithubButton").addEventListener("click",()=>beginGitHubLink().catch(error=>setStatus("githubStatus",error.message,"error")));
+  $("inspectLocalWorkspaceButton").addEventListener("click",inspectLocalWorkspace);
+  $("connectGithubButton").addEventListener("click",()=>beginGitHubLink().catch(error=>setStatus("githubStatus",error.message,"error")));
   $("disconnectGithubButton").addEventListener("click",disconnect);
   $("generateGenesisButton").addEventListener("click",saveGenesis);
   $("generateBirthButton").addEventListener("click",generateBirthCandidate);
