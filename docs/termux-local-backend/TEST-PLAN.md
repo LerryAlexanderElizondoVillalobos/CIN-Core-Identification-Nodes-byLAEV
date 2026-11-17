@@ -1,6 +1,6 @@
 # Test Plan and Acceptance
 
-**Version:** 1.3.0 · **Status:** Specification tests are being introduced; runtime tests await implementation
+**Version:** 1.3.0 · **Status:** Specification and local loopback foundation tests pass; integration/device tests await implementation
 
 ## Test layers
 
