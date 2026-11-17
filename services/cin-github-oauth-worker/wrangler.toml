@@ -1,0 +1,9 @@
+name = "cin-github-oauth-exchange"
+main = "src/index.js"
+compatibility_date = "2026-11-16"
+
+[vars]
+CIN_GITHUB_APP_CLIENT_ID = "REPLACE_WITH_GITHUB_APP_CLIENT_ID"
+CIN_TARGET_REPOSITORY_ID = "1458540194"
+CIN_ALLOWED_ORIGIN = "https://lerryalexanderelizondo.github.io"
+CIN_OAUTH_REDIRECT_URI = "https://lerryalexanderelizondo.github.io/CIN-Core-Identification-Nodes-byLAEV/"
