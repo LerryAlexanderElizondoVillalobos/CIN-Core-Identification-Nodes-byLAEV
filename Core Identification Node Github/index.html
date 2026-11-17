@@ -53,7 +53,7 @@
 </section>
 
 <section class="panel">
-  <div class="panel-head"><div><div class="eyebrow">03 · Node birth certificate</div><h2>Generate CIN 001 birth record</h2></div><span class="pill" id="birthState">Waiting for Genesis Manifest</span></div>
+  <div class="panel-head"><div><div class="eyebrow">03 · Node birth certificate</div><h2>Generate CIN 001 birth candidate</h2></div><span class="pill" id="birthState">Waiting for Genesis Manifest</span></div>
   <p class="small">Consumes the exact saved Genesis Manifest and calculates the candidate identifiers. The existing certificate derivation is still proposed; the browser result remains <code>PREVIEW_NOT_ISSUED</code> until authorization, signing/issuer rules, durable authoritative registration and independent verification are implemented.</p>
   <div class="actions"><button class="btn primary" id="generateBirthButton" disabled>Generate and save birth candidate</button><a class="btn secondary" href="./CIN-NODE-BIRTH.cincert" download>View / download Certificate 2</a></div>
   <div id="birthStatus" class="status"></div>
@@ -91,7 +91,7 @@
 <section class="grid" aria-label="Node creation sequence">
   <article class="step"><div class="n">01 / OPERATOR</div><h3>Link GitHub</h3><p>Authorize repository read/write access through the CIN GitHub App.</p><div class="step-state" id="step1State">Pending</div></article>
   <article class="step"><div class="n">02 / GENESIS</div><h3>Record ecosystem</h3><p>Inspect the repository snapshot and commit the Genesis Manifest.</p><div class="step-state" id="step2State">Pending</div></article>
-  <article class="step"><div class="n">03 / NODE BIRTH</div><h3>Establish CIN 001</h3><p>Generate the birth candidate and preserve the source references.</p><div class="step-state" id="step3State">Pending</div></article>
+  <article class="step"><div class="n">03 / NODE BIRTH</div><h3>Prepare CIN 001 birth</h3><p>Generate and save the non-authoritative birth candidate with its Genesis source references.</p><div class="step-state" id="step3State">Pending</div></article>
 </section>
 
 <footer class="footer">
