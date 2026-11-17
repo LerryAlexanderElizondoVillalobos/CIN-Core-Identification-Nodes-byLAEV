@@ -121,7 +121,7 @@
     return toHex(new Uint8Array(digest));
   };
   const jsonSha256 = async value => sha256(utf8(canonicalizeJcs(value)));
-  const sameOriginConfigured = () => location.origin === "https://lerryalexanderelizondo.github.io";
+  const sameOriginConfigured = () => location.origin === "https://lerryalexanderelizondovillalobos.github.io";
 
   function configReady() {
     let workerIsHttps=false;
@@ -354,7 +354,7 @@
         source_commit_sha:commitSha,
         source_tree_sha:treeSha,
         root_directory:root,
-        pages_url:"https://lerryalexanderelizondo.github.io/"+REPO.name+"/"
+        pages_url:"https://lerryalexanderelizondovillalobos.github.io/"+REPO.name+"/"
       },
       file_inventory:{
         algorithm:"SHA-256",
