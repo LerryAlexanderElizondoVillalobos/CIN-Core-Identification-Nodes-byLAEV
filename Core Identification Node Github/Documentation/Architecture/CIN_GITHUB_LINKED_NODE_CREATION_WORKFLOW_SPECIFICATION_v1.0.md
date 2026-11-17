@@ -186,7 +186,7 @@ The public Genesis Lobby now contains:
 - A birth-candidate workflow that consumes the saved Genesis Manifest and the domain labels from the published Node Birth Certificate.
 - GitHub progress and node-profile projections.
 - A header reconstructed from the saved CIN 001 node profile, including core and conditional node identifiers plus future personal-registration references.
-- A separate, gated Personal Registration certificate stage.
+- A MetaMask EIP-712 CIN Global Personal Document and Node Marriage certificate stage.\n- A separate, later-stage Personal Registration and Credential certificate stage.
 
 The connection control remains in a setup-required state until the GitHub App is registered/installed and the OAuth exchange Worker is deployed and configured. The user-facing connection flow must not be reported as operational until that external setup and an end-to-end save test succeed.
 
