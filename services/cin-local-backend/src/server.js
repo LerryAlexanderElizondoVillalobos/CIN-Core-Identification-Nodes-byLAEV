@@ -147,7 +147,7 @@ export function createAppServer({ dataDir, stateManager: providedStateManager } 
 
     const known = ["/health", "/api/v1/status", "/api/v1/configuration", "/api/v1/pairing/request", "/api/v1/pairing/status", "/api/v1/pairing/approve", "/api/v1/pairing/reject", "/api/v1/pairing/revoke", "/manager", "/manager/"];
     if (known.includes(url.pathname)) {
-      response.setHeader("Allow", url.pathname.includes("pairing") ? "GET, POST, OPTIONS" : "GET, OPTIONS");
+      response.setHeader("Allow", url.pathname === "/api/v1/configuration" ? "GET, PUT, OPTIONS" : (url.pathname.includes("pairing") ? "GET, POST, OPTIONS" : "GET, OPTIONS"));
       sendJson(response, 405, { ok: false, error: { code: "METHOD_NOT_ALLOWED", message: "Method not allowed." } }, cors); return;
     }
     sendJson(response, 404, { ok: false, error: { code: "NOT_FOUND", message: "Route not found." } }, cors);
