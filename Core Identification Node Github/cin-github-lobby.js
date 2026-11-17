@@ -969,6 +969,7 @@
       const response=await fetch(url);
       const result=await response.json().catch(()=>null);
       if(!response.ok || !result) throw new Error((result&&result.error)||"Could not read local file.");
+      if(result.encoding==="base64") throw new Error("This file is binary. Use Download file to retrieve it without text conversion.");
       $("localFileContent").value=result.content;
       setStatus("localWorkspaceStatus","Read local file: "+result.path+" ("+result.size_bytes+" bytes).","ok");
     } catch(error) { setStatus("localWorkspaceStatus",error.message,"error"); }
@@ -981,11 +982,62 @@
     if(!window.confirm("Save this text to the local Termux workspace? This does not commit or publish it to GitHub.")) return;
     try {
       const response=await fetch((cfg.localBackendUrl||"http://127.0.0.1:8787")+"/v1/local/file",{
-        method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({path,content})
+        method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({path,content,encoding:"utf8"})
       });
       const result=await response.json().catch(()=>null);
       if(!response.ok || !result) throw new Error((result&&result.error)||"Could not save local file.");
       setStatus("localWorkspaceStatus","Saved locally: "+result.path+" ("+result.size_bytes+" bytes). Changes remain on this Android device until separately committed to GitHub.","ok");
+      await inspectLocalWorkspace();
+    } catch(error) { setStatus("localWorkspaceStatus",error.message,"error"); }
+  }
+
+  async function uploadLocalFile() {
+    const file=$("localUploadFile").files[0];
+    if(!file) { setStatus("localWorkspaceStatus","Choose a file to upload first.","error"); return; }
+    const path=$("localFilePath").value.trim() || file.name;
+    if(!window.confirm("Upload "+file.name+" to the local Termux workspace as "+path+"? This does not publish it to GitHub.")) return;
+    try {
+      const bytes=new Uint8Array(await file.arrayBuffer());
+      const response=await fetch((cfg.localBackendUrl||"http://127.0.0.1:8787")+"/v1/local/file",{
+        method:"PUT",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({path,encoding:"base64",content_base64:toBase64(bytes)})
+      });
+      const result=await response.json().catch(()=>null);
+      if(!response.ok || !result) throw new Error((result&&result.error)||"Could not upload file.");
+      setStatus("localWorkspaceStatus","Uploaded "+file.name+" to "+result.path+" ("+result.size_bytes+" bytes). Local only; not published to GitHub.","ok");
+      await inspectLocalWorkspace();
+    } catch(error) { setStatus("localWorkspaceStatus",error.message,"error"); }
+  }
+
+  async function downloadLocalFile() {
+    const path=$("localFilePath").value.trim();
+    if(!path) { setStatus("localWorkspaceStatus","Enter a file path to download.","error"); return; }
+    try {
+      const url=new URL((cfg.localBackendUrl||"http://127.0.0.1:8787")+"/v1/local/file");
+      url.searchParams.set("path",path); url.searchParams.set("encoding","base64");
+      const response=await fetch(url);
+      const result=await response.json().catch(()=>null);
+      if(!response.ok || !result) throw new Error((result&&result.error)||"Could not download local file.");
+      const binary=fromBase64(result.content_base64);
+      const blob=new Blob([binary]);
+      const link=document.createElement("a");
+      const objectUrl=URL.createObjectURL(blob);
+      link.href=objectUrl; link.download=path.split("/").pop()||"download";
+      document.body.appendChild(link); link.click(); link.remove(); URL.revokeObjectURL(objectUrl);
+      setStatus("localWorkspaceStatus","Downloaded "+result.path+" ("+result.size_bytes+" bytes).","ok");
+    } catch(error) { setStatus("localWorkspaceStatus",error.message,"error"); }
+  }
+
+  async function createLocalDirectory() {
+    const path=window.prompt("Directory path relative to Core Identification Node Github/ (example: uploads/new-folder)");
+    if(!path) return;
+    try {
+      const response=await fetch((cfg.localBackendUrl||"http://127.0.0.1:8787")+"/v1/local/directory",{
+        method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({path})
+      });
+      const result=await response.json().catch(()=>null);
+      if(!response.ok || !result) throw new Error((result&&result.error)||"Could not create directory.");
+      setStatus("localWorkspaceStatus","Created local directory: "+result.path,"ok");
       await inspectLocalWorkspace();
     } catch(error) { setStatus("localWorkspaceStatus",error.message,"error"); }
   }
@@ -997,6 +1049,9 @@
   $("inspectLocalWorkspaceButton").addEventListener("click",inspectLocalWorkspace);
   $("readLocalFileButton").addEventListener("click",readLocalFile);
   $("saveLocalFileButton").addEventListener("click",saveLocalFile);
+  $("uploadLocalFileButton").addEventListener("click",uploadLocalFile);
+  $("downloadLocalFileButton").addEventListener("click",downloadLocalFile);
+  $("createLocalDirectoryButton").addEventListener("click",createLocalDirectory);
   $("connectGithubButton").addEventListener("click",()=>beginGitHubLink().catch(error=>setStatus("githubStatus",error.message,"error")));
   $("disconnectGithubButton").addEventListener("click",disconnect);
   $("generateGenesisButton").addEventListener("click",saveGenesis);
