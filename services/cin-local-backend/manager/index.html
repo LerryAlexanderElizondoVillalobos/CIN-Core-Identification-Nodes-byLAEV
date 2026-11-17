@@ -50,7 +50,7 @@ async function refresh(){
  const status=await api("/api/v1/status");$("runtime-state").textContent="● Runtime online";$("endpoint").textContent=status.bind_address+":"+status.port;
  const data=await api("/api/v1/pairing/status");const pending=data.requests.filter(x=>x.state==="PENDING");const active=data.sessions.filter(x=>x.state==="ACTIVE");$("storage-state").textContent=status.persistence?.enabled?"● Persistent storage enabled · "+status.persistence.domains.length+" state domains":"Storage unavailable";
  $("pending-count").textContent=pending.length;$("session-count").textContent=active.length;
- renderState(status.persistence);await loadConfiguration();renderRequests(pending);renderSessions(active);renderEvents(data.events||[]);
+ renderState(status.persistence);renderRequests(pending);renderSessions(active);renderEvents(data.events||[]);
  }catch(e){$("runtime-state").textContent="● Runtime unavailable";$("requests").replaceChildren(el("div","empty",e.message))}
 }
 async function loadConfiguration(){try{const c=await api("/api/v1/configuration");$("cfg-lobby-origin").value=c.lobby_origin;$("cfg-backend-port").value=c.backend_port;$("cfg-request-ttl").value=Math.round(c.pairing_request_ttl_ms/60000);$("cfg-session-ttl").value=Math.round(c.pairing_session_ttl_ms/3600000);$("cfg-event-limit").value=c.event_history_limit;$("config-message").textContent="Saved configuration loaded"}catch(e){$("config-message").textContent=e.message}}
@@ -63,5 +63,5 @@ function renderEvents(items){const root=$("events");root.replaceChildren();if(!i
 function renderSessions(items){const root=$("sessions");root.replaceChildren();if(!items.length){root.append(el("div","empty","No active sessions."));return}
  for(const item of items){const row=el("div","item"),info=el("div");info.append(el("strong",null,item.label),el("small",null,item.origin+" · "+item.session_id),el("small",null,"Expires "+new Date(item.expires_at).toLocaleString()));const revoke=el("button danger",null,"Revoke session");revoke.onclick=async()=>{if(!confirm("Revoke this local session?"))return;try{await api("/api/v1/pairing/revoke",{method:"POST",body:JSON.stringify({session_id:item.session_id})});await refresh()}catch(e){alert(e.message)}};row.append(info,revoke);root.append(row)}
 }
-$("refresh").addEventListener("click",refresh);refresh();setInterval(refresh,5000);
+$("refresh").addEventListener("click",refresh);loadConfiguration();refresh();setInterval(refresh,5000);
 </script></body></html>
