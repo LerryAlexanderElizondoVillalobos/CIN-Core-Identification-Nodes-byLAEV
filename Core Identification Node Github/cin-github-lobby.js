@@ -435,6 +435,7 @@
       const manifest={
         document_type:"cin.genesis-environment-manifest",
         schema_version:certificate.output_profiles.github_repository.schema_version,
+        schema_status:certificate.output_profiles.github_repository.schema_status || "TYPE_SPECIFIC_SCHEMA_PENDING",
         manifest_id:"cin:manifest:cin-001:"+crypto.randomUUID(),
         generated_at:new Date().toISOString(),
         node:{node_id:NODE,node_directory:NODE_ROOT},
@@ -582,6 +583,7 @@
       const record={
         document_type:birthCertificate.output_profiles.github_repository_candidate.document_type,
         schema_version:birthCertificate.output_profiles.github_repository_candidate.schema_version,
+        schema_status:birthCertificate.output_profiles.github_repository_candidate.schema_status || "CANDIDATE_SCHEMA_PENDING",
         candidate_status:"PREVIEW_NOT_ISSUED",
         generated_at:new Date().toISOString(),
         certificate:{certificate_id:birthCertificate.certificate_id,version:birthCertificate.certificate_version,execution_profile_id:birthCertificate.execution_profiles.github_repository.id,runner:birthCertificate.execution_profiles.github_repository.runner},
