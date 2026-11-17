@@ -72,7 +72,7 @@ The Genesis certificate supports distinct collection contexts:
 - **GitHub repository context:** inspects the selected repository, branch, commit, tree and the file inventory beneath Core Identification Node Github/. It computes SHA-256 for the inventory entries it actually reads. The manifest records the collection scope and limitations. It does not claim to have inspected the operator's local operating system, hardware or network interfaces.
 - **Local package context:** the existing local Certificate Runner may perform the full local package/runtime audit when the portable CIN application is used. This remains a separate local workflow.
 
-The repository manifest references the repository snapshot (commit and tree) inspected before it was saved. The saved manifest is a public repository progress record; it is not falsely described as the private local DataRoot transaction.
+The repository manifest references the repository snapshot (commit and tree) inspected before it was saved. Its GitHub profile is a public repository progress artifact; it is not the private local DataRoot registration. Its type-specific JSON Schema and the final mapping to the proposed Common Document Model remain pending review.
 
 ### Certificate 2 — CIN Node Birth Certificate
 
@@ -181,3 +181,15 @@ The public Genesis Lobby now contains:
 The connection control remains in a setup-required state until the GitHub App is registered/installed and the OAuth exchange Worker is deployed and configured. The user-facing connection flow must not be reported as operational until that external setup and an end-to-end save test succeed.
 
 The browser-generated birth result is a `cin.node-birth-candidate` with status `PREVIEW_NOT_ISSUED`. The authoritative `cin.node-birth-record` remains pending the reviewed document schema/envelope, birth authorization, issuer/signature policy, private local durable commit and independent verification. The public GitHub commit is a progress record, not proof of any of those authoritative lifecycle events.
+
+
+## 11. Document-contract boundary
+
+The repository workflow currently saves two public progress artifacts:
+
+- `cin.genesis-environment-manifest` with a GitHub repository snapshot profile and an explicit pending type-specific schema status.
+- `cin.node-birth-candidate` with `PREVIEW_NOT_ISSUED` and a pending candidate schema status.
+
+These artifacts permit the web Lobby to preserve sequence and progress. They do not claim conformance to a finalized type-specific JSON Schema or private CIN record registration. The official `cin.node-birth-record`, personal registration record and personal credential must use the reviewed CIN Common Document Model envelope and their approved type-specific schemas when their authoritative engines are implemented.
+
+The existing Common Document Model and ADR-0003 are proposed/draft contracts. Their envelope and cryptographic profile must not be described as production-approved until the repository's review and conformance-vector gates are completed.
