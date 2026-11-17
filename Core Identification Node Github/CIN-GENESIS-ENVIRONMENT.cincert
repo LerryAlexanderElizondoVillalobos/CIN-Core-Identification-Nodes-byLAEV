@@ -1,9 +1,9 @@
 {
   "certificate_id": "cin:certificate:genesis-environment:v1",
   "certificate_type": "cin.genesis-environment",
-  "certificate_version": "1.0.1",
+  "certificate_version": "1.1.0",
   "title": "CIN Genesis Environment Certificate",
-  "description": "Collects purpose-limited technical evidence about the extracted CIN package and the runtime environment before node birth.",
+  "description": "Collects purpose-limited technical evidence about either the selected GitHub repository snapshot or the local extracted CIN package/runtime. The execution profile must be recorded in every generated manifest; GitHub repository inspection is not a local operating-system audit.",
   "execution": {
     "instruction": "RUN CERTIFICATE",
     "runner": "cin-certificate-runner",
@@ -34,8 +34,8 @@
   "output_profile": {
     "document_type": "cin.genesis-environment-manifest",
     "schema_version": "1.0.0",
-    "storage": "CIN DataRoot TransactionalStore",
-    "registration": "first-logical-record"
+    "storage": "profile-specific",
+    "registration": "profile-specific"
   },
   "bibliographic_references": {
     "format": "APA 7th edition",
@@ -56,5 +56,65 @@
       "World Wide Web Consortium. (2022, 19 de julio). Decentralized Identifiers (DIDs) v1.0: Core architecture, data model, and representations (W3C Recommendation). https://www.w3.org/TR/did-core/",
       "Zimmermann, P. R. (1995). The Official PGP User's Guide. MIT Press."
     ]
-  }
+  },
+  "execution_profiles": {
+    "github_repository": {
+      "id": "cin.genesis-environment/github-repository/1.0.0",
+      "execution_mode": "github-pages-browser-with-github-app-authorization",
+      "scope": "repository_snapshot",
+      "include": [
+        "repository.owner",
+        "repository.name",
+        "repository.id",
+        "repository.visibility",
+        "repository.default_branch",
+        "repository.branch",
+        "repository.commit_sha",
+        "repository.tree_sha",
+        "repository.root_directory",
+        "repository.file_inventory.path",
+        "repository.file_inventory.size_bytes",
+        "repository.file_inventory.git_blob_sha",
+        "repository.file_inventory.sha256"
+      ],
+      "exclude": [
+        "github_access_tokens",
+        "github_refresh_tokens",
+        "github_app_client_secrets",
+        "private_keys",
+        "personal_credentials",
+        "personal_record_contents",
+        "unrelated_user_data"
+      ],
+      "limitations": [
+        "This profile audits the GitHub repository snapshot only.",
+        "It does not inspect the operator's local operating system, hardware, local network interfaces or local filesystem outside the repository.",
+        "It does not establish a private local CIN DataRoot transaction.",
+        "The target repository is public; the generated manifest and its commit are publicly readable."
+      ]
+    },
+    "local_package": {
+      "id": "cin.genesis-environment/local-package/1.0.0",
+      "execution_mode": "local-certificate-runner",
+      "collection_profile_reference": "collection_profile",
+      "description": "Uses the existing local package and runtime environment collection profile defined by this certificate."
+    }
+  },
+  "output_profiles": {
+    "github_repository": {
+      "document_type": "cin.genesis-environment-manifest",
+      "schema_version": "1.0.0",
+      "storage": "GitHub repository Contents API",
+      "registration": "public_repository_progress_record",
+      "authoritative_private_local_record": false
+    },
+    "local_package": {
+      "document_type": "cin.genesis-environment-manifest",
+      "schema_version": "1.0.0",
+      "storage": "CIN DataRoot TransactionalStore",
+      "registration": "first-logical-record",
+      "authoritative_private_local_record": true
+    }
+  },
+  "default_execution_profile": "local_package"
 }
