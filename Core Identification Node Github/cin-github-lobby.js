@@ -270,7 +270,7 @@
     if(!commitSha || !treeSha) throw new Error("GitHub did not return a source commit and tree SHA.");
     const tree=await githubApi("/repos/"+encodeURIComponent(REPO.owner)+"/"+encodeURIComponent(REPO.name)+"/git/trees/"+treeSha+"?recursive=1");
     if(tree.truncated) throw new Error("GitHub returned a truncated repository tree. The Genesis inventory is incomplete and cannot be saved as a complete snapshot.");
-    const root=(REPO.rootDirectory||ROOT).replace(/^\\/+|\\/+$/g,"")+"/";
+    const root=(REPO.rootDirectory||ROOT).split("/").filter(Boolean).join("/")+"/";
     const sourceFiles=(tree.tree||[]).filter(entry=>entry.type==="blob" && entry.path.startsWith(root));
     if(!sourceFiles.length) throw new Error("No files were found under the configured CIN ecosystem root.");
     setStatus("genesisStatus","Inspecting "+sourceFiles.length+" files under "+root+" and calculating SHA-256 fingerprints…","info");
@@ -328,7 +328,7 @@
       const existing=await readJson(GENESIS_PATH,true);
       if(existing) {
         genesisManifest=existing.value; genesisRaw=existing.raw;
-        genesisGitCommit=existing.value.registration && existing.value.registration.repository_commit_sha || null;
+        genesisGitCommit=(existing.value.registration && existing.value.registration.repository_commit_sha) || (profile && profile.genesis && profile.genesis.saved_commit_sha) || null;
         setStatus("genesisStatus","An initial Genesis Manifest already exists. It was loaded without overwriting the founding record.","ok");
         setPill("genesisState","Existing manifest loaded");
         $("genesisSummary").hidden=false;
@@ -445,19 +445,19 @@
       const canonical=canonicalizeJcs(manifest);
       const manifestHash=await sha256(utf8(canonical));
       const rawHash=await sha256(utf8(genesisRaw));
-      const labels={
-        nid:"CIN\\0NODE\\0NID\\0v1\\0",
-        nsid:"CIN\\0NODE\\0NSID\\0v1\\0",
-        bid:"CIN\\0NODE\\0BID\\0v1\\0"
-      };
+      const birthCertificateResponse=await fetch("./CIN-NODE-BIRTH.cincert",{cache:"no-store"});
+      if(!birthCertificateResponse.ok) throw new Error("Could not load CIN Node Birth Certificate.");
+      const birthCertificate=await birthCertificateResponse.json();
+      if(birthCertificate.certificate_type!=="cin.node-birth" || !birthCertificate.identifier_derivation || !birthCertificate.identifier_derivation.domain_labels) throw new Error("CIN Node Birth Certificate descriptor is incomplete.");
+      const labels=birthCertificate.identifier_derivation.domain_labels;
       const ids=await Promise.all([
         deriveIdentifier(labels.nid,manifestHash),
         deriveIdentifier(labels.nsid,manifestHash),
         deriveIdentifier(labels.bid,manifestHash)
       ]);
       const record={
-        document_type:"cin.node-birth-record",
-        schema_version:"1.0.0",
+        document_type:birthCertificate.output_profile.document_type,
+        schema_version:birthCertificate.output_profile.schema_version,
         record_status:"PREVIEW_NOT_ISSUED",
         generated_at:new Date().toISOString(),
         source_genesis:{
