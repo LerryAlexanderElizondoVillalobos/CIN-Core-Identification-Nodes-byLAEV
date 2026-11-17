@@ -1,0 +1,55 @@
+name: CIN Local Backend Specification Tests
+
+on:
+  push:
+    branches:
+      - feat/termux-local-backend
+    paths:
+      - "docs/termux-local-backend/**"
+      - "tests/termux-backend/**"
+      - ".github/workflows/cin-local-backend-spec.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "docs/termux-local-backend/**"
+      - "tests/termux-backend/**"
+      - ".github/workflows/cin-local-backend-spec.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cin-local-backend-spec-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  specification-contract:
+    name: Validate CIN Local Backend specification
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22
+
+      - name: Validate specification JSON
+        run: node -e "JSON.parse(require('node:fs').readFileSync('docs/termux-local-backend/SPECIFICATION.json', 'utf8'))"
+
+      - name: Check local backend JavaScript syntax
+        run: node --check services/cin-local-backend/src/server.js
+
+      - name: Run specification and runtime foundation tests
+        run: node --test tests/termux-backend/*.test.mjs services/cin-local-backend/test/*.test.mjs
+
+      - name: Report runtime maturity boundary
+        run: |
+          echo "Specification and local loopback foundation tests passed."
+          echo "These tests do not validate GitHub Device Flow, repository writes or Android browser loopback permission."
+          echo "Those integration and device acceptance tests will be added with their implementation phases."
