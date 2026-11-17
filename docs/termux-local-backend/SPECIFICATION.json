@@ -38,6 +38,8 @@
   "maturity": {
     "specification": true,
     "runtimeImplemented": false,
-    "androidBrowserCompatibilityVerified": false
+    "androidBrowserCompatibilityVerified": false,
+    "runtimeFoundation": true,
+    "managerPrototype": true
   }
 }
