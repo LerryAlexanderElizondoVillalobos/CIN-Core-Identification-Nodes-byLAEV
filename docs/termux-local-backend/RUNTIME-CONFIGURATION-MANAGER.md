@@ -12,7 +12,7 @@ The Runtime Configuration Manager gives the operator a graphical interface to co
 
 | Setting | Default | Application |
 |---|---:|---|
-| Lobby origin | `https://lerryalexanderelizondo.github.io` | Immediately changes the accepted Lobby CORS origin |
+| Lobby origin | `https://lerryalexanderelizondovillalobos.github.io` | Immediately changes the accepted Lobby CORS origin |
 | Backend port | `2112` | Persisted; applied on next backend restart |
 | Pairing request expiry | 5 minutes | Applies to newly created requests |
 | Session expiry | 24 hours | Applies to newly approved sessions |
