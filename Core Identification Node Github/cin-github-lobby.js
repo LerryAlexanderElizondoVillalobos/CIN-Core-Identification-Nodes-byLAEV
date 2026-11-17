@@ -685,7 +685,7 @@
   const MARRIAGE_TYPES = {CINMarriageAgreement:[
     {name:"personalDocumentId",type:"string"},{name:"nodeBirthRecordSha256",type:"string"},
     {name:"cinBid",type:"string"},{name:"subjectAddress",type:"address"},
-    {name:"agreementVersion",type:"string"},{name:"termsSha256",type:"string"}
+    {name:"agreementVersion",type:"string"},{name:"terms",type:"string"},{name:"termsSha256",type:"string"}
   ]};
 
   async function connectMetaMask(){
@@ -731,7 +731,7 @@
     const personalDocumentId="cin:global-personal-document:v1:"+identifierDigest;
     const termsSha256=await sha256(utf8(agreementTerms));
     const domain={name:certificate.marriage_agreement.domain.name,version:certificate.marriage_agreement.domain.version,chainId:walletChainId};
-    const message={personalDocumentId,nodeBirthRecordSha256:birthDigest,cinBid,subjectAddress:walletAddress,agreementVersion:"1.0.0",termsSha256};
+    const message={personalDocumentId,nodeBirthRecordSha256:birthDigest,cinBid,subjectAddress:walletAddress,agreementVersion:"1.0.0",terms:agreementTerms,termsSha256};
     const walletPayload={
       domain,primaryType:"CINMarriageAgreement",
       types:{
