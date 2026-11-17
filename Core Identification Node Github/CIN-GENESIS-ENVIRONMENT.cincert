@@ -6,8 +6,13 @@
   "description": "Collects purpose-limited technical evidence about either the selected GitHub repository snapshot or the local extracted CIN package/runtime. The execution profile must be recorded in every generated manifest; GitHub repository inspection is not a local operating-system audit.",
   "execution": {
     "instruction": "RUN CERTIFICATE",
-    "runner": "cin-certificate-runner",
-    "action": "generate-genesis-environment-manifest"
+    "runner": "profile-selected-runner",
+    "action": "generate-genesis-environment-manifest",
+    "runners": {
+      "github_repository": "cin-github-lobby",
+      "local_package": "cin-certificate-runner"
+    },
+    "profile_selection": "The selected execution profile determines which runner, collection scope and output registration semantics apply."
   },
   "collection_profile": {
     "id": "cin.genesis-environment/1.0.0",
@@ -91,13 +96,15 @@
         "It does not inspect the operator's local operating system, hardware, local network interfaces or local filesystem outside the repository.",
         "It does not establish a private local CIN DataRoot transaction.",
         "The target repository is public; the generated manifest and its commit are publicly readable."
-      ]
+      ],
+      "runner": "cin-github-lobby"
     },
     "local_package": {
       "id": "cin.genesis-environment/local-package/1.0.0",
       "execution_mode": "local-certificate-runner",
       "collection_profile_reference": "collection_profile",
-      "description": "Uses the existing local package and runtime environment collection profile defined by this certificate."
+      "description": "Uses the existing local package and runtime environment collection profile defined by this certificate.",
+      "runner": "cin-certificate-runner"
     }
   },
   "output_profiles": {
