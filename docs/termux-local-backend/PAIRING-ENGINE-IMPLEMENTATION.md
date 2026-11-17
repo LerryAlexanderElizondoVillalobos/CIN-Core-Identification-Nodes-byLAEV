@@ -20,20 +20,20 @@ Implements local Lobby-to-Termux pairing, the local Manager interface, and durab
 
 ## Persistent local state
 
-The runtime uses `src/persistent-store.js` to save a versioned JSON state file. The default Termux path is:
+The runtime uses `src/local-state-manager.js` over `src/persistent-store.js` to save a versioned JSON state file. The Local State Manager exposes named state domains and owns runtime configuration; the Pairing Engine uses it as its persistence adapter. The default Termux path is:
 
 `$HOME/.cin-local-backend/data/runtime-state.json`
 
 Override the directory with `CIN_DATA_DIR`. The containing directory is created with mode `0700`; the state file is written with mode `0600`. Writes use a temporary file followed by atomic rename so an interrupted write does not replace the previous complete snapshot.
 
-The state file contains:
+Snapshot schema version 2 adds named runtime domains while preserving the version-1 pairing arrays during migration. File contents are synchronized before atomic replacement. See [LOCAL-STATE-MANAGER.md](./LOCAL-STATE-MANAGER.md) for the state-domain contract.\n\nThe state file contains:
 - Pairing requests, their lifecycle states and polling secrets.
 - Session metadata, active session credentials, expiry and revocation state.
 - A bounded lifecycle event history (latest 2,000 events).
 
 On startup the engine restores the snapshot and immediately evaluates expirations. Active sessions that have not expired remain active after a normal backend restart. Expired sessions are marked `EXPIRED`; revoked sessions remain recorded as `REVOKED`. Request and session history is available to the local Manager. The Manager displays only metadata and event history, never session or polling secrets.
 
-The state file is private local application data, not a backup or synchronization service. Android uninstall, manual deletion, storage corruption or loss of the Termux home directory can still remove it. Current persistence uses filesystem permissions and Termux's private storage; application-level encryption and export/import are not part of this increment. Users should not copy this file into the public repository or shared storage.
+The state file is private local application data, not a backup or synchronization service. A malformed or unsupported snapshot stops startup visibly instead of silently resetting state. Android uninstall, manual deletion, storage corruption or loss of the Termux home directory can still remove it. Current persistence uses filesystem permissions and Termux's private storage; application-level encryption and export/import are not part of this increment. Users should not copy this file into the public repository or shared storage.
 
 ## Implemented routes
 
