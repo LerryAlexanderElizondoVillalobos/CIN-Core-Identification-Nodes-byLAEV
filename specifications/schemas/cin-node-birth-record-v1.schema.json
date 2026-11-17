@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cin.bylaev.org/schemas/cin-node-birth-record-v1.schema.json",
+  "title": "CIN Node Birth Record v1",
+  "description": "Common CIN document envelope for a technical node birth record. Structural validation only; cryptographic, trust, authorization and reference checks require independent services.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["document", "integrity", "proofs"],
+  "properties": {
+    "document": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["document_id", "document_type", "schema_version", "created_at", "references", "payload"],
+      "properties": {
+        "document_id": {"type": "string", "minLength": 1},
+        "document_type": {"const": "cin.node-birth-record"},
+        "schema_version": {"const": "1.0.0"},
+        "created_at": {"type": "string", "format": "date-time"},
+        "issuer": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["issuer_id"],
+          "properties": {"issuer_id": {"type": "string", "minLength": 1}}
+        },
+        "references": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["reference_type", "document_id"],
+            "properties": {
+              "reference_type": {"type": "string", "minLength": 1},
+              "document_id": {"type": "string", "minLength": 1},
+              "digest_algorithm": {"const": "sha-256"},
+              "digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+            }
+          }
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["birth_event", "source_genesis", "identifiers", "derivation_profile", "authorization"],
+          "properties": {
+            "birth_event": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["event_type", "status"],
+              "properties": {
+                "event_type": {"const": "cin.node.birth"},
+                "status": {"enum": ["prepared", "authorized", "committed", "verified"]}
+              }
+            },
+            "source_genesis": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["document_type", "schema_version", "manifest_id", "manifest_sha256"],
+              "properties": {
+                "document_type": {"const": "cin.genesis-environment-manifest"},
+                "schema_version": {"type": "string", "minLength": 1},
+                "manifest_id": {"type": "string", "minLength": 1},
+                "raw_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+                "manifest_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+              }
+            },
+            "identifiers": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["cin_nid", "cin_nsid", "cin_bid", "cin_ref"],
+              "properties": {
+                "cin_nid": {"type": "string", "pattern": "^cin:nid:v1:[a-f0-9]{64}$"},
+                "cin_nsid": {"type": "string", "pattern": "^cin:nsid:v1:[a-f0-9]{64}$"},
+                "cin_bid": {"type": "string", "pattern": "^cin:bid:v1:[a-f0-9]{64}$"},
+                "cin_ref": {"type": "string", "minLength": 1, "maxLength": 64},
+                "cin_enid": {"type": "string"},
+                "cin_pvid": {"type": "string"}
+              }
+            },
+            "derivation_profile": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["profile_id", "version", "digest_algorithm", "canonicalization"],
+              "properties": {
+                "profile_id": {"const": "cin.node-identifier-derivation"},
+                "version": {"const": "1.0.0"},
+                "digest_algorithm": {"const": "sha-256"},
+                "canonicalization": {"const": "RFC8785-JCS"}
+              }
+            },
+            "authorization": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["operation", "decision_document_id"],
+              "properties": {
+                "operation": {"const": "cin.node.birth"},
+                "decision_document_id": {"type": "string", "minLength": 1}
+              }
+            }
+          }
+        }
+      }
+    },
+    "integrity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["canonicalization", "digest_algorithm", "digest"],
+      "properties": {
+        "canonicalization": {"const": "RFC8785-JCS"},
+        "digest_algorithm": {"const": "sha-256"},
+        "digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+      }
+    },
+    "proofs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["proof_id", "proof_type", "purpose", "signature_suite", "verification_method", "created_at", "signature_value"],
+        "properties": {
+          "proof_id": {"type": "string", "minLength": 1},
+          "proof_type": {"type": "string", "minLength": 1},
+          "purpose": {"type": "string", "minLength": 1},
+          "signature_suite": {"type": "string", "minLength": 1},
+          "verification_method": {"type": "string", "minLength": 1},
+          "created_at": {"type": "string", "format": "date-time"},
+          "signature_value": {"type": "string", "minLength": 1}
+        }
+      }
+    }
+  }
+}
