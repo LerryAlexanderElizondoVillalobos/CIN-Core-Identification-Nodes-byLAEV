@@ -682,7 +682,6 @@
     }
   }
 
-  const MARRIAGE_TERMS = "By signing this CIN Node-Personal Document Marriage Agreement, the holder of the connected EVM address confirms control of that address and accepts its association with the CIN Global Personal Document generated for that address and the referenced CIN node birth record. This is a cryptographic commitment to the stated node-document relationship. It does not by itself establish civil attributes, legal status, government recognition, global uniqueness, issuer authorization or the truth of personal claims.";
   const MARRIAGE_TYPES = {CINMarriageAgreement:[
     {name:"personalDocumentId",type:"string"},{name:"nodeBirthRecordSha256",type:"string"},
     {name:"cinBid",type:"string"},{name:"subjectAddress",type:"address"},
@@ -716,7 +715,8 @@
     const certificateResponse=await fetch("./CIN-GLOBAL-PERSONAL-DOCUMENT.cincert",{cache:"no-store"});
     if(!certificateResponse.ok) throw new Error("Certificate 3 could not be loaded from the Lobby.");
     const certificate=await certificateResponse.json();
-    if(certificate.certificate_type!=="cin.global-personal-document-marriage"||certificate.certificate_version!=="1.0.0"||certificate.execution?.action!=="create-global-personal-document-and-sign-node-marriage") throw new Error("Certificate 3 descriptor is invalid or its execution action is unsupported.");
+    if(certificate.certificate_type!=="cin.global-personal-document-marriage"||certificate.certificate_version!=="1.0.0"||certificate.execution?.action!=="create-global-personal-document-and-sign-node-marriage"||!certificate.marriage_agreement?.terms||certificate.outputs?.personal_document?.path!==PERSONAL_DOCUMENT_PATH||certificate.outputs?.marriage_agreement?.path!==MARRIAGE_PATH) throw new Error("Certificate 3 descriptor is invalid, incomplete or its execution paths are unsupported.");
+    const agreementTerms=certificate.marriage_agreement.terms;
     const birthResult=await readPublicJson(BIRTH_PATH);
     if(!birthResult) throw new Error("The CIN 001 Node Birth candidate has not been saved. Complete Certificate 2 first.");
     const birth=birthResult.value;
@@ -726,11 +726,11 @@
     const cinBid=birth.node&&birth.node.cin_bid;
     if(typeof cinBid!=="string"||!cinBid) throw new Error("The Node Birth document does not contain CIN-BID.");
     const birthDigest=await jsonSha256(birth),subject=walletAddress.toLowerCase();
-    const identifierInput={domain:"cin.global-personal-document.identifier",version:"1",subject_address:subject,node_birth_record_sha256:birthDigest};
+    const identifierInput={domain:certificate.identifier_derivation.domain,version:certificate.identifier_derivation.version,subject_address:subject,node_birth_record_sha256:birthDigest};
     const identifierDigest=await jsonSha256(identifierInput);
     const personalDocumentId="cin:global-personal-document:v1:"+identifierDigest;
-    const termsSha256=await sha256(utf8(MARRIAGE_TERMS));
-    const domain={name:"CIN Node-Personal Document Marriage",version:"1",chainId:walletChainId};
+    const termsSha256=await sha256(utf8(agreementTerms));
+    const domain={name:certificate.marriage_agreement.domain.name,version:certificate.marriage_agreement.domain.version,chainId:walletChainId};
     const message={personalDocumentId,nodeBirthRecordSha256:birthDigest,cinBid,subjectAddress:walletAddress,agreementVersion:"1.0.0",termsSha256};
     const walletPayload={
       domain,primaryType:"CINMarriageAgreement",
@@ -761,7 +761,7 @@
         document_type:"cin.node-personal-document-marriage",schema_version:"1.0.0",certificate:{certificate_id:certificate.certificate_id,version:certificate.certificate_version},
         agreement_id:"cin:node-personal-document-marriage:v1:"+identifierDigest,status:"SIGNED_CANDIDATE",signed_at:signedAt,
         parties:{node:{node_id:NODE,cin_bid:cinBid,birth_document_sha256:birthDigest},personal_document:{document_id:personalDocumentId,subject_address:walletAddress}},
-        acceptance:{accepted:true,agreement_version:"1.0.0",terms:MARRIAGE_TERMS,terms_sha256:termsSha256},
+        acceptance:{accepted:true,agreement_version:"1.0.0",terms:agreementTerms,terms_sha256:termsSha256},
         signature:{standard:"EIP-712",method:"eth_signTypedData_v4",domain,primary_type:"CINMarriageAgreement",message,signature,recovered_signer:recovered,verification_status:"VERIFIED",chain_id:walletChainId},
         lifecycle:{node_birth_status:isCandidate?"PREVIEW_NOT_ISSUED":"BORN",personal_document_status:personalDocument.status,marriage_status:"SIGNED_CANDIDATE_NOT_AUTHORITATIVE",authoritative_registration:false},
         interpretation:"The signature is the holder's cryptographic acceptance of the specific node-to-document association. It is not a blockchain transaction, government registration, proof of civil attributes or issuer certification."
