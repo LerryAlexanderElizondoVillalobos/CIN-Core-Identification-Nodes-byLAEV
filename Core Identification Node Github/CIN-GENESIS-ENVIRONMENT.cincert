@@ -112,15 +112,17 @@
       "document_type": "cin.genesis-environment-manifest",
       "schema_version": "1.0.0",
       "storage": "GitHub repository Contents API",
-      "registration": "public_repository_progress_record",
-      "authoritative_private_local_record": false
+      "registration": "public_repository_progress_record_not_private_cin_record",
+      "authoritative_private_local_record": false,
+      "schema_status": "REPOSITORY_PROGRESS_PROFILE_PENDING_TYPE_SPECIFIC_JSON_SCHEMA"
     },
     "local_package": {
       "document_type": "cin.genesis-environment-manifest",
       "schema_version": "1.0.0",
       "storage": "CIN DataRoot TransactionalStore",
       "registration": "first-logical-record",
-      "authoritative_private_local_record": true
+      "authoritative_private_local_record": true,
+      "schema_status": "LOCAL_GENESIS_MANIFEST_SCHEMA_AND_COMMON_DOCUMENT_ENVELOPE_PENDING_REVIEW"
     }
   },
   "default_execution_profile": "local_package"
