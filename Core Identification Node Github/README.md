@@ -56,9 +56,15 @@ A Genesis Manifest created by the GitHub Pages profile is a public repository pr
 
 The browser-generated result is saved as a separate `cin.node-birth-candidate` progress artifact in `CIN-001-NODE-BIRTH-CANDIDATE.json`, with status `PREVIEW_NOT_ISSUED`. It is not the authoritative `cin.node-birth-record` document. The identifier derivation profile remains a candidate and is not production-approved. Saving the JSON to GitHub does not supply birth authorization, issuer signature, authoritative private local storage registration or independent birth verification. The header marks all derived identifiers as candidates and must not present CIN 001 as BORN.
 
-## Certificate 3 — CIN Personal Registration and Credential
+## Certificate 3 — CIN Global Personal Document and Node Marriage
 
-`CIN-PERSONAL-REGISTRATION.cincert` is a development candidate. It requires:
+`CIN-GLOBAL-PERSONAL-DOCUMENT.cincert` is the third certificate development candidate. It consumes the saved CIN 001 Node Birth document and a MetaMask-compatible EVM wallet. It derives a deterministic personal-document identifier from the normalized wallet address and the SHA-256 digest of the complete Node Birth document, then requests an EIP-712 signature accepting the association between the node and the generated personal document. Signature bytes are not used as identifier entropy, so the same address and same immutable Node Birth document always produce the same identifier.
+
+The current Node Birth artifact is `PREVIEW_NOT_ISSUED`; therefore the generated personal document and marriage agreement remain non-authoritative candidates. The wallet signature proves control of the address and acceptance of the displayed association, not civil attributes or government recognition. Public repository publication requires explicit confirmation.
+
+## Certificate 4 — CIN Personal Registration and Credential
+
+`CIN-PERSONAL-REGISTRATION.cincert` remains a later-stage development candidate. It requires:
 
 - an authoritative, verified Node Birth Record;
 - an explicit person-to-node association event;
