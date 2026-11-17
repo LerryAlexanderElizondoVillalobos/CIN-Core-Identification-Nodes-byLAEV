@@ -940,11 +940,30 @@
     }
   }
 
+  async function inspectLocalWorkspace() {
+    const button=$("inspectLocalWorkspaceButton");
+    const summary=$("localWorkspaceSummary");
+    if(button) button.disabled=true;
+    try {
+      const base=cfg.localBackendUrl||"http://127.0.0.1:8787";
+      const response=await fetch(base+"/v1/local/tree");
+      const result=await response.json().catch(()=>null);
+      if(!response.ok || !result) throw new Error((result&&result.error)||"Termux local workspace is unavailable. Start the CIN backend.");
+      summary.hidden=false;
+      summary.textContent=JSON.stringify({root:result.root,entries:result.entries||[],entry_count:(result.entries||[]).length},null,2);
+      setStatus("localWorkspaceStatus","Connected to Termux. The local CIN directory is accessible; "+(result.entries||[]).length+" top-level entries found.","ok");
+    } catch(error) {
+      setStatus("localWorkspaceStatus",error.message,"error");
+    } finally {
+      if(button) button.disabled=false;
+    }
+  }
+
   async function publicLoadProfile() {
     try { await loadNodeProfile(false); } catch {}
   }
 
-  $("connectGithubButton").addEventListener("click",()=>beginGitHubLink().catch(error=>setStatus("githubStatus",error.message,"error")));
+  $("inspectLocalWorkspaceButton").addEventListener("click",inspectLocalWorkspace);\n  $("connectGithubButton").addEventListener("click",()=>beginGitHubLink().catch(error=>setStatus("githubStatus",error.message,"error")));
   $("disconnectGithubButton").addEventListener("click",disconnect);
   $("generateGenesisButton").addEventListener("click",saveGenesis);
   $("generateBirthButton").addEventListener("click",generateBirthCandidate);
