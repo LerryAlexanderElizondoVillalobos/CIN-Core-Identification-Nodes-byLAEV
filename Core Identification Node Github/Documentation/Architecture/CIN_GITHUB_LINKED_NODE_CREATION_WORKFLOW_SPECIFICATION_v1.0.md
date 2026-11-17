@@ -180,4 +180,4 @@ The public Genesis Lobby now contains:
 
 The connection control remains in a setup-required state until the GitHub App is registered/installed and the OAuth exchange Worker is deployed and configured. The user-facing connection flow must not be reported as operational until that external setup and an end-to-end save test succeed.
 
-The browser-generated birth result remains `PREVIEW_NOT_ISSUED`. The public GitHub commit is a progress record, not proof of private local storage registration, authorization, signature or independent authoritative verification.
+The browser-generated birth result is a `cin.node-birth-candidate` with status `PREVIEW_NOT_ISSUED`. The authoritative `cin.node-birth-record` remains pending the reviewed document schema/envelope, birth authorization, issuer/signature policy, private local durable commit and independent verification. The public GitHub commit is a progress record, not proof of any of those authoritative lifecycle events.
