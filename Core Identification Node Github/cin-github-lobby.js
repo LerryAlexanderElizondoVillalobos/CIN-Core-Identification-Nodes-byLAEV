@@ -165,7 +165,7 @@
 
   async function beginGitHubLink() {
     if(!configReady()) {
-      setStatus("githubStatus","GitHub linking is not configured yet. Register the GitHub App, deploy the OAuth exchange Worker and fill in the public client ID and Worker URL in cin-github-config.js.","error");
+      setStatus("githubStatus","GitHub linking is not configured yet. Register the GitHub App and configure its public Client ID in cin-github-config.js. The OAuth code exchange runs in the local Termux backend.","error");
       return;
     }
     if(!window.isSecureContext || !crypto.subtle) {
@@ -210,7 +210,8 @@
     $("generateBirthButton").disabled=!connected || !genesisManifest;
   }
 
-  function disconnect() {\n    fetch((cfg.localBackendUrl||"http://127.0.0.1:8787")+"/v1/session/disconnect",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"}).catch(()=>{});
+  function disconnect() {
+    fetch((cfg.localBackendUrl||"http://127.0.0.1:8787")+"/v1/session/disconnect",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"}).catch(()=>{});
     accessToken=null; tokenExpiresAt=0; operator=null;
     renderConnection();
     setStatus("githubStatus","Disconnected. No GitHub token is stored in browser storage.","info");
