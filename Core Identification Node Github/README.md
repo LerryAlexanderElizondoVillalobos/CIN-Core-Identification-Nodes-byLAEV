@@ -54,7 +54,7 @@ A Genesis Manifest created by the GitHub Pages profile is a public repository pr
 
 `CIN-NODE-BIRTH.cincert` is version 1.0.0. The GitHub Lobby consumes the saved Genesis Manifest and generates a birth candidate using the labels declared by this certificate.
 
-The browser-generated result is saved as `CIN-001-NODE-BIRTH-CANDIDATE.json` with status `PREVIEW_NOT_ISSUED`. The identifier derivation profile remains a candidate and is not production-approved. Saving the JSON to GitHub does not supply birth authorization, issuer signature, authoritative private local storage registration or independent birth verification. The header marks all derived identifiers as candidates and must not present CIN 001 as BORN.
+The browser-generated result is saved as a separate `cin.node-birth-candidate` progress artifact in `CIN-001-NODE-BIRTH-CANDIDATE.json`, with status `PREVIEW_NOT_ISSUED`. It is not the authoritative `cin.node-birth-record` document. The identifier derivation profile remains a candidate and is not production-approved. Saving the JSON to GitHub does not supply birth authorization, issuer signature, authoritative private local storage registration or independent birth verification. The header marks all derived identifiers as candidates and must not present CIN 001 as BORN.
 
 ## Certificate 3 — CIN Personal Registration and Credential
 
