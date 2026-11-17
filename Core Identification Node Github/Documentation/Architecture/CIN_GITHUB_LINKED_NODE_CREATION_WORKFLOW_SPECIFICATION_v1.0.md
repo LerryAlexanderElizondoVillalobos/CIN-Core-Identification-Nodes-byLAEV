@@ -76,9 +76,9 @@ The repository manifest references the repository snapshot (commit and tree) ins
 
 ### Certificate 2 — CIN Node Birth Certificate
 
-Consumes the complete Genesis Environment Manifest. Its outputs include the technical node identifiers and the Node Birth Record, referencing the complete Genesis source.
+Consumes the complete Genesis Environment Manifest. The **local authoritative profile** is intended to produce the CIN Node Birth Record after the required lifecycle conditions pass. The **GitHub repository profile** currently produces only a separate `cin.node-birth-candidate` progress artifact with status `PREVIEW_NOT_ISSUED`.
 
-The current identifier derivation profile remains a proposed candidate until approved and supported by independent conformance vectors. The existing browser implementation generates PREVIEW_NOT_ISSUED only. Saving this candidate JSON to GitHub records development progress; it does not create a BORN state, supply authorization, sign the record or register a local authoritative birth.
+The current identifier derivation profile remains a proposed candidate until approved and supported by independent conformance vectors. Saving the browser candidate JSON to GitHub records development progress; it does not create a `BORN` state, supply authorization, sign the record or register a local authoritative birth.
 
 A node may be presented as BORN only after the lifecycle contract's separate authorization, record commit and independent verification conditions pass.
 
@@ -119,7 +119,7 @@ The public-personal-registration path is a public projection only. Full personal
 
 ## 6. Lobby header
 
-The header is a read model reconstructed from CIN 001/registry/CIN-001-NODE-PROFILE.json and the authoritative records it references.
+The header is a read model reconstructed from `CIN 001/registry/CIN-001-NODE-PROFILE.json` and the repository records it references. During the web-preview stage these references are public progress artifacts; authoritative local records will become the source only after their issuance and registration contracts are implemented.
 
 Expected fields as they become available:
 
@@ -129,7 +129,9 @@ Expected fields as they become available:
 - CIN-NSID.
 - CIN-BID.
 - CIN-REF.
+- CIN-ENID and CIN-PVID when their conditional derivation prerequisites apply.
 - CIN Personal Number and allocation status, after personal registration.
+- CIN Personal Registration ID and CIN Personal Credential ID/status, when issued and explicitly approved for public display.
 - Node lifecycle status and latest record reference.
 
 Before birth authorization and commit succeed, node identifiers must be marked as derived candidate/preview values. The header must never convert a draft into a BORN status merely because it is present in a repository file.
@@ -175,7 +177,7 @@ The public Genesis Lobby now contains:
 - A Genesis Manifest save workflow with GitHub read-back verification.
 - A birth-candidate workflow that consumes the saved Genesis Manifest and the domain labels from the published Node Birth Certificate.
 - GitHub progress and node-profile projections.
-- A header reconstructed from the saved CIN 001 node profile.
+- A header reconstructed from the saved CIN 001 node profile, including core and conditional node identifiers plus future personal-registration references.
 - A separate, gated Personal Registration certificate stage.
 
 The connection control remains in a setup-required state until the GitHub App is registered/installed and the OAuth exchange Worker is deployed and configured. The user-facing connection flow must not be reported as operational until that external setup and an end-to-end save test succeed.
