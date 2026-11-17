@@ -1,14 +1,9 @@
 {
   "name": "cin-local-backend",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "private": true,
-  "description": "Local loopback backend foundation for CIN Genesis Lobby on Android Termux",
+  "description": "Persistent local runtime and pairing backend for CIN Genesis Lobby on Android Termux",
   "type": "module",
-  "engines": {
-    "node": ">=22"
-  },
-  "scripts": {
-    "start": "node src/server.js",
-    "test": "node --test"
-  }
+  "engines": { "node": ">=22" },
+  "scripts": { "start": "node src/server.js", "test": "node --test" }
 }
