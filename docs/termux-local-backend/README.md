@@ -38,6 +38,7 @@ This proposal introduces a new Termux Device Flow path. It is a migration, not a
 - [Authentication](AUTHENTICATION.md)
 - [Permissions and storage](PERMISSIONS-AND-STORAGE.md)
 - [Local State Manager](LOCAL-STATE-MANAGER.md)
+- [Runtime Configuration Manager](RUNTIME-CONFIGURATION-MANAGER.md)
 - [Pairing Engine implementation](PAIRING-ENGINE-IMPLEMENTATION.md)
 - [Termux installation and Manager](TERMUX-INSTALLATION.md)
 - [Test plan](TEST-PLAN.md)
