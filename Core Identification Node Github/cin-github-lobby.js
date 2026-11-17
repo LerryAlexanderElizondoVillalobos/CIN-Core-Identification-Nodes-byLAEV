@@ -11,6 +11,8 @@
   const BIRTH_PATH = NODE_ROOT + "records/birth/CIN-001-NODE-BIRTH-CANDIDATE.json";
   const PROGRESS_PATH = NODE_ROOT + "state/CIN-001-PROGRESS.json";
   const PROFILE_PATH = NODE_ROOT + "registry/CIN-001-NODE-PROFILE.json";
+  const PERSONAL_DOCUMENT_PATH = NODE_ROOT + "records/personal-document/CIN-001-GLOBAL-PERSONAL-DOCUMENT-CANDIDATE.json";
+  const MARRIAGE_PATH = NODE_ROOT + "records/marriage/CIN-001-NODE-PERSONAL-DOCUMENT-MARRIAGE.json";
   const $ = id => document.getElementById(id);
 
   let accessToken = null;
@@ -20,6 +22,8 @@
   let genesisRaw = null;
   let genesisGitCommit = null;
   let profile = null;
+  let walletAddress = null;
+  let walletChainId = null;
 
   const setStatus = (id, message, kind) => {
     const el = $(id);
@@ -678,6 +682,122 @@
     }
   }
 
+  const MARRIAGE_TERMS = "By signing this CIN Node-Personal Document Marriage Agreement, the holder of the connected EVM address confirms control of that address and accepts its association with the CIN Global Personal Document generated for that address and the referenced CIN node birth record. This is a cryptographic commitment to the stated node-document relationship. It does not by itself establish civil attributes, legal status, government recognition, global uniqueness, issuer authorization or the truth of personal claims.";
+  const MARRIAGE_TYPES = {CINMarriageAgreement:[
+    {name:"personalDocumentId",type:"string"},{name:"nodeBirthRecordSha256",type:"string"},
+    {name:"cinBid",type:"string"},{name:"subjectAddress",type:"address"},
+    {name:"agreementVersion",type:"string"},{name:"termsSha256",type:"string"}
+  ]};
+
+  async function connectMetaMask(){
+    const provider=window.ethereum;
+    if(!provider||typeof provider.request!=="function") throw new Error("MetaMask or a compatible EVM wallet was not detected.");
+    if(!window.ethers||typeof window.ethers.verifyTypedData!=="function") throw new Error("EIP-712 verification library did not load. Refresh the Lobby.");
+    const accounts=await provider.request({method:"eth_requestAccounts"});
+    if(!Array.isArray(accounts)||!accounts[0]) throw new Error("The wallet did not provide an account.");
+    walletAddress=window.ethers.getAddress(accounts[0]);
+    walletChainId=Number(BigInt(await provider.request({method:"eth_chainId"})));
+    if(!Number.isSafeInteger(walletChainId)||walletChainId<=0) throw new Error("Invalid EVM chain ID.");
+    $("walletAddressValue").textContent=walletAddress;
+    $("walletChainValue").textContent=String(walletChainId);
+    $("walletStatusBadge").textContent="Wallet connected";
+    $("createPersonalDocumentButton").disabled=false;
+    setStatus("personalDocumentStatus","Wallet connected. The address will be used as the document subject; no private key leaves the wallet.","ok");
+  }
+
+  function downloadJsonFile(filename,value){
+    const blob=new Blob([JSON.stringify(value,null,2)+"\\n"],{type:"application/json"});
+    const url=URL.createObjectURL(blob),link=document.createElement("a");
+    link.href=url;link.download=filename;document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(url);
+  }
+
+  async function createPersonalDocument(){
+    if(!walletAddress||!walletChainId) throw new Error("Connect MetaMask before creating the CIN personal document.");
+    const birthResult=await readPublicJson(BIRTH_PATH);
+    if(!birthResult) throw new Error("The CIN 001 Node Birth candidate has not been saved. Complete Certificate 2 first.");
+    const birth=birthResult.value;
+    const isCandidate=birth.document_type==="cin.node-birth-candidate"&&birth.candidate_status==="PREVIEW_NOT_ISSUED";
+    const isBorn=birth.document_type==="cin.node-birth-record"&&birth.status==="BORN";
+    if(!isCandidate&&!isBorn) throw new Error("Unsupported Node Birth document type or lifecycle status.");
+    const cinBid=birth.node&&birth.node.cin_bid;
+    if(typeof cinBid!=="string"||!cinBid) throw new Error("The Node Birth document does not contain CIN-BID.");
+    const birthDigest=await jsonSha256(birth),subject=walletAddress.toLowerCase();
+    const identifierInput={domain:"cin.global-personal-document.identifier",version:"1",subject_address:subject,node_birth_record_sha256:birthDigest};
+    const identifierDigest=await jsonSha256(identifierInput);
+    const personalDocumentId="cin:global-personal-document:v1:"+identifierDigest;
+    const termsSha256=await sha256(utf8(MARRIAGE_TERMS));
+    const domain={name:"CIN Node-Personal Document Marriage",version:"1",chainId:walletChainId};
+    const message={personalDocumentId,nodeBirthRecordSha256:birthDigest,cinBid,subjectAddress:walletAddress,agreementVersion:"1.0.0",termsSha256};
+    const walletPayload={
+      domain,primaryType:"CINMarriageAgreement",
+      types:{
+        EIP712Domain:[{name:"name",type:"string"},{name:"version",type:"string"},{name:"chainId",type:"uint256"}],
+        CINMarriageAgreement:MARRIAGE_TYPES.CINMarriageAgreement
+      },message
+    };
+    if(!window.confirm("MetaMask will ask you to sign a readable EIP-712 agreement accepting the association between CIN 001 and the CIN Global Personal Document for this wallet. The identifier is deterministic for this address and the same Node Birth document. Current input: "+(isCandidate?"PREVIEW_NOT_ISSUED candidate":"authoritative BORN record")+". Continue?")) return;
+    $("createPersonalDocumentButton").disabled=true;
+    setPill("personalDocumentState","Awaiting wallet signature");
+    setStatus("personalDocumentStatus","Review the CIN Node-Personal Document Marriage Agreement in MetaMask. No transaction or gas payment is requested.","info");
+    try{
+      const signature=await window.ethereum.request({method:"eth_signTypedData_v4",params:[walletAddress,JSON.stringify(walletPayload)]});
+      const recovered=window.ethers.getAddress(window.ethers.verifyTypedData(domain,MARRIAGE_TYPES,message,signature));
+      if(recovered.toLowerCase()!==walletAddress.toLowerCase()) throw new Error("EIP-712 signature verification failed: recovered signer differs from the connected wallet.");
+      const signedAt=new Date().toISOString();
+      const personalDocument={
+        document_type:"cin.global-personal-document-candidate",schema_version:"1.0.0",document_id:personalDocumentId,
+        status:isCandidate?"PREVIEW_NOT_ISSUED":"SIGNED_PENDING_ISSUER_VERIFICATION",generated_at:signedAt,
+        subject:{evm_address:walletAddress,evm_chain_id:walletChainId},
+        node_reference:{node_id:NODE,cin_bid:cinBid,cin_nid:birth.node&&birth.node.cin_nid||null,birth_document_type:birth.document_type,birth_document_path:BIRTH_PATH,birth_document_sha256:birthDigest,birth_document_status:isCandidate?"PREVIEW_NOT_ISSUED":"BORN"},
+        identifier_derivation:{profile_id:"cin.global-personal-document.identifier/1.0.0",algorithm:"SHA-256",canonicalization:"RFC 8785 JCS",input:identifierInput,output:personalDocumentId,signature_bytes_excluded:true,determinism:"Same EVM address and same immutable Node Birth document produce the same identifier. Signature bytes are proof of control and consent, not identifier entropy."},
+        marriage_agreement_reference:MARRIAGE_PATH,
+        issuance:{status:isCandidate?"PREVIEW_NOT_ISSUED":"PENDING_ISSUER_VERIFICATION",authoritative:false,reason:isCandidate?"The referenced Node Birth input is a non-authoritative browser candidate.":"Issuer authorization, authoritative storage and independent issuance verification remain separate steps."}
+      };
+      const marriageAgreement={
+        document_type:"cin.node-personal-document-marriage",schema_version:"1.0.0",
+        agreement_id:"cin:node-personal-document-marriage:v1:"+identifierDigest,status:"SIGNED_CANDIDATE",signed_at:signedAt,
+        parties:{node:{node_id:NODE,cin_bid:cinBid,birth_document_sha256:birthDigest},personal_document:{document_id:personalDocumentId,subject_address:walletAddress}},
+        acceptance:{accepted:true,agreement_version:"1.0.0",terms:MARRIAGE_TERMS,terms_sha256:termsSha256},
+        signature:{standard:"EIP-712",method:"eth_signTypedData_v4",domain,primary_type:"CINMarriageAgreement",message,signature,recovered_signer:recovered,verification_status:"VERIFIED",chain_id:walletChainId},
+        lifecycle:{node_birth_status:isCandidate?"PREVIEW_NOT_ISSUED":"BORN",personal_document_status:personalDocument.status,marriage_status:"SIGNED_CANDIDATE_NOT_AUTHORITATIVE",authoritative_registration:false},
+        interpretation:"The signature is the holder's cryptographic acceptance of the specific node-to-document association. It is not a blockchain transaction, government registration, proof of civil attributes or issuer certification."
+      };
+      let persistence="LOCAL_DOWNLOAD_ONLY";
+      if(accessToken&&window.confirm("The wallet address, signature and marriage agreement will be committed to the PUBLIC CIN GitHub repository and become publicly readable. Publish both records?")){
+        const docSaved=await saveJson(PERSONAL_DOCUMENT_PATH,personalDocument,"CIN 001: record signed global personal document candidate",true);
+        if(docSaved.existing&&docSaved.value?.document_id!==personalDocumentId) throw new Error("A different personal document exists at the target path; no record was overwritten.");
+        const marriageSaved=await saveJson(MARRIAGE_PATH,marriageAgreement,"CIN 001: record signed node-personal document marriage agreement",true);
+        if(marriageSaved.existing&&marriageSaved.value?.agreement_id!==marriageAgreement.agreement_id) throw new Error("A different marriage agreement exists at the target path; no record was overwritten.");
+        persistence="PUBLIC_GITHUB_RECORDS_SAVED";
+        await recordProgress("CIN_GLOBAL_PERSONAL_DOCUMENT_MARRIAGE_SIGNED",{document_id:personalDocumentId,agreement_id:marriageAgreement.agreement_id,subject_address:walletAddress,node_birth_record_sha256:birthDigest,signature_verification:"VERIFIED",persistence});
+        await updateNodeProfile({personal_document:{document_id:personalDocumentId,agreement_id:marriageAgreement.agreement_id,status:personalDocument.status,marriage_status:marriageAgreement.status,path:PERSONAL_DOCUMENT_PATH,agreement_path:MARRIAGE_PATH,subject_address:walletAddress},identifiers:{cin_global_personal_document_id:{value:personalDocumentId,status:personalDocument.status},cin_personal_document_address:{value:walletAddress,status:"PUBLIC_WALLET_ADDRESS"}}});
+        await loadNodeProfile(true);
+      }else{
+        downloadJsonFile("CIN-001-GLOBAL-PERSONAL-DOCUMENT-CANDIDATE.json",personalDocument);
+        downloadJsonFile("CIN-001-NODE-PERSONAL-DOCUMENT-MARRIAGE.json",marriageAgreement);
+      }
+      $("personalDocumentSummary").hidden=false;
+      $("personalDocumentSummary").textContent=JSON.stringify({document_id:personalDocumentId,agreement_id:marriageAgreement.agreement_id,subject_address:walletAddress,chain_id:walletChainId,node_birth_record_sha256:birthDigest,recovered_signer:recovered,signature_verification:"VERIFIED",persistence,personal_document_status:personalDocument.status,marriage_status:marriageAgreement.status},null,2);
+      setPill("personalDocumentState",persistence==="PUBLIC_GITHUB_RECORDS_SAVED"?"Signed and saved":"Signed · local files");
+      setStatus("personalDocumentStatus","MetaMask signature verified. The same address and same Node Birth document produce the same personal-document identifier. "+(persistence==="PUBLIC_GITHUB_RECORDS_SAVED"?"Both records were saved and read back from GitHub.":"JSON files were downloaded locally; connect GitHub to publish repository progress."),"ok");
+    }catch(error){setPill("personalDocumentState","Not completed");setStatus("personalDocumentStatus",error.message,"error");}
+    finally{$("createPersonalDocumentButton").disabled=!walletAddress;}
+  }
+
+  function watchWalletChanges(){
+    if(!window.ethereum||typeof window.ethereum.on!=="function")return;
+    window.ethereum.on("accountsChanged",accounts=>{
+      walletAddress=accounts&&accounts[0]?window.ethers.getAddress(accounts[0]):null;
+      $("walletAddressValue").textContent=walletAddress||"Not connected";
+      $("walletStatusBadge").textContent=walletAddress?"Wallet connected":"Wallet disconnected";
+      $("createPersonalDocumentButton").disabled=!walletAddress;
+    });
+    window.ethereum.on("chainChanged",chainHex=>{
+      walletChainId=Number(BigInt(chainHex));$("walletChainValue").textContent=String(walletChainId);
+      $("personalDocumentStatus").textContent="Wallet network changed. The next agreement will use the new EIP-712 domain.";
+    });
+  }
+
   async function updateNodeProfile(patch) {
     const current=await readJson(PROFILE_PATH,true);
     const value=current?current.value:{
@@ -700,10 +820,12 @@
       genesis:null,
       birth:null,
       personal_registration:{status:"NOT_STARTED"},
+      personal_document:{status:"NOT_STARTED"},
       updated_at:null
     };
     if(patch.genesis) value.genesis=Object.assign({},value.genesis||{},patch.genesis);
     if(patch.birth) value.birth=Object.assign({},value.birth||{},patch.birth);
+    if(patch.personal_document) value.personal_document=Object.assign({},value.personal_document||{},patch.personal_document);
     if(patch.identifiers) value.identifiers=Object.assign({},value.identifiers||{},patch.identifiers);
     value.lifecycle_status=value.birth ? "BIRTH_CANDIDATE_NOT_ISSUED" : "GENESIS_REPOSITORY_SNAPSHOT_RECORDED";
     value.updated_at=new Date().toISOString();
@@ -727,6 +849,7 @@
       ["CIN-ENID · CONDITIONAL",ids.cin_enid && ids.cin_enid.value,ids.cin_enid && ids.cin_enid.status],
       ["CIN-PVID · CONDITIONAL",ids.cin_pvid && ids.cin_pvid.value,ids.cin_pvid && ids.cin_pvid.status],
       ["CIN-REF",ids.cin_ref && ids.cin_ref.value,ids.cin_ref && ids.cin_ref.status],
+      ["CIN GLOBAL PERSONAL DOCUMENT ID",ids.cin_global_personal_document_id && ids.cin_global_personal_document_id.value,ids.cin_global_personal_document_id && ids.cin_global_personal_document_id.status],
       ["CIN PERSONAL NUMBER",ids.cin_personal_number && ids.cin_personal_number.value,ids.cin_personal_number && ids.cin_personal_number.status],
       ["CIN PERSONAL REGISTRATION ID",ids.cin_personal_registration_id && ids.cin_personal_registration_id.value,ids.cin_personal_registration_id && ids.cin_personal_registration_id.status],
       ["CIN PERSONAL CREDENTIAL ID",ids.cin_personal_credential_id && ids.cin_personal_credential_id.value,ids.cin_personal_credential_id && ids.cin_personal_credential_id.status]
@@ -822,6 +945,9 @@
   $("disconnectGithubButton").addEventListener("click",disconnect);
   $("generateGenesisButton").addEventListener("click",saveGenesis);
   $("generateBirthButton").addEventListener("click",generateBirthCandidate);
+  $("connectMetaMaskButton").addEventListener("click",()=>connectMetaMask().catch(error=>setStatus("personalDocumentStatus",error.message,"error")));
+  $("createPersonalDocumentButton").addEventListener("click",()=>createPersonalDocument().catch(error=>setStatus("personalDocumentStatus",error.message,"error")));
+  watchWalletChanges();
   $("refreshProfileButton").addEventListener("click",()=>loadNodeProfile(!!accessToken));
 
   if(!configReady()) {
