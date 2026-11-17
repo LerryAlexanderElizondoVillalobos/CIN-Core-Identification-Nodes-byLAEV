@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CIN Node-Personal Document Marriage Agreement",
+  "type": "object",
+  "required": [
+    "document_type",
+    "schema_version",
+    "agreement_id",
+    "status",
+    "signed_at",
+    "parties",
+    "acceptance",
+    "signature",
+    "lifecycle",
+    "interpretation"
+  ],
+  "properties": {
+    "document_type": {
+      "const": "cin.node-personal-document-marriage"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "agreement_id": {
+      "type": "string"
+    },
+    "status": {
+      "const": "SIGNED_CANDIDATE"
+    },
+    "signed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "parties": {
+      "type": "object",
+      "required": [
+        "node",
+        "personal_document"
+      ]
+    },
+    "acceptance": {
+      "type": "object",
+      "required": [
+        "accepted",
+        "agreement_version",
+        "terms",
+        "terms_sha256"
+      ],
+      "properties": {
+        "accepted": {
+          "const": true
+        },
+        "agreement_version": {
+          "type": "string"
+        },
+        "terms": {
+          "type": "string"
+        },
+        "terms_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "signature": {
+      "type": "object",
+      "required": [
+        "standard",
+        "method",
+        "domain",
+        "primary_type",
+        "message",
+        "signature",
+        "recovered_signer",
+        "verification_status",
+        "chain_id"
+      ],
+      "properties": {
+        "standard": {
+          "const": "EIP-712"
+        },
+        "method": {
+          "const": "eth_signTypedData_v4"
+        },
+        "signature": {
+          "type": "string"
+        },
+        "recovered_signer": {
+          "type": "string",
+          "pattern": "^0x[0-9a-fA-F]{40}$"
+        },
+        "verification_status": {
+          "const": "VERIFIED"
+        },
+        "chain_id": {
+          "type": "integer"
+        }
+      }
+    },
+    "lifecycle": {
+      "type": "object",
+      "required": [
+        "node_birth_status",
+        "personal_document_status",
+        "marriage_status",
+        "authoritative_registration"
+      ],
+      "properties": {
+        "authoritative_registration": {
+          "const": false
+        }
+      }
+    },
+    "interpretation": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": true
+}
