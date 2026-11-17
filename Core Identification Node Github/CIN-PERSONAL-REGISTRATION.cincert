@@ -4,7 +4,7 @@
   "certificate_version": "1.2.0",
   "title": "CIN Personal Registration and Credential Certificate (Later Issuance Stage)",
   "status": "development-candidate",
-  "description": "Later issuance stage. Consumes a verified CIN Node Birth Record, the signed CIN Global Personal Document and Node Marriage agreement, an explicitly verified person-to-node association, and a separate Personal Issuance Authorization to allocate a CIN Personal Number and coordinate issuance of the corresponding CIN Personal Credential. This certificate is not the MetaMask personal-document creation certificate; that is CIN-GLOBAL-PERSONAL-DOCUMENT.cincert."
+  "description": "Later issuance stage. Consumes a verified CIN Node Birth Record, the signed CIN Global Personal Document and Node Marriage agreement, an explicitly verified person-to-node association, and a separate Personal Issuance Authorization to allocate a CIN Personal Number and coordinate issuance of the corresponding CIN Personal Credential. This certificate is not the MetaMask personal-document creation certificate; that is CIN-GLOBAL-PERSONAL-DOCUMENT.cincert.",
   "execution": {
     "instruction": "RUN CERTIFICATE",
     "runner": "cin-certificate-runner",
