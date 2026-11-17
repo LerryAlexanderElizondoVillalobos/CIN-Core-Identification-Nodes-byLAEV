@@ -1,7 +1,7 @@
 # CIN Local Backend — Termux
 
-**Version:** 1.4.0  
-**Status:** Initial runtime, pairing lifecycle and Local State Manager implemented; Android end-to-end validation pending  
+**Version:** 1.5.0  
+**Status:** Pairing lifecycle, persistent state and Runtime Configuration Manager implemented; Android end-to-end validation pending  
 **Repository:** LerryAlexanderElizondoVillalobos/CIN-Core-Identification-Nodes-byLAEV  
 **Branch:** feat/pairing-engine-backend-manager
 
@@ -50,4 +50,4 @@ The backend is a local GitHub repository bridge for the Lobby. It is not the CIN
 
 ## Current maturity
 
-Documentation and specification CI only. A first read-only Termux runtime foundation now exists under `services/cin-local-backend/`: loopback HTTP server, `/health`, `/api/v1/status` and the local Manager page. Pairing request/approval/session routes and durable local pairing state now have an initial implementation. GitHub Device Flow, repository adapter, write operations and Android browser compatibility remain unimplemented or pending validation. Passing the new CI checks validates this specification package only, not runtime behavior.
+The Termux runtime now includes a loopback HTTP server, pairing request/approval/session routes, durable local state, a local Backend Manager and an editable Runtime Configuration Manager. Configuration can be read and changed from the local Manager; Lobby origin and pairing/event settings apply immediately, while a port change is saved for the next restart. GitHub Device Flow, repository adapter and write operations remain out of scope. A dedicated Node.js 22 workflow runs the backend test suite for relevant pull requests. Android browser compatibility and actual Termux acceptance remain pending.
