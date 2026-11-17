@@ -4,12 +4,6 @@
   "private": true,
   "description": "Persistent local runtime and pairing backend for CIN Genesis Lobby on Android Termux",
   "type": "module",
-  "engines": {
-    "node": ">=22"
-  },
-  "scripts": {
-    "start": "node src/server.js",
-    "test": "node --test",
-    "check": "for file in src/*.js; do node --check \"$file\"; done"
-  }
+  "engines": { "node": ">=22" },
+  "scripts": { "start": "node src/server.js", "test": "node --test" }
 }
