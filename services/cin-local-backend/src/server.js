@@ -38,14 +38,14 @@ function originHeaders(origin, lobbyOrigin) {
   return { "Access-Control-Allow-Origin": lobbyOrigin, "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Allow-Headers": "Content-Type, X-CIN-Session-Id, Authorization", "Vary": "Origin" };
 }
 
-export function createAppServer({ dataDir } = {}) {
-  const stateManager = createLocalStateManager(dataDir ? { directory: dataDir } : {});
+export function createAppServer({ dataDir, stateManager: providedStateManager } = {}) {
+  const stateManager = providedStateManager ?? createLocalStateManager(dataDir ? { directory: dataDir } : {});
   const runtimeConfiguration = stateManager.getDomain("configuration");
-  const lobbyOrigin = runtimeConfiguration.lobby_origin;
   const pairing = createPairingEngine({ store: stateManager, configuration: runtimeConfiguration });
   return http.createServer(async (request, response) => {
     const url = new URL(request.url ?? "/", "http://127.0.0.1");
     const origin = request.headers.origin;
+    const lobbyOrigin = stateManager.getDomain("configuration").lobby_origin;
     const cors = originHeaders(origin, lobbyOrigin);
 
     if (origin && !isAllowedOrigin(origin, lobbyOrigin)) {
@@ -69,6 +69,28 @@ export function createAppServer({ dataDir } = {}) {
         port: request.socket.localPort, github: "not-connected", repository: "not-configured",
         pairing: "available", persistence: stateManager.status()
       } }, cors); return;
+    }
+
+    if (url.pathname === "/api/v1/configuration" && request.method === "GET") {
+      if (origin && !/^http:\/\/127\.0\.0\.1:\d+$/.test(origin)) {
+        sendJson(response, 403, { ok: false, error: { code: "LOCAL_MANAGER_ONLY", message: "Runtime configuration is available only from the local Backend Manager." } }); return;
+      }
+      sendJson(response, 200, { ok: true, data: stateManager.getDomain("configuration") }); return;
+    }
+
+    if (url.pathname === "/api/v1/configuration" && request.method === "PUT") {
+      if (origin && !/^http:\/\/127\.0\.0\.1:\d+$/.test(origin)) {
+        sendJson(response, 403, { ok: false, error: { code: "LOCAL_MANAGER_ONLY", message: "Runtime configuration can be changed only from the local Backend Manager." } }); return;
+      }
+      try {
+        const body = await readBody(request);
+        const updated = stateManager.updateConfiguration(body);
+        pairing.configure(updated);
+        sendJson(response, 200, { ok: true, data: { configuration: updated, restart_required: updated.backend_port !== request.socket.localPort } });
+      } catch (error) {
+        sendJson(response, 400, { ok: false, error: { code: "INVALID_CONFIGURATION", message: error.message } });
+      }
+      return;
     }
 
     if (url.pathname === "/api/v1/pairing/request" && request.method === "POST") {
@@ -123,7 +145,7 @@ export function createAppServer({ dataDir } = {}) {
       return;
     }
 
-    const known = ["/health", "/api/v1/status", "/api/v1/pairing/request", "/api/v1/pairing/status", "/api/v1/pairing/approve", "/api/v1/pairing/reject", "/api/v1/pairing/revoke", "/manager", "/manager/"];
+    const known = ["/health", "/api/v1/status", "/api/v1/configuration", "/api/v1/pairing/request", "/api/v1/pairing/status", "/api/v1/pairing/approve", "/api/v1/pairing/reject", "/api/v1/pairing/revoke", "/manager", "/manager/"];
     if (known.includes(url.pathname)) {
       response.setHeader("Allow", url.pathname.includes("pairing") ? "GET, POST, OPTIONS" : "GET, OPTIONS");
       sendJson(response, 405, { ok: false, error: { code: "METHOD_NOT_ALLOWED", message: "Method not allowed." } }, cors); return;
@@ -132,14 +154,16 @@ export function createAppServer({ dataDir } = {}) {
   });
 }
 
-export function configuredPort(environment = process.env) {
-  const raw = environment.CIN_LOCAL_BACKEND_PORT ?? String(DEFAULT_PORT), port = Number(raw);
+export function configuredPort(environment = process.env, configuration = {}) {
+  const raw = environment.CIN_LOCAL_BACKEND_PORT ?? String(configuration.backend_port ?? DEFAULT_PORT), port = Number(raw);
   if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error("CIN_LOCAL_BACKEND_PORT must be an integer between 1 and 65535.");
   return port;
 }
-export async function startServer(port = configuredPort()) {
-  const server = createAppServer();
-  await new Promise((resolve, reject) => { server.once("error", reject); server.listen(port, HOST, resolve); });
+export async function startServer(port) {
+  const stateManager = createLocalStateManager();
+  const selectedPort = port ?? configuredPort(process.env, stateManager.getDomain("configuration"));
+  const server = createAppServer({ stateManager });
+  await new Promise((resolve, reject) => { server.once("error", reject); server.listen(selectedPort, HOST, resolve); });
   return server;
 }
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
