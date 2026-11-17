@@ -993,7 +993,7 @@
 
   async function uploadLocalFile() {
     const file=$("localUploadFile").files[0];
-    if(!file) { setStatus("localWorkspaceStatus","Choose a file to upload first.","error"); return; }
+    if(!file) { setStatus("localWorkspaceStatus","Choose a file to upload first.","error"); return; }\n    if(file.size > 2_000_000) { setStatus("localWorkspaceStatus","The current local upload limit is 2 MB per file.","error"); return; }
     const path=$("localFilePath").value.trim() || file.name;
     if(!window.confirm("Upload "+file.name+" to the local Termux workspace as "+path+"? This does not publish it to GitHub.")) return;
     try {
