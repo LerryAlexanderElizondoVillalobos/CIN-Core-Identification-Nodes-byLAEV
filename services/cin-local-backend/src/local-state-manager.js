@@ -29,11 +29,8 @@ export function createLocalStateManager(options = {}) {
     snapshot = next;
   }
 
-  // Upgrade the in-memory snapshot on first use; the first subsequent write
-  // stores the version-2 envelope while preserving legacy pairing records.
-  if (snapshot.schema_version === 1 || !snapshot.domains) {
-    commit(domains);
-  }
+  // Migrate schema v1 in place while preserving all existing pairing records.
+  if (snapshot.schema_version === 1 || !snapshot.domains) commit(domains);
 
   function getDomain(name) {
     if (!Object.hasOwn(domains, name)) return null;
@@ -72,7 +69,33 @@ export function createLocalStateManager(options = {}) {
     commit({ ...domains }, pairingState);
   }
 
-  function updateConfiguration(patch) {\n    if (!patch || typeof patch !== "object" || Array.isArray(patch)) throw new TypeError("A configuration object is required.");\n    const current = getDomain("configuration");\n    const next = { ...current, ...patch };\n    const allowed = new Set(Object.keys(DEFAULT_CONFIGURATION));\n    for (const key of Object.keys(patch)) if (!allowed.has(key)) throw new Error("Unknown runtime configuration field: " + key);\n    if (typeof next.lobby_origin !== "string") throw new TypeError("lobby_origin must be a URL origin.");\n    const parsedOrigin = new URL(next.lobby_origin);\n    if (!["http:", "https:"].includes(parsedOrigin.protocol) || parsedOrigin.origin !== next.lobby_origin) throw new TypeError("lobby_origin must contain only an HTTP(S) origin.");\n    for (const key of ["pairing_request_ttl_ms", "pairing_session_ttl_ms", "event_history_limit"]) {\n      if (!Number.isSafeInteger(next[key]) || next[key] < 1) throw new TypeError(key + " must be a positive integer.");\n    }\n    const updated = { ...domains, configuration: next };\n    commit(updated);\n    Object.assign(domains, updated);\n    return getDomain("configuration");\n  }\n\n  function status() {
+  function updateConfiguration(patch) {
+    if (!patch || typeof patch !== "object" || Array.isArray(patch)) {
+      throw new TypeError("A configuration object is required.");
+    }
+    const current = getDomain("configuration");
+    const next = { ...current, ...patch };
+    const allowed = new Set(Object.keys(DEFAULT_CONFIGURATION));
+    for (const key of Object.keys(patch)) {
+      if (!allowed.has(key)) throw new Error("Unknown runtime configuration field: " + key);
+    }
+    if (typeof next.lobby_origin !== "string") throw new TypeError("lobby_origin must be a URL origin.");
+    const parsedOrigin = new URL(next.lobby_origin);
+    if (!["http:", "https:"].includes(parsedOrigin.protocol) || parsedOrigin.origin !== next.lobby_origin) {
+      throw new TypeError("lobby_origin must contain only an HTTP(S) origin.");
+    }
+    for (const key of ["pairing_request_ttl_ms", "pairing_session_ttl_ms", "event_history_limit"]) {
+      if (!Number.isSafeInteger(next[key]) || next[key] < 1) {
+        throw new TypeError(key + " must be a positive integer.");
+      }
+    }
+    const updated = { ...domains, configuration: next };
+    commit(updated);
+    Object.assign(domains, updated);
+    return getDomain("configuration");
+  }
+
+  function status() {
     return {
       enabled: true,
       schema_version: 2,
