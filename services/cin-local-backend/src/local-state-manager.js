@@ -15,7 +15,7 @@ export function createLocalStateManager(options = {}) {
   let snapshot = store.load();
   const domains = { ...(snapshot.domains ?? {}) };
 
-  if (!domains.configuration) domains.configuration = { ...DEFAULT_CONFIGURATION };
+  domains.configuration = { ...DEFAULT_CONFIGURATION, ...(domains.configuration ?? {}) };
   if (!domains.operations) domains.operations = { schema_version: 1, entries: [] };
 
   function commit(nextDomains, pairingState = {}) {
@@ -31,7 +31,7 @@ export function createLocalStateManager(options = {}) {
   }
 
   // Migrate schema v1 in place while preserving all existing pairing records.
-  if (snapshot.schema_version === 1 || !snapshot.domains) commit(domains);
+  if (snapshot.schema_version === 1 || !snapshot.domains || !snapshot.domains.configuration?.backend_port) commit(domains);
 
   function getDomain(name) {
     if (!Object.hasOwn(domains, name)) return null;
