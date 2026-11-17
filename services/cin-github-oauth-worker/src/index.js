@@ -27,7 +27,18 @@ export default {
   async fetch(request, env) {
     const allowedOrigin = env.CIN_ALLOWED_ORIGIN;
     const origin = request.headers.get("Origin") || "";
-    if (!allowedOrigin || origin !== allowedOrigin) {
+    const url = new URL(request.url);
+    const isHealthCheck = request.method === "GET" && url.pathname === "/health";
+
+    if (!allowedOrigin) {
+      return new Response("Worker configuration incomplete", { status: 503 });
+    }
+    if (origin && origin !== allowedOrigin) {
+      return new Response("Origin not allowed", { status: 403 });
+    }
+    // Allow direct browser navigation or uptime checks with no Origin header.
+    // Cross-origin browser requests to the OAuth exchange still require the exact Pages origin.
+    if (!origin && !isHealthCheck) {
       return new Response("Origin not allowed", { status: 403 });
     }
 
@@ -44,7 +55,6 @@ export default {
       });
     }
 
-    const url = new URL(request.url);
     if (url.pathname === "/health" && request.method === "GET") {
       return json({ service: "cin-github-oauth-exchange", status: "ready" }, 200, allowedOrigin);
     }
