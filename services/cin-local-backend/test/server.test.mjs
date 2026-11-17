@@ -53,7 +53,7 @@ test("Manager is served from the local backend", async () => {
     const html = await response.text();
     assert.equal(response.status, 200);
     assert.match(html, /CIN Backend Manager/);
-    assert.match(html, /GitHub Device Flow/);
+    assert.match(html, /Pairing requests/);\n    assert.match(html, /Active sessions/);
   });
 });
 
@@ -63,5 +63,51 @@ test("unsupported methods are rejected on the initial read-only API", async () =
     const body = await response.json();
     assert.equal(response.status, 405);
     assert.equal(body.error.code, "METHOD_NOT_ALLOWED");
+  });
+});
+
+test("pairing request requires operator approval and creates revocable session", async () => {
+  await withServer(async port => {
+    const base = `http://127.0.0.1:${port}`;
+    const created = await fetch(base + "/api/v1/pairing/request", {
+      method: "POST", headers: { "Content-Type": "application/json", Origin: "https://lerryalexanderelizondo.github.io" },
+      body: JSON.stringify({ label: "Test Lobby" })
+    });
+    assert.equal(created.status, 201);
+    const request = (await created.json()).data;
+    assert.equal(request.state, "PENDING");
+
+    const pending = await fetch(base + "/api/v1/pairing/status");
+    assert.equal((await pending.json()).data.requests[0].state, "PENDING");
+
+    const approved = await fetch(base + "/api/v1/pairing/approve", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ request_id: request.request_id })
+    });
+    assert.equal(approved.status, 200);
+
+    const polled = await fetch(base + "/api/v1/pairing/status?request_id=" +
+      encodeURIComponent(request.request_id) + "&poll_secret=" + encodeURIComponent(request.poll_secret));
+    const session = (await polled.json()).data;
+    assert.equal(session.state, "ACTIVE");
+    assert.ok(session.session_token);
+
+    const revoked = await fetch(base + "/api/v1/pairing/revoke", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ session_id: session.session_id })
+    });
+    assert.equal(revoked.status, 200);
+    const after = await fetch(base + "/api/v1/pairing/status");
+    assert.equal((await after.json()).data.sessions.length, 0);
+  });
+});
+
+test("pairing rejects unapproved browser origins", async () => {
+  await withServer(async port => {
+    const response = await fetch(`http://127.0.0.1:${port}/api/v1/pairing/request`, {
+      method: "POST", headers: { "Content-Type": "application/json", Origin: "https://example.com" },
+      body: JSON.stringify({})
+    });
+    assert.equal(response.status, 403);
   });
 });
