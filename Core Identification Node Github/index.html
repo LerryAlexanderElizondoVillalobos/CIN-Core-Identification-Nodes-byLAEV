@@ -92,6 +92,20 @@
 
 
 
+
+<section class="panel" id="localRuntimePanel">
+  <div class="panel-head">
+    <div><div class="eyebrow">05 · Local runtime connectivity</div><h2>Connect to local CIN runtime</h2></div>
+    <span class="pill" id="localRuntimeBadge">Not tested</span>
+  </div>
+  <p class="small">This test runs directly in this GitHub Pages Lobby. It requests <code>http://127.0.0.1:2112/health</code> from the browser and displays the response. It does not change the local server or the GitHub authorization flow.</p>
+  <div class="actions">
+    <button class="btn primary" id="testLocalRuntimeButton" type="button">Test local connection</button>
+  </div>
+  <div id="localRuntimeStatus" class="status info" role="status" aria-live="polite">Ready. Start the CIN local runtime in Termux, then run the test.</div>
+  <pre id="localRuntimeResult" hidden></pre>
+</section>
+
 <section class="grid" aria-label="Node creation sequence">
   <article class="step"><div class="n">01 / OPERATOR</div><h3>Link GitHub</h3><p>Authorize repository read/write access through the CIN GitHub App.</p><div class="step-state" id="step1State">Pending</div></article>
   <article class="step"><div class="n">02 / GENESIS</div><h3>Record ecosystem</h3><p>Inspect the repository snapshot and commit the Genesis Manifest.</p><div class="step-state" id="step2State">Pending</div></article>
@@ -105,6 +119,7 @@
 </main>
 <script src="./cin-github-config.js"></script>
 <script src="./cin-github-lobby.js"></script>
+<script src="./cin-local-runtime-test.js"></script>
 <script>
 if ("serviceWorker" in navigator && window.isSecureContext) {
   navigator.serviceWorker.register("./service-worker.js").catch(() => {});
