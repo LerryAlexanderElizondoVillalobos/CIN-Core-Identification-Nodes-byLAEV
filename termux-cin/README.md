@@ -10,6 +10,7 @@ This service connects the public CIN GitHub Pages Lobby to a Node.js process run
 - **GitHub repository access:** scoped API connector in `src/github/connector.js`; only the configured CIN repository and `/user` are accepted.
 - **CIN authorization:** separate permission-request engine in `src/authorization/permission-engine.js`. A GitHub login does not approve CIN issuance or other domain actions.
 - **Signing:** separate adapter interface in `src/signatures/signature-interface.js`. No private signing key is generated or stored here. A future USB/external signer can be connected through the adapter.
+- **Local workspace:** file access to the cloned `Core Identification Node Github/` directory through `src/workspace/local-directory.js`.
 - **Transport:** local HTTP listener bound to `127.0.0.1`; CORS accepts only the published CIN Pages origin and supports browser private-network preflight.
 
 ## Install in Termux
@@ -40,6 +41,9 @@ The GitHub App callback URL must exactly equal `CIN_GITHUB_REDIRECT_URI`. Enable
 
 - `GET http://127.0.0.1:8787/health`
 - `GET http://127.0.0.1:8787/v1/status`
+- `GET http://127.0.0.1:8787/v1/local/tree` (list the local CIN workspace)
+- `GET http://127.0.0.1:8787/v1/local/file?path=...` (read a local file)
+- `PUT http://127.0.0.1:8787/v1/local/file` with `{ "path": "...", "content": "..." }` (write a local text file)
 - `POST http://127.0.0.1:8787/oauth/exchange` (PKCE code exchange)
 - `GET|PUT http://127.0.0.1:8787/v1/github/...` (scoped GitHub API proxy)
 
@@ -51,6 +55,6 @@ The GitHub access token is held in process memory only. Restarting Termux or sto
 
 ## Scope and current implementation
 
-This first backend slice provides local health/status, PKCE exchange, in-memory GitHub session, and a repository-scoped API proxy. The permission engine and signing adapter are separate foundations and are not yet wired to issuance workflows. The existing Lobby's Genesis and node-birth flows can use the scoped GitHub connector once its public config points to this backend.
+This first backend slice provides local health/status, local CIN directory listing/read/write, PKCE exchange, in-memory GitHub session, and a repository-scoped API proxy. The permission engine and signing adapter are separate foundations and are not yet wired to issuance workflows. The existing Lobby's Genesis and node-birth flows can use the scoped GitHub connector once its public config points to this backend.
 
 This does not yet make CIN records private: files committed to the public GitHub repository remain publicly readable. Do not store private personal records or signing material in public repository paths.
