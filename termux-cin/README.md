@@ -30,6 +30,10 @@ npm start
 
 Fill the GitHub App Client ID and Client Secret in the local `.env` file. Do not paste the secret into chat, GitHub, the Pages configuration, or a committed file. Keep `.env` only on the Android device.
 
+In GitHub App settings, set the Homepage URL to the CIN Pages URL, the callback URL to the exact value of `CIN_GITHUB_REDIRECT_URI`, enable user authorization, and install the App on this repository with **Contents: Read and write** and **Metadata: Read-only** permissions.
+
+Then edit `Core Identification Node Github/cin-github-config.js` in the repository and replace `CONFIGURE_PUBLIC_GITHUB_APP_CLIENT_ID` with the App's public Client ID. This Client ID is public; the Client Secret is not. Commit and publish that one-line public configuration change.
+
 The GitHub App callback URL must exactly equal `CIN_GITHUB_REDIRECT_URI`. Enable user authorization and grant only the repository permissions required by the CIN workflow (Contents read/write and Metadata read-only). Install the App on the CIN repository.
 
 ## Local endpoint
