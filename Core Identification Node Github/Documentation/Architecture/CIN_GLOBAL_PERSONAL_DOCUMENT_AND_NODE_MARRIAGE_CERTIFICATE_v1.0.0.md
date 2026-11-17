@@ -66,3 +66,7 @@ The CIN repository is public. Before saving, the Lobby discloses that the wallet
 8. Candidate-based outputs remain non-authoritative.
 9. Public GitHub writes require explicit confirmation and successful read-back.
 10. No private key is requested, exposed or stored.
+
+## 9. Deterministic identifier test vector
+
+The canonical input and expected SHA-256 result are published in `examples/CIN-GLOBAL-PERSONAL-DOCUMENT-IDENTIFIER-TEST-VECTORS.json`. Implementations must reproduce the exact expected document ID before wallet signing is enabled.
