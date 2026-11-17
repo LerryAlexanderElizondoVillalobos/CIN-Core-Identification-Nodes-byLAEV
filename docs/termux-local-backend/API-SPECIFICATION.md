@@ -4,6 +4,15 @@
 
 Base URL: `http://127.0.0.1:2112/api/v1/`
 
+## Implemented foundation routes
+
+The current branch contains a read-only first runtime slice:
+- `GET /health`
+- `GET /api/v1/status`
+- `GET /manager`
+
+These routes are a loopback proof-of-runtime foundation only. All pairing, authentication and repository endpoints below remain planned contracts and are not implemented.
+
 ## Conventions
 
 - JSON UTF-8 requests/responses.
