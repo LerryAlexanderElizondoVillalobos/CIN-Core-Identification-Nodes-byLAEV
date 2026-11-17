@@ -1,7 +1,8 @@
 {
   "configuration_id": "cin.initial-environment",
-  "configuration_version": "1.0.0",
-  "status": "documented-baseline-implementation-alignment-required",
+  "configuration_version": "1.0.1",
+  "status": "corrected-documented-baseline-implementation-alignment-required",
+  "revision_note": "Separates the published Web Environment from the future Local Environment; local runtime settings are scoped only to the local profile.",
   "repository": {
     "owner": "LerryAlexanderElizondoVillalobos",
     "name": "CIN-Core-Identification-Nodes-byLAEV",
@@ -10,34 +11,60 @@
     "url": "https://github.com/LerryAlexanderElizondoVillalobos/CIN-Core-Identification-Nodes-byLAEV",
     "root_directory_role": "github-pages-publication-root"
   },
-  "deployment": {
-    "provider": "GitHub Pages",
-    "mode": "static",
-    "published_lobby_url": "https://lerryalexanderelizondo.github.io/CIN-Core-Identification-Nodes-byLAEV/",
-    "artifact_source_directory": "Core Identification Node Github/",
-    "backend_connected": false
-  },
-  "runtime": {
-    "prototype": "prototype/linux-runtime",
-    "platform_scope": "Linux x86_64",
-    "server_type": "local-http",
-    "bind_host": "127.0.0.1",
-    "port_strategy": [1221, 2112, 0],
-    "address_template": "http://127.0.0.1:<selected-port>",
-    "address_environment_output": "CIN_URL",
-    "status": "prototype"
+  "environment_profiles": {
+    "web": {
+      "profile_id": "cin.environment.web",
+      "status": "published-static-interface",
+      "delivery_model": "browser-based-static-web-publication",
+      "provider": "GitHub Pages",
+      "published_lobby_url": "https://lerryalexanderelizondo.github.io/CIN-Core-Identification-Nodes-byLAEV/",
+      "artifact_source_directory": "Core Identification Node Github/",
+      "local_http_server_required": false,
+      "loopback_address": null,
+      "local_port_strategy": null,
+      "backend_api": {
+        "configured": false,
+        "endpoint": null
+      },
+      "direct_host_filesystem_access": false
+    },
+    "local": {
+      "profile_id": "cin.environment.local",
+      "status": "prototype",
+      "intended_delivery": "future-installed-or-portable-local-application",
+      "prototype": "prototype/linux-runtime",
+      "platform_scope": "Linux x86_64",
+      "server_type": "local-http",
+      "bind_host": "127.0.0.1",
+      "port_strategy": [1221, 2112, 0],
+      "address_template": "http://127.0.0.1:<selected-port>",
+      "address_environment_output": "CIN_URL",
+      "interface": "prototype/dist/index.html",
+      "routes": {
+        "health": "GET /health",
+        "status": "GET /api/status",
+        "lifecycle": "GET /api/lifecycle",
+        "probe_write": "POST /api/probe/write",
+        "probe_read": "GET /api/probe/read",
+        "shutdown": "POST /api/runtime/shutdown"
+      },
+      "production_application": false
+    }
   },
   "storage": {
+    "scope": "local-environment-prototype",
     "provider": "local-filesystem",
     "document_format": "JSON",
     "core_implementation": "prototype/cin-core/src/storage/TransactionalStore",
     "runtime_probe": "runtime-probe.record",
     "production_record_store": false,
+    "web_environment_storage_backend": null,
     "remote_provider": null,
     "status": "prototype"
   },
   "data_root": {
-    "canonical_environment_variable": "CIN_DATA_DIR",
+    "scope": "local-environment-only",
+    "canonical_core_environment_variable": "CIN_DATA_DIR",
     "resolution_order": [
       "explicit-application-configuration",
       "CIN_DATA_DIR",
@@ -49,26 +76,27 @@
       "linux": "$XDG_DATA_HOME/CIN or ~/.local/share/CIN"
     },
     "application_package_separated_from_user_data": true,
-    "integration_discrepancy": {
+    "local_runtime_integration_discrepancy": {
       "linux_runtime_current_variable": "CIN_DATA_ROOT",
       "linux_runtime_current_fallback": "$XDG_DATA_HOME/cin or ~/.local/share/cin",
-      "required_alignment": "Use CIN_DATA_DIR and the canonical resolver behavior"
+      "required_alignment": "Reconcile the local runtime with the shared core data-root contract within the Local Environment only"
     }
   },
   "authentication": {
     "provider": null,
     "status": "not-configured",
-    "note": "The static Pages Lobby and current local Linux runtime do not declare an authentication provider."
+    "note": "No authentication provider is declared for the published Web Lobby or current local Linux runtime prototype."
   },
   "authorization": {
     "provider": null,
     "status": "not-configured",
     "note": "Authentication and operation-specific authorization remain separate configuration domains."
   },
-  "connection": {
+  "connections": {
     "github_repository": "available",
-    "github_pages": "published-static-interface",
-    "pages_backend_connection": "not-configured",
+    "web_environment_pages": "published-static-interface",
+    "web_to_local_runtime": "not-configured-and-not-assumed",
+    "web_backend_api": "not-configured",
     "local_linux_runtime": "prototype",
     "remote_node_transport": "not-configured",
     "status_is_runtime_observed": true
@@ -84,8 +112,8 @@
       "lifecycle",
       "recovery"
     ],
-    "runtime": "prototype/linux-runtime",
-    "published_lobby": "Core Identification Node Github/index.html",
+    "local_runtime": "prototype/linux-runtime",
+    "published_web_lobby": "Core Identification Node Github/index.html",
     "local_runtime_interface": "prototype/dist/index.html",
     "services_directory": null,
     "guest": {
