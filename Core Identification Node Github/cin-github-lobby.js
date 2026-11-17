@@ -959,11 +959,43 @@
     }
   }
 
+  async function readLocalFile() {
+    const path=$("localFilePath").value.trim();
+    if(!path) { setStatus("localWorkspaceStatus","Enter a path relative to Core Identification Node Github/.","error"); return; }
+    try {
+      const url=new URL((cfg.localBackendUrl||"http://127.0.0.1:8787")+"/v1/local/file");
+      url.searchParams.set("path",path);
+      const response=await fetch(url);
+      const result=await response.json().catch(()=>null);
+      if(!response.ok || !result) throw new Error((result&&result.error)||"Could not read local file.");
+      $("localFileContent").value=result.content;
+      setStatus("localWorkspaceStatus","Read local file: "+result.path+" ("+result.size_bytes+" bytes).","ok");
+    } catch(error) { setStatus("localWorkspaceStatus",error.message,"error"); }
+  }
+
+  async function saveLocalFile() {
+    const path=$("localFilePath").value.trim();
+    const content=$("localFileContent").value;
+    if(!path) { setStatus("localWorkspaceStatus","Enter a path relative to Core Identification Node Github/.","error"); return; }
+    if(!window.confirm("Save this text to the local Termux workspace? This does not commit or publish it to GitHub.")) return;
+    try {
+      const response=await fetch((cfg.localBackendUrl||"http://127.0.0.1:8787")+"/v1/local/file",{
+        method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({path,content})
+      });
+      const result=await response.json().catch(()=>null);
+      if(!response.ok || !result) throw new Error((result&&result.error)||"Could not save local file.");
+      setStatus("localWorkspaceStatus","Saved locally: "+result.path+" ("+result.size_bytes+" bytes). Changes remain on this Android device until separately committed to GitHub.","ok");
+      await inspectLocalWorkspace();
+    } catch(error) { setStatus("localWorkspaceStatus",error.message,"error"); }
+  }
+
   async function publicLoadProfile() {
     try { await loadNodeProfile(false); } catch {}
   }
 
   $("inspectLocalWorkspaceButton").addEventListener("click",inspectLocalWorkspace);
+  $("readLocalFileButton").addEventListener("click",readLocalFile);
+  $("saveLocalFileButton").addEventListener("click",saveLocalFile);
   $("connectGithubButton").addEventListener("click",()=>beginGitHubLink().catch(error=>setStatus("githubStatus",error.message,"error")));
   $("disconnectGithubButton").addEventListener("click",disconnect);
   $("generateGenesisButton").addEventListener("click",saveGenesis);
