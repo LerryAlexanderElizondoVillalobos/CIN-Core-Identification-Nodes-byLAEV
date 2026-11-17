@@ -8,7 +8,7 @@
  *   CIN_GITHUB_APP_CLIENT_ID
  *   CIN_GITHUB_APP_CLIENT_SECRET  (secret)
  *   CIN_TARGET_REPOSITORY_ID      (1458540194 for the current CIN repo)
- *   CIN_ALLOWED_ORIGIN            (https://lerryalexanderelizondo.github.io)
+ *   CIN_ALLOWED_ORIGIN            (https://lerryalexanderelizondovillalobos.github.io)
  *   CIN_OAUTH_REDIRECT_URI        (exact GitHub Pages callback URL)
  */
 const json = (body, status, origin) => new Response(JSON.stringify(body), {
