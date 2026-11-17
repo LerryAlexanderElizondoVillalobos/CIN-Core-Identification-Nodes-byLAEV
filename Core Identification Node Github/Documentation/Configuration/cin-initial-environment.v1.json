@@ -24,7 +24,8 @@
       "local_port_strategy": null,
       "backend_api": {
         "configured": false,
-        "endpoint": null
+        "endpoint": null,
+        "backend_address": null
       },
       "direct_host_filesystem_access": false
     },
@@ -36,7 +37,11 @@
       "platform_scope": "Linux x86_64",
       "server_type": "local-http",
       "bind_host": "127.0.0.1",
-      "port_strategy": [1221, 2112, 0],
+      "port_strategy": [
+        1221,
+        2112,
+        0
+      ],
       "address_template": "http://127.0.0.1:<selected-port>",
       "address_environment_output": "CIN_URL",
       "interface": "prototype/dist/index.html",
@@ -48,19 +53,21 @@
         "probe_read": "GET /api/probe/read",
         "shutdown": "POST /api/runtime/shutdown"
       },
-      "production_application": false
+      "production_application": false,
+      "backend_address_template": "http://127.0.0.1:<selected-port>"
     }
   },
   "storage": {
     "scope": "local-environment-prototype",
-    "provider": "local-filesystem",
     "document_format": "JSON",
     "core_implementation": "prototype/cin-core/src/storage/TransactionalStore",
     "runtime_probe": "runtime-probe.record",
     "production_record_store": false,
     "web_environment_storage_backend": null,
     "remote_provider": null,
-    "status": "prototype"
+    "status": "prototype",
+    "active_provider": null,
+    "prototype_provider": "local-filesystem"
   },
   "data_root": {
     "scope": "local-environment-only",
@@ -122,7 +129,9 @@
     },
     "cin_001": {
       "directory": "Core Identification Node Github/CIN 001/",
-      "current_contents": ["README.md"],
+      "current_contents": [
+        "README.md"
+      ],
       "node_lobby": "not-yet-implemented",
       "node_configuration_engine": "not-yet-implemented"
     },
