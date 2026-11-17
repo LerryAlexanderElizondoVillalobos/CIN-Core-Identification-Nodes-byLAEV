@@ -155,9 +155,9 @@ The local data root is separate from the executable and extracted package direct
 
 **Status: not configured in either profile.**
 
-The static GitHub Pages Lobby does not authenticate an operator against a CIN backend. The current Linux local runtime prototype also does not declare an authentication provider.
+The static GitHub Pages Lobby now contains source code for GitHub App operator linking, but the App and token-exchange Worker still require provisioning and deployment. Until that setup is complete, the operator connection is not active. The current Linux local runtime prototype also does not declare an authentication provider.
 
-No identity provider, credential provider, session provider or external authentication service is selected in this baseline.
+No CIN issuer/authentication provider for certificate issuance is selected in this baseline. Separately, the source for a GitHub App operator-link flow has been added for the web Lobby, using Authorization Code + PKCE and a server-side token-exchange Worker. The GitHub App is not yet registered/installed and the Worker is not yet deployed, so operator linking is currently prepared but not active. This GitHub connection grants repository-operation context only; it is not Node Birth Authorization or Personal Issuance Authorization.
 
 Authentication and operation authorization remain separate configuration domains. A future authentication provider establishes caller/session context; a separate authorization mechanism determines whether a particular operation is permitted. Neither GitHub Pages hosting nor repository ownership constitutes an authentication provider.
 
@@ -333,3 +333,18 @@ This configuration baseline is consistent when:
 ---
 
 *End of document — CIN Initial Environment Configuration v1.0, revision 1.0.1.*
+
+
+## 12. GitHub operator-link integration status
+
+The web Lobby now contains the client-side Authorization Code + PKCE flow and the repository includes the OAuth exchange Worker source.
+
+- GitHub App: not yet registered or installed on the CIN repository.
+- Worker: source committed under `services/cin-github-oauth-worker/`; deployment pending.
+- Public browser configuration: `Core Identification Node Github/cin-github-config.js`; enabled remains false until the App Client ID and deployed Worker endpoint are configured.
+- Requested repository permissions: Contents read/write and Metadata read-only.
+- Target repository ID: `1458540194`.
+- Token handling: access token held in page memory only; it is not committed or stored in browser persistent storage.
+- Scope: repository operations by the linked operator. It does not replace CIN document issuer trust, node-birth authorization or personal-issuance authorization.
+
+The GitHub Pages Lobby therefore displays the connection control, but it cannot complete account linking until the external GitHub App and Worker provisioning steps have been completed.
