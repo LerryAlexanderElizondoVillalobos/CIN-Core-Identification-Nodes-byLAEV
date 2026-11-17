@@ -1,7 +1,7 @@
 import { createPersistentStore } from "./persistent-store.js";
 
 const DEFAULT_CONFIGURATION = Object.freeze({
-  lobby_origin: process.env.CIN_LOBBY_ORIGIN ?? "https://lerryalexanderelizondo.github.io",
+  lobby_origin: process.env.CIN_LOBBY_ORIGIN ?? "https://lerryalexanderelizondovillalobos.github.io",
   backend_port: 2112,
   pairing_request_ttl_ms: 5 * 60 * 1000,
   pairing_session_ttl_ms: 24 * 60 * 60 * 1000,
