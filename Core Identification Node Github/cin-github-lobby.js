@@ -787,6 +787,7 @@
       $("personalDocumentSummary").textContent=JSON.stringify({document_id:personalDocumentId,agreement_id:marriageAgreement.agreement_id,subject_address:walletAddress,chain_id:walletChainId,node_birth_record_sha256:birthDigest,recovered_signer:recovered,signature_verification:"VERIFIED",persistence,personal_document_status:personalDocument.status,marriage_status:marriageAgreement.status},null,2);
       setPill("personalDocumentState",persistence==="PUBLIC_GITHUB_RECORDS_SAVED"?"Signed and saved":"Signed · local files");
       setStatus("personalDocumentStatus","MetaMask signature verified. The same address and same Node Birth document produce the same personal-document identifier. "+(persistence==="PUBLIC_GITHUB_RECORDS_SAVED"?"Both records were saved and read back from GitHub.":"JSON files were downloaded locally; connect GitHub to publish repository progress."),"ok");
+      setStep("step4State","Personal document signed · candidate",true);
     }catch(error){setPill("personalDocumentState","Not completed");setStatus("personalDocumentStatus",error.message,"error");}
     finally{$("createPersonalDocumentButton").disabled=!walletAddress;}
   }
@@ -846,6 +847,7 @@
     const ids=value && value.identifiers || {};
     const genesis=value && value.genesis || {};
     const birth=value && value.birth || {};
+    const personalDocument=value && value.personal_document || {};
     $("nodeTitle").textContent=(value && (value.display_name||value.node_id))||NODE;
     setPill("nodeLifecycleBadge",value && value.lifecycle_status ? value.lifecycle_status.replace(/_/g," ") : "Not initialized");
     const fields=[
@@ -870,7 +872,7 @@
       field.append(name,valueEl,statusEl);$("nodeIdentifiers").appendChild(field);
     });
     $("headerRecordLinks").replaceChildren();
-    [[genesis.path,"Genesis Manifest"],[birth.path,"Birth candidate"]].forEach(([path,label])=>{
+    [[genesis.path,"Genesis Manifest"],[birth.path,"Birth candidate"],[personalDocument.path,"Personal document"],[personalDocument.agreement_path,"Marriage agreement"]].forEach(([path,label])=>{
       if(!path)return;const a=document.createElement("a");a.className="id-chip";a.href="https://github.com/"+REPO.owner+"/"+REPO.name+"/blob/"+REPO.branch+"/"+path.split("/").map(encodeURIComponent).join("/");
       a.target="_blank";a.rel="noopener";a.textContent=label;a.textContent+=" ↗";$("headerRecordLinks").appendChild(a);
     });
@@ -881,6 +883,7 @@
     $("generateBirthButton").disabled=!accessToken || !hasGenesis;
     if(hasGenesis) setStep("step2State","Genesis manifest recorded",true);
     if(hasBirth) setStep("step3State","Birth candidate saved · not issued",true);
+    if(personalDocument.document_id) setStep("step4State","Personal document signed · candidate",true);
   }
 
   async function readPublicJson(path) {
