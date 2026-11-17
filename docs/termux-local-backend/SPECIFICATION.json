@@ -1,0 +1,43 @@
+{
+  "project": "CIN Local Backend",
+  "version": "1.3.0",
+  "status": "specification-baseline",
+  "repository": {
+    "owner": "LerryAlexanderElizondoVillalobos",
+    "name": "CIN-Core-Identification-Nodes-byLAEV",
+    "id": 1458540194,
+    "defaultBranch": "main"
+  },
+  "branch": "feat/termux-local-backend",
+  "frontend": {
+    "platform": "GitHub Pages",
+    "sourceDirectory": "Core Identification Node Github"
+  },
+  "backend": {
+    "runtime": "Node.js",
+    "platform": "Termux",
+    "bindAddress": "127.0.0.1",
+    "defaultPort": 2112,
+    "alternativePort": 1221
+  },
+  "authentication": {
+    "method": "GitHub App Device Authorization Flow",
+    "tokenLocation": "Termux private storage",
+    "browserReceivesGitHubToken": false
+  },
+  "githubPermissions": {
+    "contents": "read/write",
+    "metadata": "read",
+    "actions": "none",
+    "workflows": "none",
+    "administration": "none"
+  },
+  "existingNodeRoot": "Core Identification Node Github/CIN 001/",
+  "pagesPublicationRoot": "Core Identification Node Github/",
+  "cloudflareWorker": "excluded-from-target-architecture",
+  "maturity": {
+    "specification": true,
+    "runtimeImplemented": false,
+    "androidBrowserCompatibilityVerified": false
+  }
+}
