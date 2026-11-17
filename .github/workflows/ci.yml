@@ -61,6 +61,7 @@ jobs:
           set -euo pipefail
           node --check "Core Identification Node Github/cin-github-lobby.js"
           node --check "Core Identification Node Github/cin-github-config.js"
+          node --check "Core Identification Node Github/cin-local-runtime-test.js"
           node --check "Core Identification Node Github/service-worker.js"
           cp "services/cin-github-oauth-worker/src/index.js" /tmp/cin-github-oauth-worker.mjs
           node --check /tmp/cin-github-oauth-worker.mjs
@@ -108,3 +109,19 @@ jobs:
           assert not re.search(r'setItem\([^,]*(accessToken|token)', lobby_js, re.I)
           print("CIN Lobby, certificates, public configuration and browser storage boundaries are valid.")
           PY
+
+  termux-backend-validation:
+    name: Termux backend syntax validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 20
+      - name: Validate Termux backend modules
+        working-directory: termux-cin
+        run: npm run check
