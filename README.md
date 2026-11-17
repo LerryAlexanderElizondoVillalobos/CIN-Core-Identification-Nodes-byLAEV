@@ -609,3 +609,18 @@ Run the initial manifest generator from the extracted package context with `carg
 - [Genesis Environment Certificate](certificates/CIN-GENESIS-ENVIRONMENT.cincert)
 
 Run the first certificate with `cargo run --manifest-path prototype/cin-core/Cargo.toml --bin cin-certificate-runner -- certificates/CIN-GENESIS-ENVIRONMENT.cincert`. The Runner prints the candidate Genesis Manifest and asks for confirmation before registering it through the existing DataRoot and TransactionalStore. This first implementation supports only the Genesis Environment profile; OS double-click association is subsequent packaging work.
+
+
+---
+
+## Local CIN Runtime — Android / Termux
+
+The selected local execution profile uses **Node.js in Termux on the same Android device** as the CIN GitHub Pages Lobby. The local backend keeps the GitHub App Client Secret and the operator's GitHub access token outside the public repository.
+
+- [Termux backend architecture and installation](termux-cin/README.md)
+- [Local backend source](termux-cin/src/server.js)
+- [GitHub repository connector](termux-cin/src/github/connector.js)
+- [Separate CIN permission engine](termux-cin/src/authorization/permission-engine.js)
+- [Separate external signing interface](termux-cin/src/signatures/signature-interface.js)
+
+The previous Cloudflare OAuth Worker is retained as historical material and is not part of the selected Termux deployment.
