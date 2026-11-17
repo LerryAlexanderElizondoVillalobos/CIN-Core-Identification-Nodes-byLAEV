@@ -18,7 +18,7 @@ Override the containing directory with `CIN_DATA_DIR`.
 
 | Domain | Owner | Current contents |
 |---|---|---|
-| `configuration` | Local State Manager | Lobby origin, pairing request/session TTLs, event retention limit |
+| `configuration` | Local State Manager | Lobby origin, backend port, pairing request/session TTLs, event retention limit |
 | `pairing` | Pairing Engine | Pairing requests, sessions and lifecycle events (stored in snapshot root for v1 compatibility) |
 | `operations` | Future Operation Engine | Reserved operation-history domain |
 | `installed_engines` | Future installer | Reserved for engine installation metadata |
@@ -49,7 +49,7 @@ Initial configuration is:
 - Pairing session TTL: 24 hours
 - Lifecycle event retention: 2,000 events
 
-`updateConfiguration` validates known fields and HTTP(S) origin syntax. The Pairing Engine receives the persisted configuration at startup. Configuration changes made through the state API are picked up by the next backend start; a live reconfiguration endpoint is not included yet.
+`updateConfiguration` validates known fields, HTTP(S) origin syntax, port range and positive integer durations. The local Backend Manager exposes `GET /api/v1/configuration` and `PUT /api/v1/configuration`. Lobby origin and pairing/event settings apply immediately to subsequent requests and newly created sessions. Existing expiry timestamps are preserved. Backend port changes are persisted and require a restart; `CIN_LOCAL_BACKEND_PORT` takes precedence over the saved port. Configuration routes are restricted to loopback-origin browser requests.
 
 ## Boundaries
 
@@ -61,4 +61,4 @@ Initial configuration is:
 
 ## Verification
 
-Automated tests cover independent domain persistence, configuration validation, pairing restoration across a backend restart and retained revocation history. These tests are added to the Node test suite but still require execution under Node.js 22+ and subsequent verification on the target Android/Termux device.
+Automated tests cover independent domain persistence, configuration validation and API updates, dynamic Lobby origin changes, pairing restoration across a backend restart and retained revocation history. A dedicated GitHub Actions workflow now runs `npm test` with Node.js 22 for relevant pull requests. Android/Termux acceptance remains a separate required verification.
