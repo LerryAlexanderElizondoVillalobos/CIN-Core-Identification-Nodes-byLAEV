@@ -49,7 +49,7 @@ test("Manager is served from the local backend", async () => {
   try { await withServer(async port => {
     const response = await fetch(`http://127.0.0.1:${port}/manager`), html = await response.text();
     assert.equal(response.status, 200); assert.match(html, /CIN Backend Manager/);
-    assert.match(html, /Pairing requests/); assert.match(html, /Active sessions/);
+    assert.match(html, /Pairing requests/); assert.match(html, /Active sessions/);\n    assert.match(html, /Local State Manager/);
   }, dir); } finally { await rm(dir, { recursive: true, force: true }); }
 });
 
