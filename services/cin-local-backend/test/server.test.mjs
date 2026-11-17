@@ -4,6 +4,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createAppServer, HOST, DEFAULT_PORT, ALTERNATIVE_PORT, configuredPort } from "../src/server.js";
+import { createLocalStateManager } from "../src/local-state-manager.js";
 
 async function withServer(run, dataDir) {
   const server = createAppServer({ dataDir });
@@ -37,7 +38,7 @@ test("status endpoint reports persistence without credential material", async ()
   try { await withServer(async port => {
     const response = await fetch(`http://127.0.0.1:${port}/api/v1/status`), body = await response.json();
     assert.equal(response.status, 200); assert.equal(body.data.github, "not-connected");
-    assert.equal(body.data.repository, "not-configured"); assert.equal(body.data.persistence, "enabled");
+    assert.equal(body.data.repository, "not-configured"); assert.equal(body.data.persistence.enabled, true);\n    assert.ok(body.data.persistence.domains.includes("configuration"));
     assert.equal(JSON.stringify(body).includes("access_token"), false);
   }, dir); } finally { await rm(dir, { recursive: true, force: true }); }
 });
@@ -105,4 +106,26 @@ test("unapproved browser origins are rejected", async () => {
     });
     assert.equal(response.status, 403);
   }, dir); } finally { await rm(dir, { recursive: true, force: true }); }
+});
+
+test("Local State Manager persists independent domains and validated configuration", async () => {
+  const dir = await temporaryDirectory();
+  try {
+    const state = createLocalStateManager({ directory: dir });
+    state.setDomain("installed_engines", { pairing: { version: "1.0.0", enabled: true } });
+    state.updateDomain("installed_engines", current => ({
+      ...current, merkle: { version: "0.1.0", enabled: false }
+    }));
+    state.updateConfiguration({ lobby_origin: "https://example.org" });
+
+    const restored = createLocalStateManager({ directory: dir });
+    assert.deepEqual(restored.getDomain("installed_engines"), {
+      pairing: { version: "1.0.0", enabled: true },
+      merkle: { version: "0.1.0", enabled: false }
+    });
+    assert.equal(restored.getDomain("configuration").lobby_origin, "https://example.org");
+    assert.equal(restored.status().schema_version, 2);
+    assert.throws(() => restored.updateConfiguration({ unknown_setting: true }));
+    assert.throws(() => restored.updateConfiguration({ lobby_origin: "file:///tmp/state" }));
+  } finally { await rm(dir, { recursive: true, force: true }); }
 });
