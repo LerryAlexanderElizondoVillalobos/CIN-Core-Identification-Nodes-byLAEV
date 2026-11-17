@@ -20,7 +20,8 @@ const NETWORK_FIRST = new Set([
   "./cin-local-runtime-test.js",
   "./CIN-GENESIS-ENVIRONMENT.cincert",
   "./CIN-NODE-BIRTH.cincert",
-  "./CIN-PERSONAL-REGISTRATION.cincert"
+  "./CIN-PERSONAL-REGISTRATION.cincert",
+  "./CIN-GLOBAL-PERSONAL-DOCUMENT.cincert"
 ]);
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)));
