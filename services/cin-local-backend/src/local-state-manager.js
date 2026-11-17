@@ -33,6 +33,15 @@ export function createLocalStateManager(options = {}) {
   // Migrate schema v1 in place while preserving all existing pairing records.
   if (snapshot.schema_version === 1 || !snapshot.domains || !snapshot.domains.configuration?.backend_port) commit(domains);
 
+  // Migrate the previously published Pages origin in persisted local state.
+  // The path belongs to redirect_uri; lobby_origin stores only the origin.
+  const LEGACY_LOBBY_ORIGIN = "https://lerryalexanderelizondo.github.io";
+  const CANONICAL_LOBBY_ORIGIN = "https://lerryalexanderelizondovillalobos.github.io";
+  if (domains.configuration.lobby_origin === LEGACY_LOBBY_ORIGIN) {
+    domains.configuration.lobby_origin = CANONICAL_LOBBY_ORIGIN;
+    commit(domains);
+  }
+
   function getDomain(name) {
     if (!Object.hasOwn(domains, name)) return null;
     return structuredClone(domains[name]);
