@@ -2,7 +2,7 @@
 
 **Project:** CIN — Core Identification Nodes  
 **Component:** Environment Audit and Genesis Preparation  
-**Status:** Proposed architecture; specification and implementation pending
+**Status:** Architecture established; Genesis Manifest v1 and the initial Certificate Runner are implemented as a first vertical slice, pending full validation.
 
 ## 1. Purpose and lifecycle position
 
