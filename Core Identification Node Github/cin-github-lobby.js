@@ -542,7 +542,7 @@
           await recordProgress("NODE_BIRTH_CANDIDATE_SAVED",{
             source_manifest_id:savedRecord.source_genesis && savedRecord.source_genesis.manifest_id,
             path:BIRTH_PATH,
-            record_status:savedRecord.record_status,
+            candidate_status:savedRecord.candidate_status,
             recovery:"progress receipt reconstructed from existing birth candidate"
           });
         }
