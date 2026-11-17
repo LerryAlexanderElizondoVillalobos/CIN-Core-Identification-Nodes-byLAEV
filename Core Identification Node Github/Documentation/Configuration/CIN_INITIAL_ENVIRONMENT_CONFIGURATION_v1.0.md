@@ -2,70 +2,137 @@
 
 **Project:** Core Identification Node (CIN) byLAEV  
 **Configuration ID:** `cin.initial-environment`  
-**Version:** 1.0.0  
-**Status:** Initial configuration baseline — implementation alignment required  
-**Scope:** Repository, deployment, local runtime, storage, authentication and component layout  
+**Version:** 1.0.1  
+**Status:** Corrected documented baseline — implementation alignment required  
+**Scope:** Repository, web publication, future local application environment, storage, authentication and component layout  
 **Branch reviewed:** `main`
 
 ---
 
-## 1. Objective
+## Revision note — 1.0.1
 
-This document establishes the initial operational space of CIN: which repository and directory define the current project boundary, how the published Lobby differs from the local runtime, where local data is resolved, which providers are currently available, and how the existing components are organized.
+This patch clarifies a separation that is mandatory throughout CIN documentation and implementation:
 
-This is a configuration baseline grounded in the repository as inspected. It deliberately distinguishes:
+- **CIN Web Environment** is the browser-based publication environment. Its current publication target is GitHub Pages and it does not depend on a local HTTP server.
+- **CIN Local Environment** is the future installed/portable application environment. The Linux x86_64 runtime prototype belongs exclusively to this profile.
+- The local runtime's loopback address, port selection, local filesystem access and runtime data-root behavior are not global CIN settings and are not requirements of the Web Environment.
 
-- **Verified current configuration:** values and behavior present in the repository.
-- **Selected baseline:** the configuration value adopted for future integration.
+No runtime code or deployment behavior is changed by this documentation correction.
+
+## 1. Objective and status vocabulary
+
+This document establishes the repository boundary and separates the distinct execution environments in which CIN may operate. It distinguishes:
+
+- **Verified current configuration:** behavior or values present in the repository.
+- **Selected baseline:** a configuration value adopted for future integration.
 - **Not configured / not implemented:** a provider or component for which no active implementation was found.
-- **Pending alignment:** a discrepancy between existing implementation artifacts that must be reconciled.
+- **Pending alignment:** a discrepancy between existing implementation artifacts that must be reconciled within the relevant environment profile.
 
-This document does not claim that the multi-node Lobby architecture or a production backend is already implemented.
+This document does not claim that the multi-node Lobby architecture, a production backend, or a production local application is already implemented.
 
 ## 2. Repository configuration
 
 | Parameter | Initial value | Status |
 |---|---|---|
-| Repository Owner | `LerryAlexanderElizondoVillalobos` | Verified from GitHub repository metadata |
+| Repository owner | `LerryAlexanderElizondoVillalobos` | Verified |
 | Repository | `CIN-Core-Identification-Nodes-byLAEV` | Verified |
 | Branch | `main` | Verified default branch |
-| Root Directory | `Core Identification Node Github/` | Verified Pages publication directory |
+| GitHub Pages publication directory | `Core Identification Node Github/` | Verified |
 | Repository URL | `https://github.com/LerryAlexanderElizondoVillalobos/CIN-Core-Identification-Nodes-byLAEV` | Verified |
-| Published Lobby | `https://lerryalexanderelizondo.github.io/CIN-Core-Identification-Nodes-byLAEV/` | Declared in repository README |
+| Published Web Lobby | `https://lerryalexanderelizondo.github.io/CIN-Core-Identification-Nodes-byLAEV/` | Declared in repository |
 
-### 2.1 Meaning of Root Directory
+### 2.1 Repository root versus publication root
 
-`Core Identification Node Github/` is currently the **GitHub Pages publication root** for the CIN Genesis Lobby. The workflow `.github/workflows/cin-genesis-lobby-pages.yml` uploads only this directory as the Pages artifact.
+`Core Identification Node Github/` is the GitHub Pages publication root for the current static Genesis Lobby. The workflow `.github/workflows/cin-genesis-lobby-pages.yml` publishes this directory.
 
-It is not the root of all application source code. The current local runtime and core library are located under `prototype/` at repository root.
+It is not the root of all application source code. The Rust core library and the Linux local runtime prototype are maintained under `prototype/` at repository root.
 
-The directory also contains `CIN 001/`, which currently has a README establishing the node directory, but does not yet contain the full Node Lobby or local Configuration Engine implementation.
+The publication directory contains `CIN 001/`, currently established by a README. Its full Node Lobby and node-specific Configuration Engine are not yet implemented.
 
-## 3. Environment configuration
+## 3. Execution environment profiles
 
-### 3.1 Storage provider
+The profiles below are distinct deployment/runtime contexts. A capability or setting belonging to one profile must not be silently inherited by another.
 
-**Selected baseline:** local filesystem storage.
+### 3.1 CIN Web Environment
 
-The repository contains two related but distinct local persistence elements:
+| Setting | Current value | Status |
+|---|---|---|
+| Delivery model | Browser-based static web publication | Verified |
+| Hosting | GitHub Pages | Verified |
+| Publication URL | `https://lerryalexanderelizondo.github.io/CIN-Core-Identification-Nodes-byLAEV/` | Declared |
+| Publication source | `Core Identification Node Github/` | Verified |
+| Local HTTP server | Not required | Profile rule |
+| Loopback address / local port | Not applicable | Profile rule |
+| Direct host filesystem access | Not available to the static page by itself | Verified limitation |
+| Backend/API connection | None configured for the published site | Verified |
 
-1. `prototype/cin-core/src/storage/` contains a filesystem document repository and a `TransactionalStore` prototype. The transactional implementation stores JSON documents, stages writes, calculates SHA-256 over the exact serialized bytes, uses commit markers and supports read/recovery inspection.
-2. `prototype/linux-runtime/src/main.rs` contains a separate runtime persistence probe that writes `runtime-probe.record` to the resolved local data directory and reads it back.
+The Web Environment serves the published Lobby in a browser. It must not assume that a local CIN process is installed, running, reachable at `127.0.0.1`, or available on any particular port.
 
-These are prototype capabilities. The runtime persistence probe is not the production CIN record store, and the presence of the storage implementation does not mean Genesis, node-birth or other production records are already being persisted through it.
+A future web backend or remote node transport would be a separately declared service and connection configuration. Neither is currently configured by this baseline.
 
-| Setting | Baseline |
+### 3.2 CIN Local Environment
+
+This profile represents the future installed or portable local application environment. The existing Linux x86_64 runtime is a prototype belonging only to this profile.
+
+| Setting | Prototype value | Status |
+|---|---|---|
+| Prototype path | `prototype/linux-runtime/` | Verified |
+| Platform | Linux x86_64 | Verified |
+| Runtime model | Local HTTP server with browser interface | Verified prototype |
+| Bind address | `127.0.0.1` | Verified prototype |
+| Port selection | `1221`, then `2112`, then OS-assigned ephemeral port | Verified prototype |
+| Runtime address output | `CIN_URL=http://127.0.0.1:<selected-port>` | Verified prototype |
+| Local runtime interface | `prototype/dist/index.html` | Verified |
+| Production local application | Not yet established | Not implemented |
+
+The loopback server and port strategy are strictly local-profile implementation details. They are not part of the CIN Web Environment, the Global Lobby's general configuration, or a universal CIN backend address.
+
+The prototype exposes the following local routes:
+
+- `GET /health`
+- `GET /api/status`
+- `GET /api/lifecycle`
+- `POST /api/probe/write`
+- `GET /api/probe/read`
+- `POST /api/runtime/shutdown`
+
+The selected local address is dynamic. A local client must discover it from the running runtime's `CIN_URL` output rather than treating a particular port as permanent.
+
+**Implementation boundary:** this prototype does not yet implement the complete CIN Node Lobby, Global Lobby communication contract or a production backend.
+
+### 3.3 Profile separation rules
+
+1. GitHub Pages publication must remain usable without a local runtime.
+2. The Web Environment must not probe or assume a local loopback server as a default backend.
+3. The Local Environment may use loopback networking and local operating-system resources as required by its own runtime design.
+4. Local filesystem paths, local ports, runtime process state and local data-root variables belong to the Local Environment profile.
+5. Any future communication between Web and Local environments must be explicitly designed, declared and implemented; it is not implied by publishing the Web Lobby.
+6. Global Lobby configuration and each node's configuration scope remain separate from environment-profile configuration.
+
+## 4. Storage and data-root configuration
+
+### 4.1 Storage status
+
+The current filesystem persistence work belongs to the local Rust prototype and must not be interpreted as storage configured for GitHub Pages.
+
+1. `prototype/cin-core/src/storage/` contains a filesystem document repository and a `TransactionalStore` prototype. The transactional implementation stores JSON documents, stages writes, calculates SHA-256 over serialized bytes, uses commit markers and supports read/recovery inspection.
+2. `prototype/linux-runtime/src/main.rs` contains a separate local runtime persistence probe that writes `runtime-probe.record` and reads it back.
+
+These are prototype capabilities. The runtime probe is not the production CIN record store. The existence of the core storage prototype does not mean Genesis, node-birth or other production records are already persisted through it.
+
+| Setting | Current status |
 |---|---|
-| Provider type | Local filesystem |
+| Local prototype provider | Local filesystem |
 | Document format | JSON |
 | Core storage implementation | `prototype/cin-core/src/storage/TransactionalStore` |
-| Runtime persistence probe | `runtime-probe.record` |
-| Production record provider | Not yet designated |
+| Runtime probe | `runtime-probe.record` |
+| Production record provider | Not designated |
+| Web Environment storage backend | Not configured by this baseline |
 | Cloud/remote storage provider | Not configured |
 
-### 3.2 Data root
+### 4.2 Local data root
 
-The core data-root resolver defines this precedence:
+The core data-root resolver defines this precedence for the local application data environment:
 
 1. Explicit application configuration.
 2. Environment variable `CIN_DATA_DIR`.
@@ -79,67 +146,38 @@ Platform defaults declared by the resolver:
 | macOS | `~/Library/Application Support/CIN` |
 | Linux / Unix | `$XDG_DATA_HOME/CIN`, otherwise `~/.local/share/CIN` |
 
-The data root is separate from the executable and extracted package directory. This preserves local records when the portable application folder is moved or updated.
+The local data root is separate from the executable and extracted package directory. This is a Local Environment concern; it does not configure a storage location for the static Web Environment.
 
-**Integration discrepancy requiring resolution:** the core resolver and its specification use `CIN_DATA_DIR`, while the Linux runtime prototype currently reads `CIN_DATA_ROOT` and uses lowercase `cin` in its fallback paths. The selected canonical variable for CIN is `CIN_DATA_DIR`, matching `prototype/cin-core/src/data_root.rs` and `specifications/CIN_DATA_ROOT_RESOLVER_SPECIFICATION_V1.md`. The Linux runtime must be aligned with that contract before both components are treated as one integrated environment.
+**Local prototype integration discrepancy:** the shared core resolver/specification uses `CIN_DATA_DIR`, while the current Linux runtime prototype reads `CIN_DATA_ROOT` and uses lowercase `cin` in its fallback path. The selected canonical variable for the shared core contract is `CIN_DATA_DIR`. The local runtime integration must explicitly reconcile this discrepancy before both components are treated as one integrated local application. This discrepancy has no bearing on GitHub Pages.
 
-### 3.3 Authentication provider
+## 5. Authentication and authorization
 
-**Status: not configured.**
+**Status: not configured in either profile.**
 
-The inspected static GitHub Pages Lobby does not authenticate an operator against a CIN backend. The local Linux runtime prototype currently exposes its local HTTP interface and does not declare an authentication provider.
+The static GitHub Pages Lobby does not authenticate an operator against a CIN backend. The current Linux local runtime prototype also does not declare an authentication provider.
 
 No identity provider, credential provider, session provider or external authentication service is selected in this baseline.
 
-Authentication and operation authorization must remain separate configuration domains. A future authentication provider establishes the caller/session context; a separate authorization mechanism determines whether a particular operation is permitted. No provider is to be inferred from GitHub Pages hosting or repository ownership.
+Authentication and operation authorization remain separate configuration domains. A future authentication provider establishes caller/session context; a separate authorization mechanism determines whether a particular operation is permitted. Neither GitHub Pages hosting nor repository ownership constitutes an authentication provider.
 
-### 3.4 Backend address
+## 6. Connection state
 
-CIN currently has two different delivery/runtime contexts:
-
-**A. Published Genesis Lobby**
-
-- Hosting: GitHub Pages.
-- Address: `https://lerryalexanderelizondo.github.io/CIN-Core-Identification-Nodes-byLAEV/`
-- Mode: static web publication.
-- Backend API: none configured for the published Pages site.
-
-The existing README explicitly describes this page as a static interface and states that it cannot inspect the host operating system, execute a local certificate or write a manifest to local storage by itself.
-
-**B. Local Linux runtime prototype**
-
-- Bind address: `127.0.0.1` only.
-- Port selection: first available of `1221`, `2112`, then an operating-system-assigned ephemeral port.
-- Runtime output: `CIN_URL=http://127.0.0.1:<selected-port>`.
-- Runtime health route: `GET /health`.
-- Runtime status route: `GET /api/status`.
-- Lifecycle route: `GET /api/lifecycle`.
-- Persistence probe routes: `POST /api/probe/write` and `GET /api/probe/read`.
-- Shutdown route: `POST /api/runtime/shutdown`.
-
-The local address is dynamic and must be discovered from the runtime's `CIN_URL` output; it must not be hardcoded as a permanent backend URL.
-
-**Runtime scope:** Linux x86_64 prototype. It is not yet a production backend and does not implement the full CIN Node Lobby or Global Lobby communication contract.
-
-### 3.5 Connection state
-
-The configuration baseline distinguishes these states:
-
-| Context | Initial state | Meaning |
+| Connection/context | Initial state | Meaning |
 |---|---|---|
 | GitHub repository | Available | Repository and `main` branch are accessible |
-| GitHub Pages | Published URL declared | Static Lobby publication target exists |
-| Pages-to-backend connection | Not configured | No backend endpoint is connected to the public static page |
-| Local Linux runtime | Prototype | Can expose a loopback HTTP server when launched |
-| Local storage | Prototype | Filesystem persistence components exist in the Rust prototype |
-| Remote node communication | Not configured | No operational Global Lobby-to-node administration transport found |
-| Authentication | Not configured | No active authentication provider found |
+| CIN Web Environment / Pages | Published static interface | Static Lobby publication target exists |
+| Web-to-local-runtime connection | Not configured / not assumed | Pages does not depend on a local process |
+| Web backend/API | Not configured | No backend endpoint is connected to the published page |
+| CIN Local Environment runtime | Prototype | Local Linux prototype can expose loopback HTTP when launched |
+| Local filesystem storage | Prototype | Filesystem persistence components exist in Rust prototype |
+| Remote node transport | Not configured | No operational Global Lobby-to-node administration transport found |
+| Authentication | Not configured | No active provider found |
 
-Connection status must be measured at runtime. A repository URL or a published static page is not proof that a local backend or CIN node is online.
+Connection status must be observed in the relevant runtime. A repository URL or published static page does not prove that a local runtime or CIN node is online.
 
-## 4. Component structure
+## 7. Component structure
 
-### 4.1 Current repository layout relevant to the environment
+### 7.1 Current repository layout relevant to the profiles
 
 ```text
 CIN-Core-Identification-Nodes-byLAEV/
@@ -161,7 +199,6 @@ CIN-Core-Identification-Nodes-byLAEV/
 │
 ├── prototype/
 │   ├── cin-core/
-│   │   ├── Cargo.toml
 │   │   └── src/
 │   │       ├── data_root.rs
 │   │       ├── documents/
@@ -169,15 +206,12 @@ CIN-Core-Identification-Nodes-byLAEV/
 │   │       ├── schema.rs
 │   │       ├── lifecycle.rs
 │   │       └── recovery.rs
-│   │
 │   ├── linux-runtime/
-│   │   ├── Cargo.toml
 │   │   ├── run-cin.sh
 │   │   └── src/
 │   │       ├── main.rs
 │   │       ├── browser.rs
 │   │       └── runtime_lifecycle.rs
-│   │
 │   └── dist/
 │       └── index.html
 │
@@ -195,69 +229,61 @@ CIN-Core-Identification-Nodes-byLAEV/
         └── Configuration/
 ```
 
-This is a relevant component map, not a complete recursive inventory of every repository file.
+This is a relevant component map, not a complete recursive inventory.
 
-### 4.2 Main directory
-
-The repository has two important roots with different purposes:
+### 7.2 Repository roots
 
 - Repository root: source code, prototypes, specifications, CI and development documentation.
-- `Core Identification Node Github/`: current static Genesis Lobby publication and the designated location for its related node-facing assets and documentation.
+- `Core Identification Node Github/`: current static Genesis Lobby publication and related web-facing assets/documentation.
+- `prototype/linux-runtime/`: local Linux runtime prototype only.
+- `prototype/cin-core/`: shared Rust domain/core library currently used by prototype work.
 
-The local runtime is currently maintained under `prototype/linux-runtime/`; the domain library is under `prototype/cin-core/`.
+### 7.3 Core modules and engines
 
-### 4.3 Central engines
+The current Rust core library is `prototype/cin-core/`. Its observed modules include:
 
-The current Rust core library is `prototype/cin-core/`. Its modules include:
-
-| Module | Current repository location | Observed responsibility |
+| Module | Location | Observed responsibility |
 |---|---|---|
-| Data Root Resolver | `src/data_root.rs` | Resolve the local user-data directory |
+| Data Root Resolver | `src/data_root.rs` | Resolve local user-data directory |
 | Documents | `src/documents/` | Common document model and validation |
 | Storage | `src/storage/` | Filesystem repository and transactional record prototype |
 | Schema | `src/schema.rs` | JSON Schema validation |
 | Lifecycle | `src/lifecycle.rs` | Explicit lifecycle transition model |
 | Recovery | `src/recovery.rs` | Recovery-related core functionality |
 
-These are existing core modules, not a complete set of production engines. The current library does not yet contain the full Configuration Engine described by the evolutionary configuration specification.
+These are existing core modules, not a complete set of production engines. The full Configuration Engine described by the evolutionary configuration specification is not yet implemented.
 
-### 4.4 Services
+### 7.4 Lobby interfaces
 
-There is no separate top-level `services/` directory in the inspected repository. The current responsibilities are implemented as modules inside `prototype/cin-core/` and runtime behavior inside `prototype/linux-runtime/`.
+Two different interface artifacts currently exist:
 
-The future architecture may introduce explicit application services, but they should be created when a functional service contract and implementation slice are defined. Empty directories must not be presented as implemented services.
+1. **Published Genesis Lobby:** `Core Identification Node Github/index.html`, served as static GitHub Pages content.
+2. **Local runtime web interface:** `prototype/dist/index.html`, served by the Linux local runtime prototype.
 
-### 4.5 Lobby interface
+They belong to different profiles. Neither currently implements the complete target architecture of a Global Lobby selector plus a separate Node Lobby inside each CIN node.
 
-Two interface artifacts currently exist:
+### 7.5 Services and Guest
 
-1. **Published Genesis Lobby:** `Core Identification Node Github/index.html`, served as a static GitHub Pages site.
-2. **Local runtime web interface:** `prototype/dist/index.html`, embedded and served by the Linux local runtime.
+There is no separate top-level `services/` directory in the inspected repository. Current responsibilities are implemented as modules in `prototype/cin-core/` and runtime behavior in `prototype/linux-runtime/`.
 
-Neither artifact currently implements the full target architecture of a Global Lobby selector plus a separate Node Lobby inside each CIN node.
+No implemented `Guest/` directory, Guest service or Guest module was found in the inspected component paths. Guest remains a planned component whose purpose, permissions and relationship to the Global Lobby and node-specific Lobby must be specified before implementation.
 
-### 4.6 Guest
+### 7.6 Configuration artifacts
 
-No implemented `Guest/` directory, Guest service or Guest module was found in the inspected component paths.
-
-For this initial configuration, Guest is recorded as a **planned component / not yet mapped to an implementation**. Its purpose, permissions, relationship to the Global Lobby and relationship to a node-specific Lobby must be specified before creating its runtime directory or assigning it an authentication role.
-
-### 4.7 Configuration
-
-Configuration-related artifacts currently include:
+Current configuration-related artifacts include:
 
 - `prototype/cin-core/src/data_root.rs`: local data-root resolution.
-- `specifications/CIN_DATA_ROOT_RESOLVER_SPECIFICATION_V1.md`: data-root contract.
+- `specifications/CIN_DATA_ROOT_RESOLVER_SPECIFICATION_V1.md`: local data-root contract.
 - `specifications/CIN_LOCAL_DOCUMENT_STORAGE_SPECIFICATION_V1.md`: local JSON document storage contract.
 - `prototype/cin-core/src/schema.rs`: JSON Schema validation.
-- `Core Identification Node Github/manifest.webmanifest`: PWA publication metadata.
+- `Core Identification Node Github/manifest.webmanifest`: web publication/PWA metadata.
 - `CIN Configuration Engine — Evolutionary Configuration Specification v1.0`: multi-scope configuration architecture.
 
-The last item defines the target evolutionary Configuration Engine architecture; it does not mean that engine has already been implemented.
+The evolutionary Configuration Engine specification describes target architecture; it does not mean that engine has already been implemented.
 
-## 5. Multi-node configuration scope
+## 8. Multi-node configuration scope
 
-The target configuration architecture has one central scope and one independent scope per CIN node:
+The target architecture has one Global Lobby scope and one independent scope per CIN node:
 
 | Scope | Owner | Configuration authority |
 |---|---|---|
@@ -266,48 +292,43 @@ The target configuration architecture has one central scope and one independent 
 | CIN 002 | `Core Identification Node Github/CIN 002/` | CIN 002 local Configuration Engine |
 | CIN N | Its own node directory | Its own local Configuration Engine |
 
-The current repository only establishes the CIN 001 directory with a README. The Global Lobby and per-node local Configuration Engine folders are target architecture elements and must be introduced through their own implementation work.
+The current repository establishes the CIN 001 directory with a README. The Global Lobby and per-node local Configuration Engine folders remain target architecture elements.
 
-The environment configuration itself must therefore support scoped values. A global repository reference does not imply shared node configuration, and adding CIN 002 must not reuse CIN 001's state or local data root.
+Environment profiles and configuration scopes are separate dimensions: the Web or Local profile describes where a component executes; the Global Lobby or node scope describes which component owns the configuration state. A global repository reference does not imply shared node configuration, and adding CIN 002 must not reuse CIN 001's state or local data root.
 
-## 6. Initial configuration record
+## 9. Machine-readable configuration record
 
-The machine-readable companion file is:
+The companion file is `cin-initial-environment.v1.json`. It mirrors this document's separation between Web and Local profiles and records repository settings, profile-specific deployment/runtime details, local storage and data-root status, authentication status and component paths.
 
-`cin-initial-environment.v1.json`
+The JSON is a descriptive baseline. It does not provision a backend, create credentials, start a service or activate an authentication provider.
 
-It records repository settings, deployment context, runtime address strategy, storage provider status, data-root contract, authentication status and component paths.
+## 10. Required alignment work
 
-The JSON is an initial configuration descriptor. It does not provision a backend, create credentials, start a service or activate an authentication provider.
+1. Keep the Web Environment independent of the local Linux runtime and any loopback port.
+2. Reconcile `CIN_DATA_DIR` and `CIN_DATA_ROOT` within the Local Environment integration; do not propagate either variable as a Web Environment requirement.
+3. Connect the local runtime to the shared `cin-core` storage API rather than treating its persistence probe as the record store.
+4. Decide and implement authentication only when the operational requirements for the relevant profile are defined.
+5. Define any future Web backend/API separately from the local runtime interface.
+6. Implement the Global Lobby node selector and node registry.
+7. Implement a local Node Lobby and Configuration Engine inside CIN 001.
+8. Define Guest as a functional role/component before implementing it.
+9. Extend node provisioning to CIN 002 and later nodes without sharing local configuration state.
 
-## 7. Required alignment work
+## 11. Acceptance criteria
 
-The following work is required before this baseline can be considered an integrated operational environment:
+This configuration baseline is consistent when:
 
-1. Align the Linux runtime data-root variable and fallback path with the canonical `CIN_DATA_DIR` resolver.
-2. Connect the local runtime to the shared `cin-core` storage API instead of treating the runtime probe as the record store.
-3. Decide and implement the authentication provider, if the operational Lobby requires authenticated sessions.
-4. Define the local backend API contract and how the Lobby discovers its dynamic loopback address.
-5. Implement the Global Lobby node selector and node registry.
-6. Implement a local Node Lobby and Configuration Engine inside CIN 001.
-7. Define Guest as a functional role/component before implementing it.
-8. Extend the same provisioning model to CIN 002 and later nodes without sharing local configuration state.
+- repository owner, name, branch and Pages publication root are explicitly recorded;
+- Web and Local environments are separate named profiles;
+- the Web Environment has no dependency on `127.0.0.1`, local ports or a local server;
+- loopback binding, dynamic port selection and local filesystem access are recorded only under the Local Environment;
+- local storage and data-root details are not presented as Web hosting configuration;
+- existing providers and components are accurately marked as configured, prototype, planned or not implemented;
+- Global Lobby and node configuration scopes remain distinct from environment profiles;
+- the JSON descriptor matches the explanatory specification.
 
-## 8. Acceptance criteria
-
-The initial environment configuration is accepted as a documented baseline when:
-
-- repository owner, name, branch and Pages root are explicitly recorded;
-- static Pages hosting is distinguished from the local runtime backend;
-- storage provider and maturity are accurately represented;
-- data-root precedence and the environment-variable discrepancy are documented;
-- authentication is explicitly marked unconfigured rather than assumed;
-- backend binding and dynamic port behavior are recorded;
-- existing engines, runtime, Lobby assets, services and Guest status are mapped without claiming absent components exist;
-- Global Lobby and node configuration scopes are clearly distinguished.
-
-**Current completion status:** documentation baseline can be established now. Runtime integration, authentication, full Lobby topology and production record storage remain implementation work.
+**Current completion status:** the environment documentation is corrected. Runtime integration, authentication, full Lobby topology and production record storage remain implementation work.
 
 ---
 
-*End of document — CIN Initial Environment Configuration v1.0.*
+*End of document — CIN Initial Environment Configuration v1.0, revision 1.0.1.*
