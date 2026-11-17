@@ -88,7 +88,7 @@ export function createPairingEngine({ now = () => Date.now() } = {}) {
     return { session_id: session.id, state: "ACTIVE", expires_at: new Date(session.expiresAt).toISOString() };
   }
 
-  function revoke(id) {
+  function reject(id) {\n    const item = requests.get(id);\n    if (!item || item.state !== "PENDING") return false;\n    item.state = "REJECTED";\n    return true;\n  }\n\n  function revoke(id) {
     const session = sessions.get(id);
     if (!session) return false;
     session.state = "REVOKED";
@@ -103,5 +103,5 @@ export function createPairingEngine({ now = () => Date.now() } = {}) {
       equalSecret(session.secret, secret) && session.origin === origin);
   }
 
-  return { request, list, poll, approve, revoke, authorize };
+  return { request, list, poll, approve, reject, revoke, authorize };
 }
