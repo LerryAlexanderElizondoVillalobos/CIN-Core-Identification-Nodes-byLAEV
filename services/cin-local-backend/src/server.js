@@ -3,12 +3,12 @@ import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { createPairingEngine } from "./pairing-engine.js";
-import { createPersistentStore } from "./persistent-store.js";
+import { createLocalStateManager } from "./local-state-manager.js";
 
 export const HOST = "127.0.0.1";
 export const DEFAULT_PORT = 2112;
 export const ALTERNATIVE_PORT = 1221;
-const LOBBY_ORIGIN = process.env.CIN_LOBBY_ORIGIN ?? "https://lerryalexanderelizondo.github.io";
+
 const managerPath = fileURLToPath(new URL("../manager/index.html", import.meta.url));
 
 function sendJson(response, statusCode, payload, headers = {}) {
@@ -44,9 +44,9 @@ export function createAppServer({ dataDir } = {}) {
   return http.createServer(async (request, response) => {
     const url = new URL(request.url ?? "/", "http://127.0.0.1");
     const origin = request.headers.origin;
-    const cors = originHeaders(origin);
+    const cors = originHeaders(origin, lobbyOrigin);
 
-    if (origin && !isAllowedOrigin(origin)) {
+    if (origin && !isAllowedOrigin(origin, lobbyOrigin)) {
       sendJson(response, 403, { ok: false, error: { code: "ORIGIN_DENIED", message: "Request origin is not approved." } });
       return;
     }
@@ -65,7 +65,7 @@ export function createAppServer({ dataDir } = {}) {
       sendJson(response, 200, { ok: true, data: {
         service: "cin-local-backend", version: "0.3.0", runtime: "node", bind_address: HOST,
         port: request.socket.localPort, github: "not-connected", repository: "not-configured",
-        pairing: "available", persistence: "enabled", storage_path: store.file
+        pairing: "available", persistence: stateManager.status()
       } }, cors); return;
     }
 
