@@ -48,7 +48,9 @@
     "determinism": "Same EVM address and same immutable Node Birth document produce the same identifier. Signature bytes, timestamp and chain ID are excluded from identifier derivation.",
     "binding": "The Node Birth document digest binds the personal document to the exact CIN node birth artifact.",
     "domain": "cin.global-personal-document.identifier",
-    "version": "1"
+    "version": "1",
+    "subject_address_source": "recovered EIP-712 signer address after signature verification",
+    "signature_bytes_excluded": true
   },
   "marriage_agreement": {
     "document_type": "cin.node-personal-document-marriage",
