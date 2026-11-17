@@ -1,0 +1,109 @@
+{
+  "certificate_id": "cin:certificate:global-personal-document-marriage:v1",
+  "certificate_type": "cin.global-personal-document-marriage",
+  "certificate_version": "1.0.0",
+  "title": "CIN Global Personal Document and Node Marriage Certificate",
+  "status": "development-candidate",
+  "execution": {
+    "instruction": "RUN CERTIFICATE",
+    "runner": "cin-github-lobby",
+    "action": "create-global-personal-document-and-sign-node-marriage"
+  },
+  "input_profile": {
+    "node_birth_document": {
+      "accepted_types": [
+        "cin.node-birth-candidate",
+        "cin.node-birth-record"
+      ],
+      "required_fields": [
+        "node.cin_bid"
+      ],
+      "candidate_rule": "PREVIEW_NOT_ISSUED is accepted only for prototype testing; outputs remain non-authoritative.",
+      "authoritative_rule": "A cin.node-birth-record with status BORN is required before authoritative issuance."
+    },
+    "wallet": {
+      "provider": "EIP-1193",
+      "wallet": "MetaMask or compatible EVM wallet",
+      "account": "eth_requestAccounts",
+      "chain": "eth_chainId"
+    },
+    "signature": {
+      "standard": "EIP-712",
+      "method": "eth_signTypedData_v4",
+      "purpose": "Explicit acceptance of the association between the referenced CIN node and the generated personal document."
+    }
+  },
+  "identifier_derivation": {
+    "profile_id": "cin.global-personal-document.identifier/1.0.0",
+    "algorithm": "SHA-256",
+    "canonicalization": "RFC 8785 JSON Canonicalization Scheme",
+    "input_fields": [
+      "domain",
+      "version",
+      "subject_address_lowercase",
+      "node_birth_record_sha256"
+    ],
+    "formula": "SHA-256(JCS({domain:'cin.global-personal-document.identifier',version:'1',subject_address:lowercase(EVM_address),node_birth_record_sha256:SHA256(JCS(complete_Node_Birth_document))}))",
+    "output": "cin:global-personal-document:v1:<lowercase_sha256_hex>",
+    "determinism": "Same EVM address and same immutable Node Birth document produce the same identifier. Signature bytes, timestamp and chain ID are excluded from identifier derivation.",
+    "binding": "The Node Birth document digest binds the personal document to the exact CIN node birth artifact.",
+    "domain": "cin.global-personal-document.identifier",
+    "version": "1",
+    "subject_address_source": "recovered EIP-712 signer address after signature verification",
+    "signature_bytes_excluded": true
+  },
+  "marriage_agreement": {
+    "document_type": "cin.node-personal-document-marriage",
+    "signature_standard": "EIP-712",
+    "primary_type": "CINMarriageAgreement",
+    "domain": {
+      "name": "CIN Node-Personal Document Marriage",
+      "version": "1",
+      "chainId": "connected wallet chain ID"
+    },
+    "signed_fields": [
+      "personalDocumentId",
+      "nodeBirthRecordSha256",
+      "cinBid",
+      "subjectAddress",
+      "agreementVersion",
+      "terms",
+      "termsSha256"
+    ],
+    "consent": "The wallet holder accepts the association between the CIN node referenced by the Node Birth document and the CIN Global Personal Document generated for the connected EVM address.",
+    "verification": "Recover the signer from the EIP-712 signature and require exact match with the connected wallet address.",
+    "terms": "By signing this CIN Node-Personal Document Marriage Agreement, the holder of the connected EVM address confirms control of that address and accepts its association with the CIN Global Personal Document generated for that address and the referenced CIN node birth record. This is a cryptographic commitment to the stated node-document relationship. It does not by itself establish civil attributes, legal status, government recognition, global uniqueness, issuer authorization or the truth of personal claims."
+  },
+  "processing": [
+    "Load the saved CIN 001 Node Birth document and validate its type, status and CIN-BID.",
+    "Connect to MetaMask through EIP-1193 and obtain the active EVM address and chain ID.",
+    "Calculate the Node Birth document SHA-256 digest using JCS canonicalization.",
+    "Derive the deterministic CIN Global Personal Document identifier from the address and Node Birth document digest.",
+    "Present the EIP-712 marriage agreement to MetaMask for explicit signature approval.",
+    "Recover and verify the signer address from the returned signature.",
+    "Generate the personal-document candidate and the separate node-personal-document marriage agreement.",
+    "If GitHub is linked, request explicit public-publication confirmation and verify both writes by read-back; otherwise download both JSON artifacts locally."
+  ],
+  "outputs": {
+    "personal_document": {
+      "document_type": "cin.global-personal-document-candidate",
+      "path": "CIN 001/records/personal-document/CIN-001-GLOBAL-PERSONAL-DOCUMENT-CANDIDATE.json",
+      "initial_status": "PREVIEW_NOT_ISSUED"
+    },
+    "marriage_agreement": {
+      "document_type": "cin.node-personal-document-marriage",
+      "path": "CIN 001/records/marriage/CIN-001-NODE-PERSONAL-DOCUMENT-MARRIAGE.json",
+      "initial_status": "SIGNED_CANDIDATE"
+    }
+  },
+  "operational_boundaries": [
+    "The private key is never requested, exported or stored; MetaMask performs the signature.",
+    "The signature is an explicit cryptographic commitment to the node-document association, not a blockchain transaction.",
+    "The signature proves control of the signing address and acceptance of the displayed typed data; it does not prove civil attributes or government recognition.",
+    "The identifier is derived from the stable address and Node Birth digest, not signature bytes.",
+    "The current browser Node Birth candidate is PREVIEW_NOT_ISSUED; outputs based on it remain non-authoritative.",
+    "Production issuance requires an authoritative BORN Node Birth Record, issuer authorization, approved schema, authoritative storage and independent verification.",
+    "The GitHub repository is public. Publishing the wallet address, signature and agreement requires separate explicit confirmation.",
+    "No personal name, date of birth, address or other personal attributes are collected by this prototype."
+  ]
+}
