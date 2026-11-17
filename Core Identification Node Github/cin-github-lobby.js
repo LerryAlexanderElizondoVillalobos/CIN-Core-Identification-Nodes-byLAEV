@@ -555,7 +555,9 @@
               cin_nsid:{value:savedRecord.node && savedRecord.node.cin_nsid,status:"CANDIDATE_NOT_ISSUED"},
               cin_bid:{value:savedRecord.node && savedRecord.node.cin_bid,status:"CANDIDATE_NOT_ISSUED"},
               cin_ref:{value:savedRecord.node && savedRecord.node.cin_ref,status:"CANDIDATE_NOT_ISSUED"},
-              cin_personal_number:{value:null,status:"NOT_REGISTERED"}
+              cin_personal_number:{value:null,status:"NOT_REGISTERED"},
+              cin_personal_registration_id:{value:null,status:"NOT_REGISTERED"},
+              cin_personal_credential_id:{value:null,status:"NOT_ISSUED"}
             }
           });
         }
@@ -651,7 +653,9 @@
           cin_enid:{value:record.node.cin_enid||null,status:record.node.cin_enid?"CANDIDATE_NOT_ISSUED":"NOT_DERIVED"},
           cin_pvid:{value:record.node.cin_pvid||null,status:record.node.cin_pvid?"CANDIDATE_NOT_ISSUED":"NOT_DERIVED"},
           cin_ref:{value:record.node.cin_ref,status:"CANDIDATE_NOT_ISSUED"},
-          cin_personal_number:{value:null,status:"NOT_REGISTERED"}
+          cin_personal_number:{value:null,status:"NOT_REGISTERED"},
+              cin_personal_registration_id:{value:null,status:"NOT_REGISTERED"},
+              cin_personal_credential_id:{value:null,status:"NOT_ISSUED"}
         }
       });
       $("birthSummary").hidden=false; $("birthSummary").textContent=JSON.stringify(record,null,2);
@@ -689,7 +693,9 @@
         cin_enid:{value:null,status:"NOT_DERIVED"},
         cin_pvid:{value:null,status:"NOT_DERIVED"},
         cin_ref:{value:null,status:"NOT_AVAILABLE"},
-        cin_personal_number:{value:null,status:"NOT_REGISTERED"}
+        cin_personal_number:{value:null,status:"NOT_REGISTERED"},
+              cin_personal_registration_id:{value:null,status:"NOT_REGISTERED"},
+              cin_personal_credential_id:{value:null,status:"NOT_ISSUED"}
       },
       genesis:null,
       birth:null,
@@ -721,7 +727,9 @@
       ["CIN-ENID · CONDITIONAL",ids.cin_enid && ids.cin_enid.value,ids.cin_enid && ids.cin_enid.status],
       ["CIN-PVID · CONDITIONAL",ids.cin_pvid && ids.cin_pvid.value,ids.cin_pvid && ids.cin_pvid.status],
       ["CIN-REF",ids.cin_ref && ids.cin_ref.value,ids.cin_ref && ids.cin_ref.status],
-      ["CIN PERSONAL NUMBER",ids.cin_personal_number && ids.cin_personal_number.value,ids.cin_personal_number && ids.cin_personal_number.status]
+      ["CIN PERSONAL NUMBER",ids.cin_personal_number && ids.cin_personal_number.value,ids.cin_personal_number && ids.cin_personal_number.status],
+      ["CIN PERSONAL REGISTRATION ID",ids.cin_personal_registration_id && ids.cin_personal_registration_id.value,ids.cin_personal_registration_id && ids.cin_personal_registration_id.status],
+      ["CIN PERSONAL CREDENTIAL ID",ids.cin_personal_credential_id && ids.cin_personal_credential_id.value,ids.cin_personal_credential_id && ids.cin_personal_credential_id.status]
     ];
     $("nodeIdentifiers").replaceChildren();
     fields.forEach(([label,val,state])=>{
