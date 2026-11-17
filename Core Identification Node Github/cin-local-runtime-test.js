@@ -1,7 +1,9 @@
 (() => {
   "use strict";
 
-  const ENDPOINT = "http://127.0.0.1:2112/health";
+  const CONFIG = window.CIN_GITHUB_CONFIG || {};
+  const BASE_URL = String(CONFIG.localBackendUrl || "http://127.0.0.1:8787").replace(/\/$/, "");
+  const ENDPOINT = BASE_URL + "/health";
   const button = document.getElementById("testLocalRuntimeButton");
   const badge = document.getElementById("localRuntimeBadge");
   const status = document.getElementById("localRuntimeStatus");
@@ -51,10 +53,10 @@
 
       if (!response.ok) {
         show("The local server responded, but returned HTTP " + response.status + ".", "error", "HTTP error");
-      } else if (data && data.ok === true && data.project === "CIN byLAEV") {
+      } else if (data && data.service === "cin-termux-local-backend" && data.status === "ready" && typeof data.runtime === "string") {
         show("Connection successful. The Lobby received the CIN local runtime health response.", "ok", "Connected");
       } else {
-        show("The endpoint is reachable, but its response does not match the expected CIN health payload.", "error", "Unexpected response");
+        show("The endpoint is reachable, but its response does not match the CIN Termux health contract.", "error", "Unexpected response");
       }
     } catch (error) {
       const detail = error && error.name === "AbortError"

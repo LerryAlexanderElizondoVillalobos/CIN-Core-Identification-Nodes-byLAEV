@@ -100,13 +100,20 @@ const server = http.createServer(async (req, res) => {
       const entries = await workspace.list(url.searchParams.get("path") || "");
       return send(res, 200, { root: "Core Identification Node Github", entries }, origin);
     }
+    if (req.method === "POST" && url.pathname === "/v1/local/directory") {
+      const input = await readJson(req);
+      const created = await workspace.createDirectory(input.path);
+      return send(res, 201, created, origin);
+    }
     if (req.method === "GET" && url.pathname === "/v1/local/file") {
-      const file = await workspace.read(url.searchParams.get("path") || "");
+      const file = await workspace.read(url.searchParams.get("path") || "", url.searchParams.get("encoding") || "utf8");
       return send(res, 200, file, origin);
     }
     if (req.method === "PUT" && url.pathname === "/v1/local/file") {
       const input = await readJson(req);
-      const saved = await workspace.write(input.path, input.content);
+      const encoding = input.encoding === "base64" ? "base64" : "utf8";
+      const content = encoding === "base64" ? input.content_base64 : input.content;
+      const saved = await workspace.write(input.path, content, encoding);
       return send(res, 200, saved, origin);
     }
     if (req.method === "POST" && url.pathname === "/v1/permissions/requests") {
