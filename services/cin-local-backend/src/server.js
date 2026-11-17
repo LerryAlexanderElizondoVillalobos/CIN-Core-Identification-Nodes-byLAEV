@@ -51,7 +51,7 @@ export function createAppServer() {
     const origin = request.headers.origin;
     const cors = originHeaders(origin);
 
-    if (origin && !cors["Access-Control-Allow-Origin"]) {
+    if (origin && !isAllowedOrigin(origin)) {
       sendJson(response, 403, { ok: false, error: { code: "ORIGIN_DENIED", message: "Request origin is not approved." } });
       return;
     }
@@ -111,7 +111,7 @@ export function createAppServer() {
       return;
     }
 
-    if (url.pathname === "/api/v1/pairing/revoke" && request.method === "POST") {
+    if (url.pathname === "/api/v1/pairing/reject" && request.method === "POST") {\n      try {\n        const body = await readBody(request);\n        const rejected = pairing.reject(body.request_id);\n        sendJson(response, rejected ? 200 : 409, rejected ? { ok: true, data: { request_id: body.request_id, state: "REJECTED" } } : { ok: false, error: { code: "PAIRING_NOT_PENDING", message: "The request is unavailable, expired or already processed." } });\n      } catch {\n        sendJson(response, 400, { ok: false, error: { code: "INVALID_REQUEST", message: "A valid JSON body is required." } });\n      }\n      return;\n    }\n\n    if (url.pathname === "/api/v1/pairing/revoke" && request.method === "POST") {
       try {
         const body = await readBody(request);
         const revoked = pairing.revoke(body.session_id);
