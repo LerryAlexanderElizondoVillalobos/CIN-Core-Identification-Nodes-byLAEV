@@ -7,6 +7,10 @@ This directory is the **exclusive publication source** for the CIN Genesis Lobby
 ```text
 Core Identification Node Github/
 ├── index.html
+├── cin-github-config.js
+├── cin-github-lobby.js
+├── service-worker.js
+├── Documentation/
 ├── CIN Lobby.url
 ├── Install Genesis Manifest Certificate.url
 ├── CIN-GENESIS-ENVIRONMENT.cincert
@@ -25,7 +29,7 @@ The Lobby is a static GitHub Pages interface. It can publish and offer the certi
 
 ## Genesis Environment Certificate
 
-`CIN-GENESIS-ENVIRONMENT.cincert` is the declarative Genesis certificate (v1.0.1). It defines the environment collection profile and contains **12 bibliographic references in APA 7th edition** under `bibliographic_references`. The manifest generator is expected to transfer this block into each generated Genesis Environment Manifest, separately from observed environment data.
+`CIN-GENESIS-ENVIRONMENT.cincert` is the declarative Genesis certificate (v1.1.0). It defines the environment collection profile and contains **12 bibliographic references in APA 7th edition** under `bibliographic_references`. The manifest generator is expected to transfer this block into each generated Genesis Environment Manifest, separately from observed environment data.
 
 The declared collection profile includes operating system and architecture, allowlisted runtime configuration, supported hardware capabilities, a SHA-256 package file inventory, network interface names, digest capabilities, and storage-configuration presence. It excludes credentials, private keys, arbitrary environment variables, user file contents, network payloads, and absolute paths.
 
@@ -59,3 +63,13 @@ The Lobby workflow is designed to connect the operator's GitHub account, inspect
 Because this repository is public and the Pages workflow publishes the entire directory, saved repository manifests, progress records, node profile projections and birth candidates are public. Personal records and complete credentials must not be committed to public paths by default.
 
 The web repository audit is not the local package/operating-system audit. The local Certificate Runner remains a separate execution profile.
+
+
+## Current Genesis Lobby implementation status
+
+- The published page includes the GitHub account-link control, OAuth callback processing, repository snapshot collector, GitHub Contents API save/read-back flow, node progress record and registry-driven header.
+- The Genesis certificate has separate `github_repository` and `local_package` execution profiles. The repository profile describes the GitHub tree snapshot; the local profile retains the separate local package/runtime collection contract.
+- The browser birth operation saves only a `PREVIEW_NOT_ISSUED` candidate and marks the identifiers as candidates in the node profile.
+- The Personal Registration certificate is a development candidate. Personal issuance requires an authoritative born node, explicit person-to-node association and separately verified authorization.
+- GitHub linking is not active until the GitHub App is created/installed and the OAuth exchange Worker is deployed and configured. See [Worker setup](../services/cin-github-oauth-worker/README.md).
+- The GitHub repository and published Pages site are public. Public progress records are not a private DataRoot registration; do not commit private personal records or credentials here.
