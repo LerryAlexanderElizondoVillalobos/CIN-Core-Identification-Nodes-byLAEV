@@ -715,7 +715,7 @@
     const certificateResponse=await fetch("./CIN-GLOBAL-PERSONAL-DOCUMENT.cincert",{cache:"no-store"});
     if(!certificateResponse.ok) throw new Error("Certificate 3 could not be loaded from the Lobby.");
     const certificate=await certificateResponse.json();
-    if(certificate.certificate_type!=="cin.global-personal-document-marriage"||certificate.certificate_version!=="1.0.0"||certificate.execution?.action!=="create-global-personal-document-and-sign-node-marriage"||!certificate.marriage_agreement?.terms||certificate.outputs?.personal_document?.path!==PERSONAL_DOCUMENT_PATH||certificate.outputs?.marriage_agreement?.path!==MARRIAGE_PATH) throw new Error("Certificate 3 descriptor is invalid, incomplete or its execution paths are unsupported.");
+    if(certificate.certificate_type!=="cin.global-personal-document-marriage"||certificate.certificate_version!=="1.0.0"||certificate.execution?.action!=="create-global-personal-document-and-sign-node-marriage"||!certificate.marriage_agreement?.terms||certificate.outputs?.personal_document?.path!==PERSONAL_DOCUMENT_PATH.slice(ROOT.length)||certificate.outputs?.marriage_agreement?.path!==MARRIAGE_PATH.slice(ROOT.length)) throw new Error("Certificate 3 descriptor is invalid, incomplete or its execution paths are unsupported.");
     const agreementTerms=certificate.marriage_agreement.terms;
     const birthResult=await readPublicJson(BIRTH_PATH);
     if(!birthResult) throw new Error("The CIN 001 Node Birth candidate has not been saved. Complete Certificate 2 first.");
@@ -749,7 +749,7 @@
       if(recovered.toLowerCase()!==walletAddress.toLowerCase()) throw new Error("EIP-712 signature verification failed: recovered signer differs from the connected wallet.");
       const signedAt=new Date().toISOString();
       const personalDocument={
-        document_type:"cin.global-personal-document-candidate",schema_version:"1.0.0",document_id:personalDocumentId,certificate:{certificate_id:certificate.certificate_id,version:certificate.certificate_version},
+        document_type:certificate.outputs.personal_document.document_type,schema_version:"1.0.0",document_id:personalDocumentId,certificate:{certificate_id:certificate.certificate_id,version:certificate.certificate_version},
         status:isCandidate?"PREVIEW_NOT_ISSUED":"SIGNED_PENDING_ISSUER_VERIFICATION",generated_at:signedAt,
         subject:{evm_address:walletAddress,evm_chain_id:walletChainId},
         node_reference:{node_id:NODE,cin_bid:cinBid,cin_nid:birth.node&&birth.node.cin_nid||null,birth_document_type:birth.document_type,birth_document_path:BIRTH_PATH,birth_document_sha256:birthDigest,birth_document_status:isCandidate?"PREVIEW_NOT_ISSUED":"BORN"},
@@ -758,7 +758,7 @@
         issuance:{status:isCandidate?"PREVIEW_NOT_ISSUED":"PENDING_ISSUER_VERIFICATION",authoritative:false,reason:isCandidate?"The referenced Node Birth input is a non-authoritative browser candidate.":"Issuer authorization, authoritative storage and independent issuance verification remain separate steps."}
       };
       const marriageAgreement={
-        document_type:"cin.node-personal-document-marriage",schema_version:"1.0.0",certificate:{certificate_id:certificate.certificate_id,version:certificate.certificate_version},
+        document_type:certificate.outputs.marriage_agreement.document_type,schema_version:"1.0.0",certificate:{certificate_id:certificate.certificate_id,version:certificate.certificate_version},
         agreement_id:"cin:node-personal-document-marriage:v1:"+identifierDigest,status:"SIGNED_CANDIDATE",signed_at:signedAt,
         parties:{node:{node_id:NODE,cin_bid:cinBid,birth_document_sha256:birthDigest},personal_document:{document_id:personalDocumentId,subject_address:walletAddress}},
         acceptance:{accepted:true,agreement_version:"1.0.0",terms:agreementTerms,terms_sha256:termsSha256},
