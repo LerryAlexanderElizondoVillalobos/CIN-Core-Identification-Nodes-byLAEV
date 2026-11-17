@@ -386,7 +386,7 @@
         $("genesisSummary").textContent=JSON.stringify({
           manifest_id:genesisManifest.manifest_id,
           saved_path:GENESIS_PATH,
-          collection_scope:genesisManifest.environment_data && genesisManifest.environment_data.collection_scope,
+          collection_scope:genesisManifest.environment_data && genesisManifest.environment_data.execution_environment && genesisManifest.environment_data.execution_environment.collection_scope,
           source_commit_sha:genesisManifest.environment_data && genesisManifest.environment_data.repository && genesisManifest.environment_data.repository.source_commit_sha
         },null,2);
         await loadNodeProfile(true);
@@ -423,7 +423,7 @@
           manifest_id:genesisManifest.manifest_id,
           saved_path:GENESIS_PATH,
           repository_commit_sha:genesisGitCommit,
-          collection_scope:genesisManifest.environment_data && genesisManifest.environment_data.collection_scope,
+          collection_scope:genesisManifest.environment_data && genesisManifest.environment_data.execution_environment && genesisManifest.environment_data.execution_environment.collection_scope,
           source_commit_sha:genesisManifest.environment_data && genesisManifest.environment_data.repository && genesisManifest.environment_data.repository.source_commit_sha
         },null,2);
         renderConnection(); return;
