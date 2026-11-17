@@ -10,7 +10,7 @@ The page uses Authorization Code + PKCE. The GitHub App user token is restricted
 
 ## Deployment
 
-Deploy src/index.js as a Cloudflare Worker or equivalent HTTPS serverless function.
+Deploy src/index.js as a Cloudflare Worker or equivalent HTTPS serverless function. A Wrangler configuration template is included as wrangler.toml.
 
 Configure these Worker variables:
 
@@ -24,7 +24,15 @@ Configure these Worker variables:
 
 Expose GET /health and POST /oauth/exchange.
 
-Set the Worker endpoint URL in the public configuration file under Core Identification Node Github as tokenExchangeEndpoint, and set the public GitHub App client ID as clientId. Then set enabled to true.
+### Wrangler deployment
+
+1. Replace the placeholder client ID in wrangler.toml with the GitHub App Client ID.
+2. From this directory, run `npx wrangler secret put CIN_GITHUB_APP_CLIENT_SECRET` and paste the Client Secret into the hidden prompt. Never commit it or send it in chat.
+3. Run `npx wrangler deploy`.
+4. Confirm `https://<your-worker-host>/health` returns the ready status.
+5. In `Core Identification Node Github/cin-github-config.js`, set `clientId` to the same public Client ID, `tokenExchangeEndpoint` to `https://<your-worker-host>/oauth/exchange`, and `enabled` to `true`.
+
+After configuring the public file, the GitHub Pages workflow publishes the update. The Worker endpoint must use HTTPS and its callback/origin variables must exactly match the Pages origin and redirect URI.
 
 ## GitHub App configuration
 
@@ -48,7 +56,7 @@ The Lobby:
 4. Sends the one-time code and PKCE verifier to this Worker.
 5. Receives a repository-restricted user access token.
 6. Calls GitHub APIs as the operator and validates the expected repository.
-7. Holds the token only in page memory. Reloading the page requires reconnecting.
+7. Holds the access token only in page memory. Reloading the page requires reconnecting. The exchange Worker does not return refresh tokens to the browser; reconnect after the access token expires.
 
 ## Operational limits
 
