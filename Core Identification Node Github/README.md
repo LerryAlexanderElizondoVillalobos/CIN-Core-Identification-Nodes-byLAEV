@@ -84,6 +84,12 @@ The GitHub Pages Lobby is a static web environment. It does not require or assum
 
 The future portable local CIN application is a separate execution profile. Its local Certificate Runner and private DataRoot workflows must not be represented as completed merely because the web repository workflow has saved a public progress record.
 
+## Certificate 3 — technical specification and schemas
+
+- [CIN Global Personal Document and Node Marriage Certificate v1.0.0](Documentation/Architecture/CIN_GLOBAL_PERSONAL_DOCUMENT_AND_NODE_MARRIAGE_CERTIFICATE_v1.0.0.md)
+- [Global Personal Document JSON Schema](Documentation/Architecture/schemas/CIN-GLOBAL-PERSONAL-DOCUMENT.schema.json)
+- [Node-Personal Document Marriage JSON Schema](Documentation/Architecture/schemas/CIN-NODE-PERSONAL-DOCUMENT-MARRIAGE.schema.json)
+
 ## Development documentation
 
 - [Documentation index](Documentation/README.md)
