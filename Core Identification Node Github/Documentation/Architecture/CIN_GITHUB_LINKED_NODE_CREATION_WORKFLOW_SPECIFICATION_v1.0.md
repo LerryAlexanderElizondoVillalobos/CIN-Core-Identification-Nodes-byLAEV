@@ -26,7 +26,7 @@ This workflow supplements the portable local CIN architecture. A browser-based G
 | Branch | main |
 | Published root | Core Identification Node Github/ |
 | Initial node | CIN 001/ |
-| GitHub Pages URL | https://lerryalexanderelizondo.github.io/CIN-Core-Identification-Nodes-byLAEV/ |
+| GitHub Pages URL | https://lerryalexanderelizondovillalobos.github.io/CIN-Core-Identification-Nodes-byLAEV/ |
 
 The repository is public. All records committed into this repository are publicly readable. The workflow must display that fact before the first save and before any personal identifier or personal credential is published.
 
