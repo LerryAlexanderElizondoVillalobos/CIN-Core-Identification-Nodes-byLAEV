@@ -1,0 +1,108 @@
+{
+  "configuration_id": "cin.initial-environment",
+  "configuration_version": "1.0.0",
+  "status": "documented-baseline-implementation-alignment-required",
+  "repository": {
+    "owner": "LerryAlexanderElizondoVillalobos",
+    "name": "CIN-Core-Identification-Nodes-byLAEV",
+    "branch": "main",
+    "root_directory": "Core Identification Node Github/",
+    "url": "https://github.com/LerryAlexanderElizondoVillalobos/CIN-Core-Identification-Nodes-byLAEV",
+    "root_directory_role": "github-pages-publication-root"
+  },
+  "deployment": {
+    "provider": "GitHub Pages",
+    "mode": "static",
+    "published_lobby_url": "https://lerryalexanderelizondo.github.io/CIN-Core-Identification-Nodes-byLAEV/",
+    "artifact_source_directory": "Core Identification Node Github/",
+    "backend_connected": false
+  },
+  "runtime": {
+    "prototype": "prototype/linux-runtime",
+    "platform_scope": "Linux x86_64",
+    "server_type": "local-http",
+    "bind_host": "127.0.0.1",
+    "port_strategy": [1221, 2112, 0],
+    "address_template": "http://127.0.0.1:<selected-port>",
+    "address_environment_output": "CIN_URL",
+    "status": "prototype"
+  },
+  "storage": {
+    "provider": "local-filesystem",
+    "document_format": "JSON",
+    "core_implementation": "prototype/cin-core/src/storage/TransactionalStore",
+    "runtime_probe": "runtime-probe.record",
+    "production_record_store": false,
+    "remote_provider": null,
+    "status": "prototype"
+  },
+  "data_root": {
+    "canonical_environment_variable": "CIN_DATA_DIR",
+    "resolution_order": [
+      "explicit-application-configuration",
+      "CIN_DATA_DIR",
+      "platform-user-data-default"
+    ],
+    "defaults": {
+      "windows": "%APPDATA%/CIN",
+      "macos": "~/Library/Application Support/CIN",
+      "linux": "$XDG_DATA_HOME/CIN or ~/.local/share/CIN"
+    },
+    "application_package_separated_from_user_data": true,
+    "integration_discrepancy": {
+      "linux_runtime_current_variable": "CIN_DATA_ROOT",
+      "linux_runtime_current_fallback": "$XDG_DATA_HOME/cin or ~/.local/share/cin",
+      "required_alignment": "Use CIN_DATA_DIR and the canonical resolver behavior"
+    }
+  },
+  "authentication": {
+    "provider": null,
+    "status": "not-configured",
+    "note": "The static Pages Lobby and current local Linux runtime do not declare an authentication provider."
+  },
+  "authorization": {
+    "provider": null,
+    "status": "not-configured",
+    "note": "Authentication and operation-specific authorization remain separate configuration domains."
+  },
+  "connection": {
+    "github_repository": "available",
+    "github_pages": "published-static-interface",
+    "pages_backend_connection": "not-configured",
+    "local_linux_runtime": "prototype",
+    "remote_node_transport": "not-configured",
+    "status_is_runtime_observed": true
+  },
+  "components": {
+    "repository_root": "/",
+    "core_library": "prototype/cin-core",
+    "central_engine_modules": [
+      "data_root",
+      "documents",
+      "storage",
+      "schema",
+      "lifecycle",
+      "recovery"
+    ],
+    "runtime": "prototype/linux-runtime",
+    "published_lobby": "Core Identification Node Github/index.html",
+    "local_runtime_interface": "prototype/dist/index.html",
+    "services_directory": null,
+    "guest": {
+      "status": "planned-not-implemented",
+      "directory": null
+    },
+    "cin_001": {
+      "directory": "Core Identification Node Github/CIN 001/",
+      "current_contents": ["README.md"],
+      "node_lobby": "not-yet-implemented",
+      "node_configuration_engine": "not-yet-implemented"
+    },
+    "global_lobby_node_selector": "target-architecture-not-yet-implemented"
+  },
+  "configuration_scopes": {
+    "global_lobby": "independent-global-scope",
+    "cin_nodes": "one-independent-configuration-scope-per-node",
+    "shared_code_implies_shared_state": false
+  }
+}
