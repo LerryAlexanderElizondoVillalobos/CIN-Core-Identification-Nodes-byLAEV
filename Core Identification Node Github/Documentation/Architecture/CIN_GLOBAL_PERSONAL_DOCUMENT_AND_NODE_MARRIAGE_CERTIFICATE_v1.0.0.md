@@ -31,7 +31,7 @@ Raw signature bytes, signature timestamp and chain ID are excluded. The signatur
 
 The Lobby constructs EIP-712 typed data using domain name `CIN Node-Personal Document Marriage`, version `1`, and the active wallet chain ID. The primary type is `CINMarriageAgreement`.
 
-Signed fields: `personalDocumentId`, `nodeBirthRecordSha256`, `cinBid`, `subjectAddress`, `agreementVersion`, and `termsSha256`.
+Signed fields: `personalDocumentId`, `nodeBirthRecordSha256`, `cinBid`, `subjectAddress`, `agreementVersion`, the complete readable `terms` string, and `termsSha256`. MetaMask receives the complete terms text as part of the typed data rather than only an opaque digest.
 
 MetaMask signs through `eth_signTypedData_v4`. The Lobby recovers the signer and requires an exact match with the connected wallet address. No transaction or gas payment is requested.
 
