@@ -706,7 +706,7 @@
   }
 
   function downloadJsonFile(filename,value){
-    const blob=new Blob([JSON.stringify(value,null,2)+"\\n"],{type:"application/json"});
+    const blob=new Blob([JSON.stringify(value,null,2)+"\n"],{type:"application/json"});
     const url=URL.createObjectURL(blob),link=document.createElement("a");
     link.href=url;link.download=filename;document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(url);
   }
@@ -765,9 +765,9 @@
       let persistence="LOCAL_DOWNLOAD_ONLY";
       if(accessToken&&window.confirm("The wallet address, signature and marriage agreement will be committed to the PUBLIC CIN GitHub repository and become publicly readable. Publish both records?")){
         const docSaved=await saveJson(PERSONAL_DOCUMENT_PATH,personalDocument,"CIN 001: record signed global personal document candidate",true);
-        if(docSaved.existing&&docSaved.value?.document_id!==personalDocumentId) throw new Error("A different personal document exists at the target path; no record was overwritten.");
+        if(docSaved.existing&&JSON.parse(docSaved.raw).document_id!==personalDocumentId) throw new Error("A different personal document exists at the target path; no record was overwritten.");
         const marriageSaved=await saveJson(MARRIAGE_PATH,marriageAgreement,"CIN 001: record signed node-personal document marriage agreement",true);
-        if(marriageSaved.existing&&marriageSaved.value?.agreement_id!==marriageAgreement.agreement_id) throw new Error("A different marriage agreement exists at the target path; no record was overwritten.");
+        if(marriageSaved.existing&&JSON.parse(marriageSaved.raw).agreement_id!==marriageAgreement.agreement_id) throw new Error("A different marriage agreement exists at the target path; no record was overwritten.");
         persistence="PUBLIC_GITHUB_RECORDS_SAVED";
         await recordProgress("CIN_GLOBAL_PERSONAL_DOCUMENT_MARRIAGE_SIGNED",{document_id:personalDocumentId,agreement_id:marriageAgreement.agreement_id,subject_address:walletAddress,node_birth_record_sha256:birthDigest,signature_verification:"VERIFIED",persistence});
         await updateNodeProfile({personal_document:{document_id:personalDocumentId,agreement_id:marriageAgreement.agreement_id,status:personalDocument.status,marriage_status:marriageAgreement.status,path:PERSONAL_DOCUMENT_PATH,agreement_path:MARRIAGE_PATH,subject_address:walletAddress},identifiers:{cin_global_personal_document_id:{value:personalDocumentId,status:personalDocument.status},cin_personal_document_address:{value:walletAddress,status:"PUBLIC_WALLET_ADDRESS"}}});
