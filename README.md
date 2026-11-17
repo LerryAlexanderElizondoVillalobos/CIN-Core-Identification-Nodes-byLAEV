@@ -66,6 +66,16 @@ This separation is intended to allow each application to maintain its own functi
 
 The network becomes an infrastructure for multiple technological ecosystems rather than a single-purpose blockchain.
 
+## 3.1. Master Architecture
+
+The consolidated system architecture, including its layers, engines, dependencies, authorization and signing flows, ESMT placement, generalized UTXO model, and implementation maturity boundaries, is documented in:
+
+- [CIN — Master Architecture v1.0](docs/architecture/CIN_MASTER_ARCHITECTURE_V1.md)
+
+This document is the architectural overview for the target CIN system. It distinguishes conceptual subsystems from specifications, prototypes and validated implementations.
+
+---
+
 ## 4. Original Architectural Conception
 
 The original architectural diagram developed by LAEV illustrates the initial vision of this modular decentralized infrastructure.
