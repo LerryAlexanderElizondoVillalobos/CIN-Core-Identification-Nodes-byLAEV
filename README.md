@@ -619,6 +619,7 @@ The selected local execution profile uses **Node.js in Termux on the same Androi
 
 - [Termux backend architecture and installation](termux-cin/README.md)
 - [Local backend source](termux-cin/src/server.js)
+- [Local CIN directory connector](termux-cin/src/workspace/local-directory.js)
 - [GitHub repository connector](termux-cin/src/github/connector.js)
 - [Separate CIN permission engine](termux-cin/src/authorization/permission-engine.js)
 - [Separate external signing interface](termux-cin/src/signatures/signature-interface.js)
