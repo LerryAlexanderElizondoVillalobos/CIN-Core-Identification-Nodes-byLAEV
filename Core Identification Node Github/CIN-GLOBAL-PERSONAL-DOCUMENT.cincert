@@ -67,6 +67,7 @@
       "cinBid",
       "subjectAddress",
       "agreementVersion",
+      "terms",
       "termsSha256"
     ],
     "consent": "The wallet holder accepts the association between the CIN node referenced by the Node Birth document and the CIN Global Personal Document generated for the connected EVM address.",
