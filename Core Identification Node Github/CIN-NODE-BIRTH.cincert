@@ -1,7 +1,7 @@
 {
   "certificate_id": "cin:certificate:node-birth:v1",
   "certificate_type": "cin.node-birth",
-  "certificate_version": "1.0.0",
+  "certificate_version": "1.1.0",
   "title": "CIN Node Birth Certificate",
   "status": "development-candidate",
   "description": "Consumes the complete registered Genesis Environment Manifest, calculates its deterministic SHA-256 fingerprint, and derives the CIN node birth identifiers.",
