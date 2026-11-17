@@ -50,7 +50,9 @@ jobs:
           assert.equal(certificate.identifier_derivation.algorithm, 'SHA-256');
           assert.equal(certificate.identifier_derivation.signature_bytes_excluded, true);
           assert.equal(certificate.marriage_agreement.signature_standard, 'EIP-712');
-          assert.ok(certificate.marriage_agreement.signed_fields.includes('termsSha256'));
+          assert.ok(certificate.marriage_agreement.signed_fields.includes('terms'));
+assert.ok(certificate.marriage_agreement.signed_fields.includes('termsSha256'));
+assert.ok(lobby.includes('terms:agreementTerms'));
           assert.equal(certificate.outputs.personal_document.document_type, 'cin.global-personal-document-candidate');
           assert.equal(certificate.outputs.marriage_agreement.document_type, 'cin.node-personal-document-marriage');
           assert.equal(personalSchema.properties.document_type.const, certificate.outputs.personal_document.document_type);
@@ -61,7 +63,9 @@ jobs:
           assert.ok(html.includes('ethers@6.13.5'));
           assert.ok(html.includes('createPersonalDocumentButton'));
           assert.ok(serviceWorker.includes('CIN-GLOBAL-PERSONAL-DOCUMENT.cincert'));
+          const canonicalize = value => Array.isArray(value) ? '[' + value.map(canonicalize).join(',') + ']' : value && typeof value === 'object' ? '{' + Object.keys(value).sort().map(key => JSON.stringify(key) + ':' + canonicalize(value[key])).join(',') + '}' : JSON.stringify(value);
           for (const vector of vectors.vectors) {
+            assert.equal(canonicalize(vector.input), vector.jcs_canonical_utf8, vector.test_vector_id + ' JCS');
             const digest = crypto.createHash('sha256').update(vector.jcs_canonical_utf8, 'utf8').digest('hex');
             assert.equal(digest, vector.expected_sha256, vector.test_vector_id);
             assert.equal('cin:global-personal-document:v1:' + digest, vector.expected_document_id);
