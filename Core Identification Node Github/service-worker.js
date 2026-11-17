@@ -1,4 +1,4 @@
-const CACHE_NAME = "cin-genesis-lobby-v4";
+const CACHE_NAME = "cin-genesis-lobby-v5";
 const APP_SHELL = [
   "./",
   "./index.html",
