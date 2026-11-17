@@ -92,7 +92,7 @@ The current browser Node Birth artifact is `PREVIEW_NOT_ISSUED`, so the personal
 
 ### Certificate 4 — CIN Personal Registration and Credential
 
-The third certificate is CIN-PERSONAL-REGISTRATION.cincert. It consumes:
+The later Personal Registration and Credential certificate is CIN-PERSONAL-REGISTRATION.cincert. It consumes:
 
 - an authoritative, verified Node Birth Record;
 - an explicit person-to-node association event;
@@ -169,8 +169,9 @@ The fourth certificate is a development candidate. Its descriptor does not repla
 5. The Lobby commits the manifest and a progress receipt to GitHub.
 6. The Node Birth workflow consumes that exact committed manifest and saves its candidate/authorized result according to its true status.
 7. The profile projection updates and the public Lobby header reconstructs the saved identifiers.
-8. The third certificate becomes executable only when an authoritative birth, explicit person-node association and separate personal-issuance authorization are available.
-9. The personal number and credential status are represented according to their actual allocation, signature and verification state.
+8. Certificate 3 creates the CIN Global Personal Document candidate and obtains the EIP-712 signed node-document marriage agreement.
+9. The later Personal Registration and Credential certificate becomes executable only when authoritative birth, the signed association and separate personal-issuance authorization are available.
+10. The personal number and credential status are represented according to their actual allocation, signature and verification state.
 
 ---
 
