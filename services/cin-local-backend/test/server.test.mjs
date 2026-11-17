@@ -38,7 +38,8 @@ test("status endpoint reports persistence without credential material", async ()
   try { await withServer(async port => {
     const response = await fetch(`http://127.0.0.1:${port}/api/v1/status`), body = await response.json();
     assert.equal(response.status, 200); assert.equal(body.data.github, "not-connected");
-    assert.equal(body.data.repository, "not-configured"); assert.equal(body.data.persistence.enabled, true);\n    assert.ok(body.data.persistence.domains.includes("configuration"));
+    assert.equal(body.data.repository, "not-configured"); assert.equal(body.data.persistence.enabled, true);
+    assert.ok(body.data.persistence.domains.includes("configuration"));
     assert.equal(JSON.stringify(body).includes("access_token"), false);
   }, dir); } finally { await rm(dir, { recursive: true, force: true }); }
 });
