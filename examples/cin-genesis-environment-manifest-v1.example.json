@@ -1,0 +1,48 @@
+{
+  "document_id": "cin:genesis:initial",
+  "document_type": "cin.genesis-environment-manifest",
+  "schema_version": "1.0.0",
+  "created_at": "2026-11-15T18:00:00Z",
+  "references": [],
+  "payload": {
+    "manifest_profile": "cin.genesis-environment-manifest/1.0.0",
+    "lifecycle_stage": "pre-birth",
+    "capture_scope": "purpose-limited-technical-environment-and-extracted-cin-package",
+    "audit": {
+      "captured_at": "2026-11-15T18:00:00Z",
+      "fields": {
+        "execution.os.name": {
+          "value": "linux",
+          "source": "rust-std",
+          "method": "std::env::consts::OS",
+          "observed_at": "2026-11-15T18:00:00Z",
+          "status": "observed",
+          "sensitivity": "public",
+          "limitation": null
+        },
+        "package.archive_origin": {
+          "value": null,
+          "source": "operator or package-verifier",
+          "method": "no archive provenance input was supplied",
+          "observed_at": "2026-11-15T18:00:00Z",
+          "status": "unavailable",
+          "sensitivity": "internal",
+          "limitation": "The extracted process cannot infer which ZIP file was used or authenticate its origin."
+        }
+      }
+    },
+    "privacy": {
+      "absolute_paths_collected": false,
+      "arbitrary_environment_variables_collected": false,
+      "user_file_contents_collected": false,
+      "credentials_or_private_keys_collected": false,
+      "network_payloads_collected": false
+    },
+    "limitations": [
+      "Illustrative fixture only; values do not describe an actual CIN installation.",
+      "Unavailable and uncollected values are not negative assertions.",
+      "Package archive origin is not established by inspecting an extracted directory.",
+      "This document is not a Node Birth Record, personal registration, signature, or trust decision."
+    ]
+  }
+}
