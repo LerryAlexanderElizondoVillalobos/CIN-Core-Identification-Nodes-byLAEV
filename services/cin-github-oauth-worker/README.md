@@ -1,3 +1,5 @@
+> **DEPRECATED FOR THE SELECTED DEPLOYMENT:** CIN now uses the same-Android Termux Node.js backend in `termux-cin/`. Do not deploy this Worker for the selected architecture. The GitHub App Client Secret belongs in the private Termux `.env` file. This directory is retained as historical implementation material only.
+
 # CIN GitHub OAuth Exchange Worker
 
 This Worker is the confidential OAuth code-exchange endpoint for the static CIN Genesis Lobby.
