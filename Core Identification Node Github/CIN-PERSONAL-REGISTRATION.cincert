@@ -50,7 +50,17 @@
       "node_birth_record.cin_bid",
       "person_node_association.document_id",
       "personal_issuance_authorization.document_id"
-    ]
+    ],
+    "personal_registration_document_id_field": "personal_registration_document_id",
+    "personal_credential_document_id_field": "personal_credential_document_id",
+    "header_projection_fields": [
+      "cin_personal_number",
+      "cin_personal_registration_id",
+      "cin_personal_credential_id",
+      "personal_registration_status",
+      "personal_credential_status"
+    ],
+    "publication_rule": "Only publish the personal number or credential references after an explicit operator publication decision. The full personal registration document and credential remain in the approved private storage scope by default."
   },
   "allocation": {
     "initial_supported_status": "PERSONAL_REGISTERED_LOCAL",
