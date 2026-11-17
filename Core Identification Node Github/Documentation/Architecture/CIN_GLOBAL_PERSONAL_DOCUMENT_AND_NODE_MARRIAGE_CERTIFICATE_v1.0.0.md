@@ -23,9 +23,9 @@ The current Lobby accepts the saved `cin.node-birth-candidate` with status `PREV
 
 The identifier input is the JCS-canonical JSON object containing domain `cin.global-personal-document.identifier`, version `1`, lowercase EVM address and SHA-256 digest of the complete Node Birth document.
 
-The identifier is `SHA-256(JCS(identifier_input))`, formatted as `cin:global-personal-document:v1:<lowercase SHA-256 hex>`.
+The Lobby first derives the proposed identifier from the connected address, then signs a typed-data message that includes that identifier. After signing, it recovers the signer from the EIP-712 signature, requires an exact match with the connected address, and recomputes the identifier using the recovered signer address and the same Node Birth digest. Only the recomputed value is accepted. The identifier is `SHA-256(JCS(identifier_input))`, formatted as `cin:global-personal-document:v1:<lowercase SHA-256 hex>`.
 
-Signature bytes, signature timestamp and chain ID are excluded. The same address and same immutable Node Birth document therefore always produce the same identifier, including when the holder signs again. A different address or Node Birth document produces a different identifier.
+Raw signature bytes, signature timestamp and chain ID are excluded. The signature is nevertheless used to recover and verify the signer address, and that recovered address is the authoritative subject-address input for the final identifier recomputation. The same address and same immutable Node Birth document therefore always produce the same identifier, including when the holder signs again. A different address or Node Birth document produces a different identifier.
 
 ## 4. Marriage agreement and MetaMask signature
 
