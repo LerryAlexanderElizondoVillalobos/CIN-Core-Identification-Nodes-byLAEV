@@ -23,11 +23,11 @@ Pairing requests expire after five minutes. Approved sessions expire after 24 ho
 
 ## Persistence
 
-The backend persists pairing requests, session records, active session credentials, revocation/expiry state and the latest 2,000 lifecycle events to a versioned JSON snapshot in Termux private storage. Default path:
+The CIN Local State Manager persists pairing requests, session records, active session credentials, revocation/expiry state, runtime configuration and named state domains in a schema-versioned JSON snapshot. Schema v1 is migrated to v2 without dropping pairing records. The local Manager exposes the storage status and state-domain inventory. Default path:
 
 `$HOME/.cin-local-backend/data/runtime-state.json`
 
-Override with `CIN_DATA_DIR`. The directory uses mode `0700`; the state file uses mode `0600`. Updates use temporary-file plus atomic rename. State is restored when the backend starts. See [PAIRING-ENGINE-IMPLEMENTATION.md](./PAIRING-ENGINE-IMPLEMENTATION.md).
+Override with `CIN_DATA_DIR`. The directory uses mode `0700`; the state file uses mode `0600`. Updates use a temporary file, file synchronization and atomic rename. State is restored when the backend starts. See [LOCAL-STATE-MANAGER.md](./LOCAL-STATE-MANAGER.md) and [PAIRING-ENGINE-IMPLEMENTATION.md](./PAIRING-ENGINE-IMPLEMENTATION.md).
 
 This increment does not provide application-level encryption, automatic backup, multi-process concurrent writes, or cloud synchronization. Uninstalling Termux or deleting its private data can remove the state.
 
