@@ -1,4 +1,4 @@
-const CACHE_NAME = "cin-genesis-lobby-v6";
+const CACHE_NAME = "cin-genesis-lobby-v7";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -9,7 +9,8 @@ const APP_SHELL = [
   "./cin-local-runtime-test.js",
   "./CIN-GENESIS-ENVIRONMENT.cincert",
   "./CIN-NODE-BIRTH.cincert",
-  "./CIN-PERSONAL-REGISTRATION.cincert"
+  "./CIN-PERSONAL-REGISTRATION.cincert",
+  "./CIN-GLOBAL-PERSONAL-DOCUMENT.cincert"
 ];
 const NETWORK_FIRST = new Set([
   "./",
@@ -19,7 +20,8 @@ const NETWORK_FIRST = new Set([
   "./cin-local-runtime-test.js",
   "./CIN-GENESIS-ENVIRONMENT.cincert",
   "./CIN-NODE-BIRTH.cincert",
-  "./CIN-PERSONAL-REGISTRATION.cincert"
+  "./CIN-PERSONAL-REGISTRATION.cincert",
+  "./CIN-GLOBAL-PERSONAL-DOCUMENT.cincert"
 ]);
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)));

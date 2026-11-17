@@ -82,9 +82,17 @@ The current identifier derivation profile remains a proposed candidate until app
 
 A node may be presented as BORN only after the lifecycle contract's separate authorization, record commit and independent verification conditions pass.
 
-### Certificate 3 — CIN Personal Registration and Credential
+### Certificate 3 — CIN Global Personal Document and Node Marriage
 
-The third certificate is CIN-PERSONAL-REGISTRATION.cincert. It consumes:
+The third certificate is `CIN-GLOBAL-PERSONAL-DOCUMENT.cincert`. It consumes the saved CIN 001 Node Birth document and a MetaMask-compatible EVM wallet. It derives the deterministic personal-document identifier from the normalized wallet address and the SHA-256 digest of the complete Node Birth document, then requests an EIP-712 signature accepting the node-to-document marriage agreement. The Lobby recovers the signer and verifies it matches the connected wallet address.
+
+The identifier excludes signature bytes, signature timestamp and chain ID; the same address and same immutable Node Birth document therefore produce the same identifier. The signed agreement binds the identifier, Node Birth digest, CIN-BID, address and terms digest. The wallet signature is an explicit commitment to the association, not a transaction or proof of civil attributes.
+
+The current browser Node Birth artifact is `PREVIEW_NOT_ISSUED`, so the personal document and marriage agreement remain candidates. The Lobby requires explicit confirmation before publishing the address, signature and agreement to the public repository. See `CIN_GLOBAL_PERSONAL_DOCUMENT_AND_NODE_MARRIAGE_CERTIFICATE_v1.0.0.md`.
+
+### Certificate 4 — CIN Personal Registration and Credential
+
+The later Personal Registration and Credential certificate is CIN-PERSONAL-REGISTRATION.cincert. It consumes:
 
 - an authoritative, verified Node Birth Record;
 - an explicit person-to-node association event;
@@ -150,7 +158,7 @@ Because the target repository is public and its Pages workflow publishes the ent
 
 This specification and the Worker source prepare the integration. The GitHub App must still be registered, installed on the target repository, and its Worker deployed with the required environment values. Until those steps are completed, the Lobby cannot complete an authenticated GitHub write.
 
-The third certificate is a development candidate. Its descriptor does not replace the required Personal Registration Service, authorization engine, number allocator, signer or credential verifier.
+The fourth certificate is a development candidate. Its descriptor does not replace the required Personal Registration Service, authorization engine, number allocator, signer or credential verifier.
 
 ## 9. Acceptance sequence
 
@@ -161,8 +169,9 @@ The third certificate is a development candidate. Its descriptor does not replac
 5. The Lobby commits the manifest and a progress receipt to GitHub.
 6. The Node Birth workflow consumes that exact committed manifest and saves its candidate/authorized result according to its true status.
 7. The profile projection updates and the public Lobby header reconstructs the saved identifiers.
-8. The third certificate becomes executable only when an authoritative birth, explicit person-node association and separate personal-issuance authorization are available.
-9. The personal number and credential status are represented according to their actual allocation, signature and verification state.
+8. Certificate 3 creates the CIN Global Personal Document candidate and obtains the EIP-712 signed node-document marriage agreement.
+9. The later Personal Registration and Credential certificate becomes executable only when authoritative birth, the signed association and separate personal-issuance authorization are available.
+10. The personal number and credential status are represented according to their actual allocation, signature and verification state.
 
 ---
 
@@ -178,7 +187,7 @@ The public Genesis Lobby now contains:
 - A birth-candidate workflow that consumes the saved Genesis Manifest and the domain labels from the published Node Birth Certificate.
 - GitHub progress and node-profile projections.
 - A header reconstructed from the saved CIN 001 node profile, including core and conditional node identifiers plus future personal-registration references.
-- A separate, gated Personal Registration certificate stage.
+- A MetaMask EIP-712 CIN Global Personal Document and Node Marriage certificate stage.\n- A separate, later-stage Personal Registration and Credential certificate stage.
 
 The connection control remains in a setup-required state until the GitHub App is registered/installed and the OAuth exchange Worker is deployed and configured. The user-facing connection flow must not be reported as operational until that external setup and an end-to-end save test succeed.
 

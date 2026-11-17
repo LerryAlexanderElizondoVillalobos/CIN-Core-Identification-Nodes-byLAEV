@@ -1,0 +1,18 @@
+{
+  "profile_id": "cin.global-personal-document.identifier/1.0.0",
+  "algorithm": "SHA-256 over RFC 8785 JCS UTF-8 bytes",
+  "vectors": [
+    {
+      "test_vector_id": "cin.global-personal-document.identifier/1.0.0#vector-001",
+      "input": {
+        "domain": "cin.global-personal-document.identifier",
+        "version": "1",
+        "subject_address": "0x000000000000000000000000000000000000dead",
+        "node_birth_record_sha256": "1111111111111111111111111111111111111111111111111111111111111111"
+      },
+      "jcs_canonical_utf8": "{\"domain\":\"cin.global-personal-document.identifier\",\"node_birth_record_sha256\":\"1111111111111111111111111111111111111111111111111111111111111111\",\"subject_address\":\"0x000000000000000000000000000000000000dead\",\"version\":\"1\"}",
+      "expected_sha256": "4fc238456671b1d5fa36666040929d587214bbd353d77a2df126d068038392c3",
+      "expected_document_id": "cin:global-personal-document:v1:4fc238456671b1d5fa36666040929d587214bbd353d77a2df126d068038392c3"
+    }
+  ]
+}

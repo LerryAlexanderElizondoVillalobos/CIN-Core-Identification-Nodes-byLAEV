@@ -12,6 +12,7 @@ Core Identification Node Github/
 ├── service-worker.js
 ├── CIN-GENESIS-ENVIRONMENT.cincert
 ├── CIN-NODE-BIRTH.cincert
+├── CIN-GLOBAL-PERSONAL-DOCUMENT.cincert
 ├── CIN-PERSONAL-REGISTRATION.cincert
 ├── CIN Lobby.url
 ├── Documentation/
@@ -32,8 +33,9 @@ The intended first-node workflow is performed from the published Lobby:
 2. Inspect the repository snapshot beneath `Core Identification Node Github/` using Genesis Certificate 1.
 3. Save the complete GitHub repository Genesis Manifest and progress receipt.
 4. Consume the saved Manifest with Node Birth Certificate 2, generate the CIN identifier candidate and save the birth candidate.
-5. Reconstruct the CIN 001 header from the saved node profile and its record references.
-6. Continue to Personal Registration Certificate 3 only after the authoritative node birth, explicit person-to-node association and separate Personal Issuance Authorization are available.
+5. Run Personal Document and Node Marriage Certificate 3: connect MetaMask, derive the deterministic CIN Global Personal Document identifier from the wallet address and exact Node Birth document digest, then sign the EIP-712 marriage agreement.
+6. Reconstruct the CIN 001 header from the saved node profile and its record references.
+7. Continue to Personal Registration and Credential Certificate 4 only after authoritative node birth, the signed association and separate issuance authorization are available.
 
 ### Current implementation status
 
@@ -56,9 +58,15 @@ A Genesis Manifest created by the GitHub Pages profile is a public repository pr
 
 The browser-generated result is saved as a separate `cin.node-birth-candidate` progress artifact in `CIN-001-NODE-BIRTH-CANDIDATE.json`, with status `PREVIEW_NOT_ISSUED`. It is not the authoritative `cin.node-birth-record` document. The identifier derivation profile remains a candidate and is not production-approved. Saving the JSON to GitHub does not supply birth authorization, issuer signature, authoritative private local storage registration or independent birth verification. The header marks all derived identifiers as candidates and must not present CIN 001 as BORN.
 
-## Certificate 3 — CIN Personal Registration and Credential
+## Certificate 3 — CIN Global Personal Document and Node Marriage
 
-`CIN-PERSONAL-REGISTRATION.cincert` is a development candidate. It requires:
+`CIN-GLOBAL-PERSONAL-DOCUMENT.cincert` is the third certificate development candidate. It consumes the saved CIN 001 Node Birth document and a MetaMask-compatible EVM wallet. It derives a deterministic personal-document identifier from the normalized wallet address and the SHA-256 digest of the complete Node Birth document, then requests an EIP-712 signature accepting the association between the node and the generated personal document. Signature bytes are not used as identifier entropy, so the same address and same immutable Node Birth document always produce the same identifier.
+
+The current Node Birth artifact is `PREVIEW_NOT_ISSUED`; therefore the generated personal document and marriage agreement remain non-authoritative candidates. The wallet signature proves control of the address and acceptance of the displayed association, not civil attributes or government recognition. Public repository publication requires explicit confirmation.
+
+## Certificate 4 — CIN Personal Registration and Credential
+
+`CIN-PERSONAL-REGISTRATION.cincert` remains a later-stage development candidate. It requires:
 
 - an authoritative, verified Node Birth Record;
 - an explicit person-to-node association event;
@@ -77,6 +85,13 @@ Do not commit GitHub access tokens, refresh tokens, client secrets, private sign
 The GitHub Pages Lobby is a static web environment. It does not require or assume a local server at `127.0.0.1`, and it cannot independently inspect the operator's host operating system or local hardware.
 
 The future portable local CIN application is a separate execution profile. Its local Certificate Runner and private DataRoot workflows must not be represented as completed merely because the web repository workflow has saved a public progress record.
+
+## Certificate 3 — specification and validation
+
+- [CIN Global Personal Document and Node Marriage Certificate v1.0.0](Documentation/Architecture/CIN_GLOBAL_PERSONAL_DOCUMENT_AND_NODE_MARRIAGE_CERTIFICATE_v1.0.0.md)
+- [Global Personal Document JSON Schema](Documentation/Architecture/schemas/CIN-GLOBAL-PERSONAL-DOCUMENT.schema.json)
+- [Node-Personal Document Marriage JSON Schema](Documentation/Architecture/schemas/CIN-NODE-PERSONAL-DOCUMENT-MARRIAGE.schema.json)
+- [MetaMask manual acceptance test](Documentation/Testing/CIN_GLOBAL_PERSONAL_DOCUMENT_METAMASK_ACCEPTANCE_v1.0.md)
 
 ## Development documentation
 
