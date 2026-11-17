@@ -30,12 +30,12 @@ function readBody(request) {
     request.on("error", reject);
   });
 }
-function isAllowedOrigin(origin) {
-  return !origin || origin === LOBBY_ORIGIN || /^http:\/\/127\.0\.0\.1:\d+$/.test(origin);
+function isAllowedOrigin(origin, lobbyOrigin) {
+  return !origin || origin === lobbyOrigin || /^http:\/\/127\.0\.0\.1:\d+$/.test(origin);
 }
-function originHeaders(origin) {
-  if (!origin || origin !== LOBBY_ORIGIN) return {};
-  return { "Access-Control-Allow-Origin": LOBBY_ORIGIN, "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Allow-Headers": "Content-Type, X-CIN-Session-Id, Authorization", "Vary": "Origin" };
+function originHeaders(origin, lobbyOrigin) {
+  if (!origin || origin !== lobbyOrigin) return {};
+  return { "Access-Control-Allow-Origin": lobbyOrigin, "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Allow-Headers": "Content-Type, X-CIN-Session-Id, Authorization", "Vary": "Origin" };
 }
 
 export function createAppServer({ dataDir } = {}) {
