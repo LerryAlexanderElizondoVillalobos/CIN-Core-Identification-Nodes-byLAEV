@@ -1,10 +1,14 @@
-const CACHE_NAME = "cin-genesis-lobby-v2";
+const CACHE_NAME = "cin-genesis-lobby-v3";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
   "./cin-icon.svg",
-  "./CIN-NODE-BIRTH.cincert"
+  "./cin-github-config.js",
+  "./cin-github-lobby.js",
+  "./CIN-GENESIS-ENVIRONMENT.cincert",
+  "./CIN-NODE-BIRTH.cincert",
+  "./CIN-PERSONAL-REGISTRATION.cincert"
 ];
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)));
