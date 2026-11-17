@@ -646,6 +646,8 @@
           cin_nid:{value:record.node.cin_nid,status:"CANDIDATE_NOT_ISSUED"},
           cin_nsid:{value:record.node.cin_nsid,status:"CANDIDATE_NOT_ISSUED"},
           cin_bid:{value:record.node.cin_bid,status:"CANDIDATE_NOT_ISSUED"},
+          cin_enid:{value:record.node.cin_enid||null,status:record.node.cin_enid?"CANDIDATE_NOT_ISSUED":"NOT_DERIVED"},
+          cin_pvid:{value:record.node.cin_pvid||null,status:record.node.cin_pvid?"CANDIDATE_NOT_ISSUED":"NOT_DERIVED"},
           cin_ref:{value:record.node.cin_ref,status:"CANDIDATE_NOT_ISSUED"},
           cin_personal_number:{value:null,status:"NOT_REGISTERED"}
         }
@@ -682,6 +684,8 @@
         cin_nid:{value:null,status:"NOT_AVAILABLE"},
         cin_nsid:{value:null,status:"NOT_AVAILABLE"},
         cin_bid:{value:null,status:"NOT_AVAILABLE"},
+        cin_enid:{value:null,status:"NOT_DERIVED"},
+        cin_pvid:{value:null,status:"NOT_DERIVED"},
         cin_ref:{value:null,status:"NOT_AVAILABLE"},
         cin_personal_number:{value:null,status:"NOT_REGISTERED"}
       },
@@ -712,6 +716,8 @@
       ["CIN-NID",ids.cin_nid && ids.cin_nid.value,ids.cin_nid && ids.cin_nid.status],
       ["CIN-NSID",ids.cin_nsid && ids.cin_nsid.value,ids.cin_nsid && ids.cin_nsid.status],
       ["CIN-BID",ids.cin_bid && ids.cin_bid.value,ids.cin_bid && ids.cin_bid.status],
+      ["CIN-ENID · CONDITIONAL",ids.cin_enid && ids.cin_enid.value,ids.cin_enid && ids.cin_enid.status],
+      ["CIN-PVID · CONDITIONAL",ids.cin_pvid && ids.cin_pvid.value,ids.cin_pvid && ids.cin_pvid.status],
       ["CIN-REF",ids.cin_ref && ids.cin_ref.value,ids.cin_ref && ids.cin_ref.status],
       ["CIN PERSONAL NUMBER",ids.cin_personal_number && ids.cin_personal_number.value,ids.cin_personal_number && ids.cin_personal_number.status]
     ];
