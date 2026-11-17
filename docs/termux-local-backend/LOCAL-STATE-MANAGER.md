@@ -44,7 +44,7 @@ If the snapshot is malformed or has an unsupported schema, startup fails visibly
 ## Runtime configuration
 
 Initial configuration is:
-- Lobby origin: `https://lerryalexanderelizondo.github.io` (overridable at first initialization with `CIN_LOBBY_ORIGIN`)
+- Lobby origin: `https://lerryalexanderelizondovillalobos.github.io` (overridable at first initialization with `CIN_LOBBY_ORIGIN`)
 - Backend port: `2112` (`CIN_LOCAL_BACKEND_PORT` overrides the persisted value)
 - Pairing request TTL: 5 minutes
 - Pairing session TTL: 24 hours
