@@ -40,3 +40,22 @@ The current browser implementation marks generated records `PREVIEW_NOT_ISSUED`.
 Workflow: `.github/workflows/cin-genesis-lobby-pages.yml`
 
 The workflow publishes **only** `Core Identification Node Github/` as the GitHub Pages artifact. To activate deployment, repository Settings → Pages → Build and deployment → Source must be set to **GitHub Actions**. The first workflow deployment will publish the Lobby at the URL above.
+
+
+## GitHub-linked CIN 001 creation workflow
+
+The Genesis Lobby now includes the GitHub connection and repository-progress workflow.
+
+- [GitHub-linked node creation workflow specification](Documentation/Architecture/CIN_GITHUB_LINKED_NODE_CREATION_WORKFLOW_SPECIFICATION_v1.0.md)
+- [Public GitHub App configuration](cin-github-config.js)
+- [Browser GitHub integration](cin-github-lobby.js)
+- [GitHub OAuth exchange Worker source and deployment instructions](../services/cin-github-oauth-worker/README.md)
+- [CIN Personal Registration Certificate candidate](CIN-PERSONAL-REGISTRATION.cincert)
+
+The Lobby workflow is designed to connect the operator's GitHub account, inspect the repository snapshot beneath this publication root, and save the CIN 001 Genesis Manifest and Node Birth candidate as GitHub progress records.
+
+**Activation is still required:** create and install the GitHub App on this repository, deploy the OAuth exchange Worker, and configure the public Client ID and Worker URL in `cin-github-config.js`. The source code and documentation are committed, but the GitHub App and Worker have not been provisioned or deployed by this repository change.
+
+Because this repository is public and the Pages workflow publishes the entire directory, saved repository manifests, progress records, node profile projections and birth candidates are public. Personal records and complete credentials must not be committed to public paths by default.
+
+The web repository audit is not the local package/operating-system audit. The local Certificate Runner remains a separate execution profile.
