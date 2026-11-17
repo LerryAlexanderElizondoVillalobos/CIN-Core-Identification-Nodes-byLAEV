@@ -80,14 +80,17 @@
   <pre id="birthSummary" hidden></pre>
 </section>
 
-<section class="panel">
-  <div class="panel-head"><div><div class="eyebrow">04 · Personal registration certificate</div><h2>CIN Personal Registration</h2></div><span class="pill">Prerequisites pending</span></div>
-  <p class="small">The third certificate is published as a development candidate. It requires a verified Node Birth Record, an explicit person-to-node association and a separate Personal Issuance Authorization. GitHub login identifies the operator only; it does not create that association.</p>
+<section class="panel" id="personalDocumentPanel">
+  <div class="panel-head"><div><div class="eyebrow">04 · Personal document certificate</div><h2>Create CIN personal document</h2></div><span class="pill" id="personalDocumentState">Certificate 3 · Candidate</span></div>
+  <p class="small">Certificate 3 consumes the saved CIN 001 Node Birth candidate, requests an explicit MetaMask EIP-712 approval, derives a stable CIN personal-document identifier from the selected wallet address, and creates a technical binding agreement between that document and the node birth artifact.</p>
   <div class="actions">
+    <button class="btn primary" id="createPersonalDocumentButton" type="button">Create CIN personal document with MetaMask</button>
     <a class="btn secondary" href="./CIN-PERSONAL-REGISTRATION.cincert" download>View / download Certificate 3</a>
-    <button class="btn secondary" disabled>Personal registration unavailable until prerequisites pass</button>
   </div>
-  <div class="notice">A CIN Personal Number generated locally must not be described as globally reserved without a verified reservation from a defined coordinating registry. Full personal records and credentials must not be published in this public repository by default.</div>
+  <div id="personalDocumentWalletHint" class="notice">Checking wallet provider…</div>
+  <div id="personalDocumentStatus" class="status info" role="status" aria-live="polite">Ready. The saved CIN 001 birth candidate is required before creation.</div>
+  <pre id="personalDocumentPreview" hidden></pre>
+  <div class="notice warning"><strong>Important:</strong> the current source is a PREVIEW_NOT_ISSUED birth candidate. The generated personal document remains WALLET_APPROVED_CANDIDATE_NOT_ISSUED. The wallet signature proves control of the selected address for this request; it does not establish civil identity, legal personhood or government issuance. The generated JSON is downloaded locally and is not committed to this public repository.</div>
 </section>
 
 
@@ -119,6 +122,7 @@
 </main>
 <script src="./cin-github-config.js"></script>
 <script src="./cin-github-lobby.js"></script>
+<script src="./cin-personal-document-runner.js"></script>
 <script src="./cin-local-runtime-test.js"></script>
 <script>
 if ("serviceWorker" in navigator && window.isSecureContext) {
