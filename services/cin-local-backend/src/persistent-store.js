@@ -24,12 +24,18 @@ export function createPersistentStore({
 
   function save(state) {
     const temporary = file + "." + randomUUID() + ".tmp";
-    const data = JSON.stringify({ schema_version: 1, ...state }, null, 2) + "\n";
+    const data = JSON.stringify({ schema_version: 2, ...state }, null, 2) + "\n";
     try {
       writeFileSync(temporary, data, { encoding: "utf8", mode: 0o600, flag: "wx" });
       chmodSync(temporary, 0o600);
+      const fileDescriptor = openSync(temporary, "r");
+      try { fsyncSync(fileDescriptor); } finally { closeSync(fileDescriptor); }
       renameSync(temporary, file);
       try { chmodSync(file, 0o600); } catch {}
+      try {
+        const directoryDescriptor = openSync(dirname(file), "r");
+        try { fsyncSync(directoryDescriptor); } finally { closeSync(directoryDescriptor); }
+      } catch {}
     } catch (error) {
       try { renameSync(temporary, temporary + ".failed"); } catch {}
       throw new Error("CIN runtime state could not be saved: " + error.message);
