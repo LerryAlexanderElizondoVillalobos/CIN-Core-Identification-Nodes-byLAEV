@@ -46,7 +46,9 @@
     "formula": "SHA-256(JCS({domain:'cin.global-personal-document.identifier',version:'1',subject_address:lowercase(EVM_address),node_birth_record_sha256:SHA256(JCS(complete_Node_Birth_document))}))",
     "output": "cin:global-personal-document:v1:<lowercase_sha256_hex>",
     "determinism": "Same EVM address and same immutable Node Birth document produce the same identifier. Signature bytes, timestamp and chain ID are excluded from identifier derivation.",
-    "binding": "The Node Birth document digest binds the personal document to the exact CIN node birth artifact."
+    "binding": "The Node Birth document digest binds the personal document to the exact CIN node birth artifact.",
+    "domain": "cin.global-personal-document.identifier",
+    "version": "1"
   },
   "marriage_agreement": {
     "document_type": "cin.node-personal-document-marriage",
@@ -66,7 +68,8 @@
       "termsSha256"
     ],
     "consent": "The wallet holder accepts the association between the CIN node referenced by the Node Birth document and the CIN Global Personal Document generated for the connected EVM address.",
-    "verification": "Recover the signer from the EIP-712 signature and require exact match with the connected wallet address."
+    "verification": "Recover the signer from the EIP-712 signature and require exact match with the connected wallet address.",
+    "terms": "By signing this CIN Node-Personal Document Marriage Agreement, the holder of the connected EVM address confirms control of that address and accepts its association with the CIN Global Personal Document generated for that address and the referenced CIN node birth record. This is a cryptographic commitment to the stated node-document relationship. It does not by itself establish civil attributes, legal status, government recognition, global uniqueness, issuer authorization or the truth of personal claims."
   },
   "processing": [
     "Load the saved CIN 001 Node Birth document and validate its type, status and CIN-BID.",
