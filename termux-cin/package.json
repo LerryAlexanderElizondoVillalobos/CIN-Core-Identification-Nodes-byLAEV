@@ -9,6 +9,6 @@
   },
   "scripts": {
     "start": "node src/server.js",
-    "check": "node --check src/server.js && node --check src/github/oauth.js && node --check src/github/connector.js && node --check src/authorization/permission-engine.js && node --check src/signatures/signature-interface.js"
+    "check": "node --check src/server.js && node --check src/github/oauth.js && node --check src/github/connector.js && node --check src/authorization/permission-engine.js && node --check src/signatures/signature-interface.js && node --check src/workspace/local-directory.js"
   }
 }
