@@ -39,7 +39,7 @@ This document does not claim that the multi-node Lobby architecture, a productio
 | Branch | `main` | Verified default branch |
 | GitHub Pages publication directory | `Core Identification Node Github/` | Verified |
 | Repository URL | `https://github.com/LerryAlexanderElizondoVillalobos/CIN-Core-Identification-Nodes-byLAEV` | Verified |
-| Published Web Lobby | `https://lerryalexanderelizondo.github.io/CIN-Core-Identification-Nodes-byLAEV/` | Declared in repository |
+| Published Web Lobby | `https://lerryalexanderelizondovillalobos.github.io/CIN-Core-Identification-Nodes-byLAEV/` | Declared in repository |
 
 ### 2.1 Repository root versus publication root
 
@@ -59,7 +59,7 @@ The profiles below are distinct deployment/runtime contexts. A capability or set
 |---|---|---|
 | Delivery model | Browser-based static web publication | Verified |
 | Hosting | GitHub Pages | Verified |
-| Publication URL | `https://lerryalexanderelizondo.github.io/CIN-Core-Identification-Nodes-byLAEV/` | Declared |
+| Publication URL | `https://lerryalexanderelizondovillalobos.github.io/CIN-Core-Identification-Nodes-byLAEV/` | Declared |
 | Publication source | `Core Identification Node Github/` | Verified |
 | Local HTTP server | Not required | Profile rule |
 | Loopback address / local port | Not applicable | Profile rule |
