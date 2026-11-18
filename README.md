@@ -71,6 +71,7 @@ The network becomes an infrastructure for multiple technological ecosystems rath
 The consolidated system architecture, including its layers, engines, dependencies, authorization and signing flows, ESMT placement, generalized UTXO model, and implementation maturity boundaries, is documented in:
 
 - [CIN — Master Architecture v1.0](docs/architecture/CIN_MASTER_ARCHITECTURE_V1.md)
+- [CIN — Enterprise Identification, Storage Architecture and Private Folder](docs/architecture/CIN_ENTERPRISE_IDENTIFICATION_AND_PRIVATE_STORAGE.md)
 
 This document is the architectural overview for the target CIN system. It distinguishes conceptual subsystems from specifications, prototypes and validated implementations.
 
