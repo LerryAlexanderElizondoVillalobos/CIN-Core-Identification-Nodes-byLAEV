@@ -625,3 +625,468 @@ The selected local execution profile uses **Node.js in Termux on the same Androi
 - [Separate external signing interface](termux-cin/src/signatures/signature-interface.js)
 
 The previous Cloudflare OAuth Worker is retained as historical material and is not part of the selected Termux deployment.
+
+
+---
+
+# 20. CIN Distribution Architecture, Participation, Administrative Continuity and Business Model
+
+**Document:** Architectural Rationale and Infrastructure Proposal  
+**Classification:** Architectural and Foundational Documentation  
+**Status:** Development Proposal
+
+## 20.1. Introduction
+
+Core Identification Nodes (CIN) proposes a modular and distributed infrastructure for developing, distributing, installing, operating and maintaining services through a network of independent nodes.
+
+The architecture contemplates two complementary implementations:
+
+1. **Core Identification Node GitHub (CIN GitHub):** an implementation dedicated to the GitHub environment, in which each node resides within the directories of a participating repository.
+2. **Core Identification Node Local (CIN Local):** an autonomous implementation designed to operate on computers, smartphones, servers and other compatible operating systems.
+
+These implementations have different responsibilities but belong to the same technological ecosystem.
+
+The decision to develop CIN GitHub first is a deliberate validation strategy. It uses existing repositories, accounts and participants as an initial environment for developing a distributed network for software distribution, community participation, documentary preservation and administrative continuity.
+
+GitHub is not intended to become CIN's permanent infrastructure or an irreversible platform dependency. It is the initial environment in which the model can be developed and validated before progressively operating independently.
+
+The proposal also introduces an economic model under which authorized participants may become independent CIN distributors, develop commercial relationships, find customers and offer professional implementations of CIN Local.
+
+## 20.2. Core Identification Node GitHub
+
+### 20.2.1. Nature of the node
+
+CIN GitHub is an implementation specifically designed to exist within the directory structure of a GitHub repository.
+
+It is not simply a local CIN installation that uses GitHub for authentication. The repository itself constitutes the node's environment for existence, distribution, preservation and participation.
+
+Depending on its implementation and authorization, a node may contain:
+
+- Node configuration.
+- Participating repository registration and identification.
+- Version information.
+- Certificates and attestations.
+- Verification engines.
+- Binary Merkle Tree Engine.
+- Participation and consensus mechanisms.
+- Administrative protocols.
+- Backup and replication mechanisms.
+- Software distribution components.
+
+Each participant implementing CIN GitHub in their own repository may become part of CIN's distribution infrastructure, subject to the project's authorization conditions.
+
+### 20.2.2. The repository as distribution infrastructure
+
+A foundational objective is to turn participating repositories into software distribution points.
+
+Rather than depending exclusively on one central repository, CIN envisions a network of participants maintaining their own project copies and distributing verified versions of CIN Local.
+
+A typical distribution flow is:
+
+1. A GitHub user installs or maintains CIN GitHub in their repository.
+2. The repository incorporates authorized distribution components.
+3. Other users obtain CIN Local through that distributor.
+4. Distributed versions can be cryptographically verified.
+5. The participating repository preserves copies and references to the corresponding versions.
+
+Participants do not necessarily need to be collaborators on the original repository. They may operate their own repositories, installations and distribution activities.
+
+This separates direct contribution to the original source code from participation in the wider distribution network.
+
+## 20.3. Core Identification Node Local
+
+### 20.3.1. Nature of the node
+
+CIN Local is an independent implementation designed to operate on physical devices and compatible operating systems.
+
+Potential deployment environments include:
+
+- Smartphones.
+- Personal computers.
+- Tablets.
+- Servers.
+- Workstations.
+- Institutional infrastructure.
+- Specialized devices.
+
+Its purpose is to provide an autonomous execution environment for the engines, services and applications belonging to the CIN ecosystem.
+
+Unlike CIN GitHub, it does not reside within a repository directory. It operates as a node installed on a physical device or computing environment.
+
+### 20.3.2. Relationship with CIN GitHub
+
+CIN Local uses CIN GitHub as an available software distribution source. Participating repositories may act as authorized distributors of CIN Local releases.
+
+A user may obtain software from a participating distributor, verify its provenance and integrity, and proceed with installation.
+
+Distribution must support verification of signatures, versions and provenance so that a modified copy cannot be represented as an officially authorized release.
+
+### 20.3.3. Operational independence
+
+Once installed, CIN Local should operate independently of GitHub.
+
+Repository connectivity may be required for distribution, updates and synchronization, but it should not be a permanent requirement for executing local services.
+
+This design supports deployment in environments with limited or unavailable connectivity.
+
+## 20.4. Network of Authorized Distributors
+
+An important part of the proposal is enabling GitHub users to participate directly in software distribution.
+
+Each participant maintaining an authorized CIN GitHub implementation may become a distribution point for CIN Local. This creates a distribution network that does not depend on a single repository.
+
+### 20.4.1. Distributor responsibilities
+
+Depending on their authorization, participants may:
+
+- Maintain source-code copies.
+- Preserve previous versions.
+- Distribute authorized releases.
+- Facilitate local installations.
+- Provide updates.
+- Maintain package availability.
+- Participate in version verification.
+- Contribute to project continuity.
+- Provide professional installation and configuration services.
+
+A distributor does not need write access to the original repository to perform these activities. Participation depends on membership in the CIN network and the capabilities granted by project protocols.
+
+### 20.4.2. Independent commercial distribution
+
+Each distributor may develop an independent commercial activity.
+
+A participant can maintain their own repository, distribute authorized versions and establish commercial relationships with companies, institutions, organizations or individual customers.
+
+For example, a distributor may secure a contract to deploy CIN Local within a company, use their authorized repository as a distribution point and provide the professional services required for implementation.
+
+The distributor conducts this business independently and receives the compensation agreed with the customer for products, services and contracted work, subject to CIN distribution and licensing conditions.
+
+## 20.5. CIN Authorized Distributor Business Model
+
+### 20.5.1. Commercial foundation
+
+CIN's business model contemplates a network of independent distributors offering products, installations, technology services and solutions built on CIN Local.
+
+The proposal does not centralize every sale, implementation and customer relationship in the founding repository. Authorized participants can develop their own markets and work directly with customers.
+
+Each distributor may use their own CIN GitHub repository as infrastructure for authorized software distribution and as a technical reference for their implementations.
+
+This model allows different participants to pursue opportunities in distinct territories, sectors and markets without requiring every commercial transaction to pass through one central entity.
+
+### 20.5.2. Revenue opportunities
+
+Authorized distributors may generate revenue through several activities.
+
+**A. CIN Local sales and installation services**
+
+Services may include initial installation, node configuration, infrastructure deployment, certificate configuration, engine integration, documentary pool configuration, synchronization setup and commissioning.
+
+**B. Specialized enterprise implementations**
+
+Customer projects may include private enterprise nodes, documentary infrastructure, internal node networks, document auditing services, integration with existing systems, distributed storage architectures, process automation and cryptographic verification systems.
+
+**C. Specialized application development**
+
+Distributors may develop solutions on CIN Local using available engines and extension mechanisms. Potential offerings include enterprise document administration, traceability, record management, certification infrastructure, verification services, resource control, unique-event records and institutional applications.
+
+**D. Maintenance and technical support**
+
+Recurring services may include preventive maintenance, updates, node monitoring, infrastructure recovery, certificate administration, technical support, training and implementation audits.
+
+**E. Managed infrastructure**
+
+A distributor may operate and administer CIN nodes for customers who do not wish to maintain their own technical infrastructure. Services may include hosting, monitoring, synchronization and service administration under the applicable contractual and security arrangements.
+
+### 20.5.3. Potential customer segments
+
+| Customer segment | Potential opportunities |
+|---|---|
+| Private companies | Local nodes, documentary records and enterprise infrastructure |
+| Public institutions | Documentary infrastructure, certification and verification |
+| Humanitarian organizations | Registration, documentation and local services |
+| Hospitals and medical centers | Verifiable records and document management |
+| Universities | Academic infrastructure and document repositories |
+| Professional organizations | Certification, records and validation services |
+| Technology companies | Integration, development and specialized services |
+| Cooperatives | Administrative records and traceability |
+| Infrastructure operators | Node distribution, maintenance and administration |
+| Consultancies | Implementation and technology transformation |
+
+These are potential markets. Their inclusion does not imply existing contracts, institutional authorization or acquired customers.
+
+### 20.5.4. Customer acquisition
+
+Each distributor may develop independent commercial strategies, including:
+
+- **Business prospecting:** identifying organizations that need document management, record integrity, distributed infrastructure or verification systems.
+- **Technical presentations:** demonstrating CIN Local and explaining its capabilities, architecture and applications.
+- **Commercial proposals:** defining project scope, infrastructure, costs, schedule, maintenance and responsibilities.
+- **Professional partnerships:** working with technology consultancies, system integrators, infrastructure companies and specialized professionals.
+- **Demonstrations and pilot projects:** offering limited deployments so customers can evaluate CIN before commissioning a larger implementation.
+- **Repository-based distribution:** using the distributor's repository as a public reference for participation, authorized distribution and available releases.
+
+Customer acquisition belongs to each participant's independent commercial activity. CIN provides the technological infrastructure and distribution and verification mechanisms.
+
+### 20.5.5. Commercial transaction workflow
+
+A typical transaction may follow this sequence:
+
+1. A participant maintains a CIN GitHub implementation.
+2. The participant obtains or maintains distributor authorization.
+3. The distributor identifies a potential customer.
+4. The distributor contacts the customer and presents a proposal.
+5. The parties define services, products and commercial terms.
+6. They enter into an independent commercial agreement.
+7. The distributor distributes and installs CIN Local through authorized infrastructure.
+8. The distributor configures the contracted services.
+9. The implementation is delivered to the customer.
+10. The distributor may provide subsequent maintenance, support and updates.
+
+The distributor receives the compensation agreed directly with the customer. The founding repository does not need to participate in every negotiation, contract, installation or payment.
+
+### 20.5.6. Economic independence
+
+Each distributor may develop an independent customer portfolio, specialization and commercial strategy.
+
+One participant may focus on enterprise implementations, another on institutional services, another on humanitarian infrastructure and another on application development.
+
+All may use the same technological infrastructure while respecting the conditions of authorized distribution.
+
+This creates economic opportunities around CIN without making the central project a mandatory intermediary for every transaction.
+
+### 20.5.7. Commercial authorization conditions
+
+Commercial participation must be distinguished from community participation and technical access to source code.
+
+Membership in the CIN community does not automatically grant authorization to represent oneself as an official distributor.
+
+Distributor authorization must have a documented scope, including:
+
+- Participant and repository identification.
+- Software provenance.
+- Authorized versions and components.
+- Appropriate use of the project name and marks.
+- Compliance with licensing conditions.
+- Update procedures.
+- Integrity verification.
+- Responsibility for commercial implementations.
+- Suspension and revocation procedures.
+
+Customer contracts must clearly identify the service provider, implemented components and distributor responsibilities.
+
+Distribution authorization does not automatically authorize a distributor to bind the founding project contractually, provide institutional guarantees on its behalf or change the project's licensing conditions.
+
+## 20.6. Community Participation and Public Repository Governance
+
+CIN contemplates a community of participants connected to the project through GitHub.
+
+A distinction must be maintained between users who contribute directly to source code and participants who belong to the wider CIN community and infrastructure. Not every participant needs to be a collaborator on the main repository.
+
+Community participation is intended to be governed by a **Manifesto and Public Administration Protocols for the Core Identification Node Repository**.
+
+This governance framework is intended to address:
+
+- Participant admission.
+- Participation in decisions.
+- Consultation and voting procedures.
+- Repository administration.
+- Preservation of copies.
+- Project continuity.
+- Administrative succession.
+- Transfer of responsibilities.
+- Verifiable decision records.
+
+Community membership and participation in decisions do not automatically grant write or administrative permissions on the main repository. These are distinct capabilities and must be documented separately in the public protocols.
+
+## 20.7. Repository Consensus and Administrative Succession
+
+Software distribution is not the only reason for developing CIN GitHub. Another objective is to establish administrative continuity mechanisms through a distributed participant community.
+
+Participating repositories may contribute to a backup and participation infrastructure that preserves the project and supports decisions concerning its administration.
+
+### 20.7.1. Founder dependency
+
+Software projects can become excessively dependent on their original creators and administrators. If the primary administrator becomes permanently unavailable, continuity questions arise:
+
+- Who preserves the source code?
+- Who maintains releases?
+- Who has authority to administer the repository?
+- How is succession determined?
+- Who can continue distribution?
+- How is documentation preserved?
+- How does development continue?
+
+CIN intends to address these questions as part of its initial architectural design.
+
+### 20.7.2. Administrative succession
+
+The participant community may have documented procedures for determining how to proceed when the original administrator is permanently unavailable.
+
+A possible procedure includes:
+
+1. Activation of the succession procedure.
+2. Verification that the triggering conditions have been met.
+3. Convening the participants.
+4. Submission of proposals.
+5. Voting under the established mechanisms.
+6. Verifiable recording of the decision.
+7. Transfer of administrative responsibilities.
+8. Preservation of the project's history.
+
+The objective is to prevent repository continuity from depending exclusively on the availability of its founder.
+
+CIN consensus does not, by itself, override the technical and contractual powers GitHub recognizes for repository and organization owners and administrators. Effective procedures must therefore account for the actual transfer, recovery and administration of the relevant accounts and organizations.
+
+## 20.8. Repository Preservation Outside GitHub
+
+CIN also aims to avoid permanent dependence on GitHub.
+
+Each authorized participant may maintain a repository replica in their own local environment. These replicas can help preserve:
+
+- Source code.
+- Commit history.
+- Branches.
+- Tags.
+- Releases and versions.
+- Documentation.
+- Distribution files.
+- Configuration information.
+- Components required to reconstruct the project.
+
+The preservation strategy must also account for resources that a conventional Git copy does not automatically retain, including certain Git LFS objects, release assets, attachments, issues and discussions.
+
+If GitHub becomes unavailable, participants should be able to use verifiable copies to reconstruct the repository, preserve source code and continue development.
+
+CIN should progressively enable coordination, distribution and continuity procedures to migrate to other environments. GitHub is an initial onboarding and distribution infrastructure, not an irreversible technological dependency.
+
+## 20.9. Participant Reputation and Trust
+
+GitHub provides an environment in which participants already have accounts, repositories, contributions and public histories.
+
+These elements can provide verifiable references concerning a participant's technological activity and experience. Account and repository history may contribute to trust between participants who do not personally know one another.
+
+However, public reputation is not automatically a certification of trustworthiness.
+
+CIN should provide its own mechanisms to verify:
+
+- Effective control of participating accounts.
+- Cryptographic association with nodes.
+- Authorization to distribute software.
+- Administrative capabilities.
+- Release provenance.
+- Authorization validity.
+- Revocation of authorizations and attestations.
+
+A GitHub account is a reference for participation and activity history. Operational trust must be established through CIN certificates, signatures and verifiable procedures.
+
+## 20.10. CIN Local Application Opportunities
+
+The combination of CIN GitHub and CIN Local can support infrastructure adapted to numerous scenarios and is not limited to one application or sector.
+
+**Enterprise infrastructure**
+
+Companies may install local nodes and engage authorized distributors to implement specialized services.
+
+**Institutional infrastructure**
+
+Institutions may maintain independent nodes, participate in documentary pools and use verification and preservation mechanisms.
+
+**Humanitarian services**
+
+In refugee camps and humanitarian missions, an operator may carry a local node on a smartphone or computer and use remote participant networks for software distribution, backup and synchronization.
+
+People receiving services do not need their own devices or GitHub accounts.
+
+The infrastructure could support documentary records, verifications, case files and other services, subject to access controls, personal-data custody and applicable consent requirements.
+
+**Distributed documentary networks**
+
+Local nodes may manage documentary pools, verifiable records and Merkle structures for different organizations and applications.
+
+**Technology distribution**
+
+Participants may maintain independent CIN software distribution, installation and update points.
+
+## 20.11. Modular Architecture and Specialized Engines
+
+CIN should not become a monolithic application dedicated to one service.
+
+Its structure should support the installation and integration of specialized engines without compromising the foundational core.
+
+| Component | Intended function |
+|---|---|
+| Node Registry | Node registration and recognition |
+| GitHub Integration | Integration with the GitHub environment |
+| Distribution Engine | Software distribution |
+| Local Installation Engine | Local installation and updates |
+| Repository Verification Engine | Repository and release verification |
+| Governance Engine | Implementation of governance protocols |
+| Succession Engine | Administrative continuity and succession |
+| Merkle Engine | Merkle tree construction and verification |
+| Certificate Engine | Certificate administration |
+| Authorization Engine | Requests, permissions and authorizations |
+| Pool Manager | Documentary pool administration |
+| Synchronization Engine | Synchronization between nodes |
+
+These components may evolve independently while maintaining common interoperability protocols.
+
+## 20.12. Rationale for Two Complementary Implementations
+
+Developing CIN GitHub first and CIN Local subsequently is a strategy of progressive validation.
+
+The first implementation uses an existing environment to demonstrate:
+
+- Repository-based node structures.
+- Participation by independent accounts.
+- Software distribution between repositories.
+- Version preservation.
+- Code replication.
+- Consensus procedures.
+- Public administration.
+- Project continuity and succession.
+- Distributor authorization.
+
+CIN Local can then be developed as an autonomous implementation that consumes and executes software distributed through the GitHub infrastructure.
+
+This sequence makes it possible to test the distribution, participation and commercial model before deploying a complete infrastructure of local nodes.
+
+The final objective is for both implementations to share compatible protocols and structures without depending on the same execution environment.
+
+## 20.13. Continuity, Expansion and Economic Sustainability
+
+The proposed architecture allows Core Identification Node to evolve from a founding repository into a network of participants, distributors and independent local nodes.
+
+A participant may join through their own GitHub account, maintain a CIN GitHub implementation, participate in public project procedures and distribute authorized software.
+
+The participant may subsequently install CIN Local on their own devices, provide implementations to individuals and organizations, and develop a commercial activity around the services they offer.
+
+As the network grows, each participant may contribute to infrastructure distribution, preservation and continuity while developing independent commercial opportunities.
+
+This model seeks to make CIN sustainable through a community of participants and distributors rather than depending exclusively on a central entity responsible for selling, installing and maintaining every implementation.
+
+The project does not require every participant to administer the same repository or have direct access to the original source repository. It requires shared mechanisms for node identification, distribution, verification, participation, commercial authorization and continuity.
+
+## 20.14. Conclusion
+
+The CIN proposal is founded on an architectural decision: separating the software distribution environment from the software execution environment.
+
+**Core Identification Node GitHub** is the implementation dedicated to repositories. Its nodes participate in code distribution, version preservation, community participation and project continuity mechanisms. They may also serve as commercial distribution points for authorized participants.
+
+**Core Identification Node Local** is the autonomous implementation operating on devices and compatible operating systems. It receives software through the CIN distribution network and provides the execution environment for CIN services and applications.
+
+Together, these implementations make it possible for participants to preserve, distribute and deploy software without depending exclusively on the original repository. They also provide a foundation for public participation and administrative succession procedures intended to support the project beyond its founding administrators.
+
+The commercial model extends this architecture by allowing authorized participants to find customers, develop projects, negotiate contracts, provide professional services and earn revenue through CIN implementations.
+
+The central infrastructure provides technological mechanisms for distribution, verification and authorization. Distributors develop their own commercial activities and customer relationships.
+
+The objective is not merely to decentralize files or distribute source-code copies. It is to develop infrastructure in which technology distribution, preservation of knowledge, community participation, administrative continuity and economic opportunities can coexist within one ecosystem.
+
+**CIN proposes that the continuity of its infrastructure should not depend on the permanence of a single account, one individual, one repository or one platform—and that its economic growth should not depend on a single centralized commercial structure.**
+
+Development begins on GitHub as an environment for distribution and experimentation, but the long-term vision is an autonomous, extensible and distributed infrastructure capable of incorporating participants, distributors, organizations, customers and independent services worldwide.
+
+---
+
+**Core Identification Nodes (CIN) byLAEV**  
+*Distributed Infrastructure · Repository Governance · Authorized Software Distribution · Independent Business Opportunities · Local Autonomous Nodes*
