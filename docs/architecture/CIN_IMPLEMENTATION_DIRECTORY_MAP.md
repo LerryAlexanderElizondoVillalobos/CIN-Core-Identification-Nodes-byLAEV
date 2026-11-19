@@ -83,3 +83,27 @@ Every implemented module should contain mod.rs (public interface), types.rs (mod
 - Profile assembly resolves persisted references and verification outcomes; Lobby displays it.
 - Signer adapter supplies signature/result; CIN evaluates issuer policy and authorization.
 - ESMT is supplementary integrity metadata; signatures/trust remain independent.
+
+
+## Future independently installed engine packages
+
+The following Phase 2 engine package boundaries are architectural targets, not directories or implemented modules in the current runtime baseline. Introduce each package when its first functional slice and reviewed contract are ready; do not create empty engine directories and label them implemented.
+
+| Engine package | Planned responsibility | Key boundaries |
+|---|---|---|
+| Networks | Node discovery, network profiles, CIN addressing, domain resolution, network certificates and communication transports | Uses Requests & Permissions for authorization; does not decide disclosure policy |
+| Requests & Permissions | Request lifecycle, operation scopes and authorization decisions | Does not own transport or private-key custody |
+| Storage | Shared storage interfaces and controlled data availability | Does not decide trust or network admission |
+| Evidence & Proof | Evidence references, proof creation and verification workflows | Does not treat cryptographic integrity alone as factual truth |
+| Cryptography | Cryptographic primitives, signature verification and proof support | Does not independently authorize operations |
+| Consensus | Agreement on network-specific shared state | Does not replace operation-level authorization |
+
+### Networks Engine documentation and planned boundaries
+
+Canonical architecture specification: [CIN-NET-001 v1.2](CIN_NETWORKS_NATIVE_ADDRESSING_AND_DOMAIN_REGISTRY_v1.2.md).
+
+The Networks Engine specification defines these planned components: CIN Network Certificates, CIN Native Addressing, CIN Address Resolver, local web routing through the shared runtime, P2P communication interface and CIN Domain Registry & Management.
+
+The local example `http://127.0.0.1:1221/laev.cin` is a virtual route handled by the local CIN runtime; it does not imply public DNS resolution. Public use such as `https://laev.cin` depends on external name resolution, a reachable service endpoint and compatible TLS trust. The proposed namespace registry is limited to eligible CIN nodes under governance rules that remain to be defined.
+
+The Networks Engine must be installed and managed as an independent package through the CIN Engine Manager. Its package must not be embedded into the Phase 1 foundational CIN document or the Motor de Motores.
