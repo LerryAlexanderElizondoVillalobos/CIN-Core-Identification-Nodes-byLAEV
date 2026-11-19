@@ -11,6 +11,13 @@ This directory contains the architectural baselines, subsystem specifications, d
 - [CIN Repository Technical Audit](CIN_REPOSITORY_TECHNICAL_AUDIT.md)
 - [CIN Engine Manager Specification v1](CIN_ENGINE_MANAGER_SPECIFICATION_V1.md)
 
+## Individual and social participation architecture
+
+- [Layered Participation and Interoperability Architecture](LAYERED_PARTICIPATION_AND_INTEROPERABILITY.md)
+- [Individual Lifecycle and Initial Registration](INDIVIDUAL_LIFECYCLE_AND_INITIAL_REGISTRATION.md)
+
+These documents describe a proposed participation model across individual, family, community, territorial, national and cross-border contexts. They are conceptual architecture inputs, not claims of implemented functionality or a strict hierarchy of authority.
+
 ## Networks and native addressing
 
 - [CIN-NET-001 v1.2 — Native Addressing, Local Web Infrastructure, P2P Communication and CIN Domain Registry](CIN_NETWORKS_NATIVE_ADDRESSING_AND_DOMAIN_REGISTRY_v1.2.md)
