@@ -23,6 +23,9 @@ These documents describe a proposed participation model across individual, famil
 - [CIN-NET-001 v1.2 — Native Addressing, Local Web Infrastructure, P2P Communication and CIN Domain Registry](CIN_NETWORKS_NATIVE_ADDRESSING_AND_DOMAIN_REGISTRY_v1.2.md)
 
 CIN-NET-001 documents the proposed Phase 2 Networks Engine, including network certificates, the native .cin addressing model, local browser/runtime routing, P2P application messaging, and the proposed registry for eligible CIN nodes. It distinguishes local virtual routes from public DNS resolution and records public namespace delegation and TLS trust as external deployment dependencies.
+- [CIN-NET-002 v1.0 — Personal Document Presentation, Domain Resolution, Node Addressing and Block Explorer](CIN_DOMAIN_PRESENTATION_NODE_ADDRESSING_AND_BLOCK_EXPLORER_v1.0.md)
+
+CIN-NET-002 extends CIN-NET-001 with the controlled presentation associated with a CIN personal document, hierarchical paths such as laev.cin/node001, scoped node references such as node001@laev.cin, directional P2P route notation, registry lookup by domain/registration number/hash/node, and Block Explorer verification requirements. It is a proposed specification; implementation, registry governance and public .cin deployment remain pending.
 
 ## Project planning
 
