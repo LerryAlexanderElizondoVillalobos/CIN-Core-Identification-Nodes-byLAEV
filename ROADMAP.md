@@ -46,7 +46,7 @@ The foundational certificate process comprises the environment certificate, node
 
 Each engine is developed and distributed as an independent installation package through the CIN Engine Manager.
 
-1. **Networks Engine** — Discovers and recognizes nodes, defines network types and configurations, and provides communication channels.
+1. **Networks Engine** — Discovers and recognizes nodes, defines network types and configurations, resolves logical CIN addresses, and provides communication channels.
 2. **Requests & Permissions Engine** — Coordinates requests, authorization requirements and participation permissions.
 3. **Storage Engine** — Manages information and resources, availability, storage and selection of content that may be shared.
 4. **Evidence & Proof Engine** — Generates, organizes and verifies evidence and operational proofs.
@@ -56,6 +56,12 @@ Each engine is developed and distributed as an independent installation package 
 Together, these engines allow CIN nodes to discover one another, evaluate network participation, manage permissions, determine what information may be shared, exchange authorized content and coordinate consensus.
 
 Discovery and recognition of a node are distinct from admission of that node to a particular network. Participation conditions may differ between networks.
+
+### Networks Engine — Native addressing and domain registry
+
+The Networks Engine architecture includes CIN Network Certificates, native CIN addressing, a CIN Address Resolver, local web routing through the shared browser/runtime, P2P communication interfaces and CIN Domain Registry & Management. The proposed .cin namespace is reserved for eligible CIN nodes and supports personal, professional, commercial, institutional, governmental and organizational services. Domain registration is conceived as a paid, renewable right of use; registry authority, eligibility details, fees and lifecycle rules remain subject to governance.
+
+Local resolution can operate without public DNS delegation. An illustrative local route is http://127.0.0.1:1221/laev.cin, where the loopback address and port reach the local runtime and /laev.cin is a virtual path interpreted by that runtime. This is not public DNS resolution. The intended public form https://laev.cin requires external resolution, a reachable endpoint and compatible TLS trust; conventional DNS availability also depends on the applicable global top-level-domain process. See [CIN-NET-001 v1.2](docs/architecture/CIN_NETWORKS_NATIVE_ADDRESSING_AND_DOMAIN_REGISTRY_v1.2.md).
 
 **Phase 2 outcome:** The six basic engines provide the operational foundation for decentralized networks of CIN nodes.
 
