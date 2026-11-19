@@ -43,7 +43,8 @@ The Package Manifest v1 proposes JSON, RFC 8785 JCS, SHA-256, Ed25519 and a deta
 | Evidence association | Architectural direction | Evidence adapters, provenance and verification implementation |
 | Attributes/history/profile | Architectural direction | Versioned records, append-preserving history and profile assembly |
 | Main Lobby | Acceptance target | Read model, UI runtime and full restart reconstruction not implemented |
-| Ledgers, ESMT, consensus and network | Future workstreams | Separate specifications and implementation phases |
+| Networks Engine and CIN addressing | Architecture documented in [CIN-NET-001 v1.2](../architecture/CIN_NETWORKS_NATIVE_ADDRESSING_AND_DOMAIN_REGISTRY_v1.2.md); implementation pending | Phase 2 package; local resolver, network certificates, P2P interfaces and proposed .cin registry require contracts, implementation and tests |
+| Ledgers, ESMT and specialized registration | Future workstreams | Phase 3 engines; separate specifications and implementation phases |
 
 ## 4. First-release objective
 
