@@ -89,6 +89,8 @@ CIN follows a five-phase development plan, separating the foundational personal 
 
 The complete scope, objectives, outcomes and architectural dependencies are documented in the [CIN Development Roadmap](ROADMAP.md).
 
+The package-management architecture for Phase 1 is specified in [CIN Engine Manager — Technical Specification v1.0](docs/architecture/CIN_ENGINE_MANAGER_SPECIFICATION_V1.md). It defines the independent package structure, engine manifest, local registry, configuration, dependency inspection and engine lifecycle. The manager operates locally and does not depend on Networks Engine.
+
 ---
 
 ## 4. Original Architectural Conception
