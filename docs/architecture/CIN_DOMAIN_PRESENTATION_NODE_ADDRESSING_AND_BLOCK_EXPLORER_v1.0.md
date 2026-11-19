@@ -162,7 +162,7 @@ Illustrative result fields:
 | Field | Illustrative content |
 |---|---|
 | CIN domain | laev.cin |
-| CIN registration reference | 111540707 — example only |
+| CIN registration reference | Retrieved from the actual registry, if disclosure is permitted |
 | Record/version hash | Retrieved from the actual registry |
 | Registry event | Retrieved from the actual registry |
 | Domain status | Active / pending / expired / suspended / revoked |
