@@ -96,6 +96,16 @@ The consolidated system architecture, including its layers, engines, dependencie
 
 This document is the architectural overview for the target CIN system. It distinguishes conceptual subsystems from specifications, prototypes and validated implementations.
 
+### CIN Namespace, Personal Document Presentation and Block Explorer
+
+The Networks Engine and its .cin namespace are further specified in two complementary documents:
+
+- [CIN-NET-001 — Native Addressing, Local Web Infrastructure, P2P Communication and CIN Domain Registry](docs/architecture/CIN_NETWORKS_NATIVE_ADDRESSING_AND_DOMAIN_REGISTRY_v1.2.md)
+- [CIN-NET-002 — Personal Document Presentation, Domain Resolution, Node Addressing and Block Explorer](docs/architecture/CIN_DOMAIN_PRESENTATION_NODE_ADDRESSING_AND_BLOCK_EXPLORER_v1.0.md)
+
+CIN-NET-002 defines the proposed role of a .cin domain as a human-readable access point associated with a registered CIN personal document and the presentation selected by its owner. It describes hierarchical node/resource paths (for example, laev.cin/node001), scoped node references (node001@laev.cin), direct Node ID addressing, directional P2P route notation, and CIN Block Explorer searches by domain, registration reference, hash or node. Registry discovery and cryptographic verification do not grant access to private document content. These are architectural specifications; implementation and registry governance remain pending.
+
+
 ---
 
 ## 3.2. Development Roadmap
