@@ -66,6 +66,27 @@ This separation is intended to allow each application to maintain its own functi
 
 The network becomes an infrastructure for multiple technological ecosystems rather than a single-purpose blockchain.
 
+## 3.0. Civilizational Foundation and Individual Participation
+
+CIN's technological proposal is grounded in a broader question: how should human societies evolve the infrastructure through which people are registered, recognized, and able to participate while preserving autonomy, privacy, inclusion, and due process?
+
+The need to recognize members, record significant events, and preserve continuity exists independently of CIN and of any particular technology. A Mars–Earth thought experiment is used in the project documentation to examine these functional needs across different social and territorial settings. It is a research argument, not proof that one universal registry, authority, or mandatory technology is inevitable.
+
+CIN investigates an architecture in which the individual is a foundational subject of participation across family, community, territorial, national, and cross-border structures. The human person, the person's registration, a technical node, and the association between a person and a node remain distinct concepts.
+
+Foundational and research documents:
+
+- [The Civilizational Need for Individual Recognition and Registration](docs/foundations/CIVILIZATIONAL_NEED_FOR_INDIVIDUAL_RECOGNITION.md)
+- [The Individual as a Foundational Unit of Participation](docs/foundations/INDIVIDUAL_PARTICIPATION_AND_NODE_ASSOCIATION.md)
+- [Recognition, Privacy, and Individual Participation](docs/foundations/RECOGNITION_PRIVACY_AND_PARTICIPATION.md)
+- [Layered Participation and Interoperability Architecture](docs/architecture/LAYERED_PARTICIPATION_AND_INTEROPERABILITY.md)
+- [Individual Lifecycle and Initial Registration](docs/architecture/INDIVIDUAL_LIFECYCLE_AND_INITIAL_REGISTRATION.md)
+- [Research Dialogue: Civilizational Recognition, Mars and Earth](research/dialogues/CIVILIZATIONAL_RECOGNITION_MARS_EARTH_DIALOGUE.md)
+
+These documents record conceptual foundations and proposed architecture. They do not claim that a global registration service or the described future capabilities have been implemented.
+
+---
+
 ## 3.1. Master Architecture
 
 The consolidated system architecture, including its layers, engines, dependencies, authorization and signing flows, ESMT placement, generalized UTXO model, and implementation maturity boundaries, is documented in:
