@@ -77,6 +77,20 @@ This document is the architectural overview for the target CIN system. It distin
 
 ---
 
+## 3.2. Development Roadmap
+
+CIN follows a five-phase development plan, separating the foundational personal identification infrastructure from the basic network engines, decentralized registration engines, specialized applications and later economic, social and civilizational expansion.
+
+- **Phase 1 — Worldwide CIN Personal Identification Infrastructure:** Generate the worldwide personal identification document CIN and enable the CIN Engine Manager (Motor of Motors). These are the complete foundational scope of Phase 1.
+- **Phase 2 — CIN Basic Network Infrastructure:** Develop six independent installation packages: Networks, Requests & Permissions, Storage, Evidence & Proof, Cryptography and Consensus. Together, they establish the basic decentralized network infrastructure for CIN nodes.
+- **Phase 3 — Decentralized Registration Infrastructure:** Develop the Ledger, UTXO and Binary Merkle Tree engines to provide decentralized records, unique-consumption resource structures and cryptographic proofs.
+- **Phase 4 — Dedicated Specialized Applications:** Develop applications that use Phase 1 for CIN foundational references, Phase 2 for network verification and consensus, and Phase 3 for decentralized registration and proofs.
+- **Phase 5 — Economic, Social and Civilizational Ecosystems:** Expand CIN through additional engines and applications, including Worldwide CIN Enterprise Identification Infrastructure.
+
+The complete scope, objectives, outcomes and architectural dependencies are documented in the [CIN Development Roadmap](ROADMAP.md).
+
+---
+
 ## 4. Original Architectural Conception
 
 The original architectural diagram developed by LAEV illustrates the initial vision of this modular decentralized infrastructure.
