@@ -9,7 +9,9 @@ Linux-first installation and runtime. Lindesk Android is the intended installati
 - CIN domain-core Rust crate migrated into `Main/core/domain`; all original source modules and CLI binaries copied, with crate name `cin-core` preserved.
 - Android/Termux integration copied into `Main/installation/android-termux`, including OAuth, scoped GitHub connector, permission engine, signer interface, workspace and installer.
 - Local pairing/state backend and tests copied into `Main/services/cin-local-backend`.
-- Declarative module registry and CLI implemented under `Main/core/module-manager`, including descriptors, dependency enablement, platform checks, configuration persistence and unit tests.
+- Declarative module registry and CLI implemented under `Main/core/module-manager`, including descriptors for runtime, domain core, local backend, Android bridge and Merkle engine; dependency enablement, platform checks, configuration persistence and unit tests.
+- Certificate assets copied into Main with both Genesis versions preserved distinctly.
+- Standalone binary Merkle engine implemented in Rust with root construction and membership proofs, plus unit tests.
 - Linux installer/uninstaller and portable package builder are Main-owned.
 - CI/E2E workflows and browser E2E target moved to Main paths; Node 22 setup and module-manager validation added.
 - Full 233-entry repository path inventory captured.
