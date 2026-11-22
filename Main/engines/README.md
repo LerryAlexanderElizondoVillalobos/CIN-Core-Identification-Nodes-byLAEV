@@ -3,6 +3,7 @@
 Engines are independent capabilities managed by CIN Main. They are not all activated by the installer.
 
 ## Implemented
+- **Certificate assets:** migrated certificate sources are kept under `certificate/assets/`, with version-specific Genesis files preserved.
 - **Binary Merkle Engine:** standalone Rust crate at `merkle-tree/`, with domain-separated SHA-256 leaf/node hashes, deterministic odd-leaf handling, roots and proofs.
 
 ## Migrated assets / interfaces
