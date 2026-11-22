@@ -1,0 +1,9 @@
+{
+  "module_id": "lindesk-android-bridge",
+  "name": "Lindesk Android Bridge",
+  "version": "0.1.0-specification",
+  "platform": "android",
+  "dependencies": [],
+  "enabled_by_default": false,
+  "description": "Mobile installation/control integration; transport implementation pending verification"
+}
