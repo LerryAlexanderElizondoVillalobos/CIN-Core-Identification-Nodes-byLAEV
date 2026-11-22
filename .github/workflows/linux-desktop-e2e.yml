@@ -19,6 +19,7 @@ on:
     paths:
       - "Main/runtime/linux-portable/**"
       - "Main/core/domain/**"
+      - "Main/core/module-manager/**"
       - "Main/services/**"
       - "Main/installation/linux/**"
       - "Main/installation/android-termux/**"
