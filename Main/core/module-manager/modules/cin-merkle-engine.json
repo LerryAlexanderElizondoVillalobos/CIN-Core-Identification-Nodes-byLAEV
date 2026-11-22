@@ -1,0 +1,9 @@
+{
+  "module_id": "cin-merkle-engine",
+  "name": "CIN Binary Merkle Engine",
+  "version": "0.1.0",
+  "platform": "linux",
+  "dependencies": ["cin-domain-core"],
+  "enabled_by_default": false,
+  "description": "Standalone binary Merkle root and proof engine"
+}
