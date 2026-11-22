@@ -1,0 +1,129 @@
+{
+  "certificate_id": "cin:certificate:genesis-environment:v1",
+  "certificate_type": "cin.genesis-environment",
+  "certificate_version": "1.1.0",
+  "title": "CIN Genesis Environment Certificate",
+  "description": "Collects purpose-limited technical evidence about either the selected GitHub repository snapshot or the local extracted CIN package/runtime. The execution profile must be recorded in every generated manifest; GitHub repository inspection is not a local operating-system audit.",
+  "execution": {
+    "instruction": "RUN CERTIFICATE",
+    "runner": "profile-selected-runner",
+    "action": "generate-genesis-environment-manifest",
+    "runners": {
+      "github_repository": "cin-github-lobby",
+      "local_package": "cin-certificate-runner"
+    },
+    "profile_selection": "The selected execution profile determines which runner, collection scope and output registration semantics apply."
+  },
+  "collection_profile": {
+    "id": "cin.genesis-environment/1.0.0",
+    "package_root": "..",
+    "include": [
+      "execution.os",
+      "execution.architecture",
+      "execution.configuration.allowlist",
+      "hardware.capabilities",
+      "package.file_inventory.sha256",
+      "network.interface_names",
+      "cryptographic.digest_capabilities",
+      "storage.configuration_presence"
+    ],
+    "exclude": [
+      "credentials",
+      "private_keys",
+      "arbitrary_environment_variables",
+      "user_file_contents",
+      "network_payloads",
+      "absolute_paths"
+    ]
+  },
+  "output_profile": {
+    "document_type": "cin.genesis-environment-manifest",
+    "schema_version": "1.0.0",
+    "storage": "profile-specific",
+    "registration": "profile-specific"
+  },
+  "bibliographic_references": {
+    "format": "APA 7th edition",
+    "language": "es",
+    "transfer_to_manifest": true,
+    "description": "These references are certificate-supplied bibliographic metadata. The manifest generator must copy them into the generated Genesis Environment Manifest without treating them as environment observations.",
+    "references": [
+      "Allen, C. (2016, 25 de abril). The Path to Self-Sovereign Identity. Life With Alacrity. http://www.lifewithalacrity.com/2016/04/the-path-to-self-sovereign-identity.html",
+      "Buterin, V. (2023, 24 de julio). What do I think about biometric proof of personhood? Vitalik Buterin's Website. https://vitalik.eth.limo/general/2023/07/24/biometric.html",
+      "Chaum, D. (1985). Security without identification: Transaction systems to make big brother obsolete. Communications of the ACM, 28(10), 1030–1044. https://doi.org/10.1145/4372.4373",
+      "Diffie, W., & Hellman, M. E. (1976). New directions in cryptography. IEEE Transactions on Information Theory, 22(6), 644–654. https://doi.org/10.1109/TIT.1976.1055638",
+      "Douceur, J. R. (2002). The Sybil Attack. En P. Druschel, F. Kaashoek, & A. Rowstron (Eds.), Peer-to-Peer Systems (IPTPS 2002) (Lecture Notes in Computer Science, Vol. 2429, pp. 251–260). Springer. https://doi.org/10.1007/3-540-45748-8_24",
+      "European Parliament and Council of the European Union. (2024). Regulation (EU) 2024/1183 amending Regulation (EU) No 910/2014 as regards establishing the European Digital Identity Framework (eIDAS 2.0). Official Journal of the European Union. http://data.europa.eu/eli/reg/2024/1183/oj",
+      "Nakamoto, S. (2008, 31 de octubre). Bitcoin: A Peer-to-Peer Electronic Cash System. Bitcoin.org. https://bitcoin.org/bitcoin.pdf",
+      "National Institute of Standards and Technology. (2024). Digital Identity Guidelines (NIST Special Publication 800-63-4). U.S. Department of Commerce. https://doi.org/10.6028/NIST.SP.800-63-4",
+      "New York State Department of Financial Services. (2020, 14 de octubre). Report on Investigation of Twitter's July 15, 2020 Cybersecurity Incident: High-Profile Account Hijacking and Impersonation. https://www.dfs.ny.gov/Twitter_Report",
+      "U.S. Federal Trade Commission. (2019, julio). Equifax Data Breach Settlement: Mass Compromise of National Identification Records. https://www.ftc.gov/enforcement/refunds/equifax-data-breach-settlement",
+      "World Wide Web Consortium. (2022, 19 de julio). Decentralized Identifiers (DIDs) v1.0: Core architecture, data model, and representations (W3C Recommendation). https://www.w3.org/TR/did-core/",
+      "Zimmermann, P. R. (1995). The Official PGP User's Guide. MIT Press."
+    ]
+  },
+  "execution_profiles": {
+    "github_repository": {
+      "id": "cin.genesis-environment/github-repository/1.0.0",
+      "execution_mode": "github-pages-browser-with-github-app-authorization",
+      "scope": "repository_snapshot",
+      "include": [
+        "repository.owner",
+        "repository.name",
+        "repository.id",
+        "repository.visibility",
+        "repository.default_branch",
+        "repository.branch",
+        "repository.commit_sha",
+        "repository.tree_sha",
+        "repository.root_directory",
+        "repository.file_inventory.path",
+        "repository.file_inventory.size_bytes",
+        "repository.file_inventory.git_blob_sha",
+        "repository.file_inventory.sha256"
+      ],
+      "exclude": [
+        "github_access_tokens",
+        "github_refresh_tokens",
+        "github_app_client_secrets",
+        "private_keys",
+        "personal_credentials",
+        "personal_record_contents",
+        "unrelated_user_data"
+      ],
+      "limitations": [
+        "This profile audits the GitHub repository snapshot only.",
+        "It does not inspect the operator's local operating system, hardware, local network interfaces or local filesystem outside the repository.",
+        "It does not establish a private local CIN DataRoot transaction.",
+        "The target repository is public; the generated manifest and its commit are publicly readable."
+      ],
+      "runner": "cin-github-lobby"
+    },
+    "local_package": {
+      "id": "cin.genesis-environment/local-package/1.0.0",
+      "execution_mode": "local-certificate-runner",
+      "collection_profile_reference": "collection_profile",
+      "description": "Uses the existing local package and runtime environment collection profile defined by this certificate.",
+      "runner": "cin-certificate-runner"
+    }
+  },
+  "output_profiles": {
+    "github_repository": {
+      "document_type": "cin.genesis-environment-manifest",
+      "schema_version": "1.0.0",
+      "storage": "GitHub repository Contents API",
+      "registration": "public_repository_progress_record_not_private_cin_record",
+      "authoritative_private_local_record": false,
+      "schema_status": "REPOSITORY_PROGRESS_PROFILE_PENDING_TYPE_SPECIFIC_JSON_SCHEMA"
+    },
+    "local_package": {
+      "document_type": "cin.genesis-environment-manifest",
+      "schema_version": "1.0.0",
+      "storage": "CIN DataRoot TransactionalStore",
+      "registration": "first-logical-record",
+      "authoritative_private_local_record": true,
+      "schema_status": "LOCAL_GENESIS_MANIFEST_SCHEMA_AND_COMMON_DOCUMENT_ENVELOPE_PENDING_REVIEW"
+    }
+  },
+  "default_execution_profile": "local_package"
+}
