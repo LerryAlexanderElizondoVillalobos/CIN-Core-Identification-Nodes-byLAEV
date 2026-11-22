@@ -1,4 +1,4 @@
-name: CIN Linux Local Web End-to-End Acceptance
+name: CIN Main Linux Local Web End-to-End Acceptance
 
 on:
   pull_request:
@@ -7,26 +7,22 @@ on:
       - "Main/runtime/linux-portable/**"
       - "Main/core/domain/**"
       - "Main/services/**"
-      - "Main/installation/linux/install.sh"
-      - "Main/installation/linux/uninstall.sh"
+      - "Main/installation/linux/**"
       - "Main/installation/android-termux/**"
-      - "Main/tests/**"
-      - "Main/core/domain/**"
-      - "Main/services/**"
-      - "Main/installation/linux/install.sh"
-      - "Main/installation/linux/uninstall.sh"
-      - "Main/installation/android-termux/**"
-      - "Main/tests/**"
       - "Main/interfaces/local-web/**"
-      - "Main/installation/linux/package-portable.sh"
+      - "Main/tests/**"
       - "e2e/**"
       - ".github/workflows/linux-desktop-e2e.yml"
   push:
     branches: [main]
     paths:
       - "Main/runtime/linux-portable/**"
+      - "Main/core/domain/**"
+      - "Main/services/**"
+      - "Main/installation/linux/**"
+      - "Main/installation/android-termux/**"
       - "Main/interfaces/local-web/**"
-      - "Main/installation/linux/package-portable.sh"
+      - "Main/tests/**"
       - "e2e/**"
       - ".github/workflows/linux-desktop-e2e.yml"
   workflow_dispatch:
@@ -35,12 +31,12 @@ permissions:
   contents: read
 
 concurrency:
-  group: cin-linux-local-web-e2e-${{ github.workflow }}-${{ github.ref }}
+  group: cin-linux-main-e2e-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   portable-local-web:
-    name: Build, serve local web UI, test ports and persistence
+    name: Main runtime build, package and browser acceptance
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
@@ -48,26 +44,22 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           persist-credentials: false
-
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
-
       - name: Run runtime unit tests
         working-directory: Main/runtime/linux-portable
         run: cargo test
-
       - name: Build local web runtime
         working-directory: Main/runtime/linux-portable
         run: cargo build --release
-
-      - name: Test migrated CIN domain core
+      - name: Run domain core tests
         working-directory: Main/core/domain
         run: cargo test
-
-
+      - name: Test migrated local service
+        working-directory: Main/services/cin-local-backend
+        run: npm test
       - name: Package portable ZIP
         run: bash Main/installation/linux/package-portable.sh Main/runtime/linux-portable/target/release/cin-linux-main
-
       - name: Verify package checksum and layout
         run: |
           set -euo pipefail
@@ -76,12 +68,10 @@ jobs:
           unzip -q CIN-Linux-Portable-x86_64.zip -d package-check
           test -x package-check/CIN-Linux-Portable-x86_64/run-cin.sh
           test -x package-check/CIN-Linux-Portable-x86_64/cin
-
       - name: Install Playwright and Chromium
         run: |
           npm install --prefix e2e --no-save --package-lock=false playwright@1.56.1
           e2e/node_modules/.bin/playwright install --with-deps chromium
-
       - name: Run local HTTP, port selection, relocation and Chromium acceptance tests
         run: |
           set -euo pipefail
