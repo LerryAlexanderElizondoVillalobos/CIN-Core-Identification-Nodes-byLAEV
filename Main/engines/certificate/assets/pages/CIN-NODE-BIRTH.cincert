@@ -1,0 +1,95 @@
+{
+  "certificate_id": "cin:certificate:node-birth:v1",
+  "certificate_type": "cin.node-birth",
+  "certificate_version": "1.1.0",
+  "title": "CIN Node Birth Certificate",
+  "status": "development-candidate",
+  "description": "Consumes the complete registered Genesis Environment Manifest, calculates its deterministic SHA-256 fingerprint, and derives the CIN node birth identifiers.",
+  "execution": {
+    "instruction": "RUN CERTIFICATE",
+    "runner": "cin-certificate-runner",
+    "action": "generate-cin-node-birth-record"
+  },
+  "input_profile": {
+    "document_type": "cin.genesis-environment-manifest",
+    "required": "Complete JSON root document; no root fields may be omitted.",
+    "canonicalization": "RFC 8785 JSON Canonicalization Scheme (JCS)",
+    "digest": "SHA-256 over canonical UTF-8 bytes",
+    "provenance_digest": "SHA-256 over exact uploaded UTF-8 bytes"
+  },
+  "identifier_derivation": {
+    "profile_id": "cin.node-identifier-derivation/1.0.0",
+    "status": "proposed-candidate-not-production-approved",
+    "formula": "SHA-256(ASCII(domain_label) || raw_32_byte_genesis_digest)",
+    "domain_labels": {
+      "cin_nid": "CIN\\0NODE\\0NID\\0v1\\0",
+      "cin_nsid": "CIN\\0NODE\\0NSID\\0v1\\0",
+      "cin_bid": "CIN\\0NODE\\0BID\\0v1\\0"
+    },
+    "output_encoding": "lowercase hexadecimal",
+    "cin_ref": "First 16 uppercase hexadecimal characters of CIN-NID; display reference only."
+  },
+  "output_profile": {
+    "document_type": "cin.node-birth-record",
+    "schema_version": "1.0.0",
+    "initial_status": "PREVIEW_NOT_ISSUED",
+    "identifiers": [
+      "cin_nid",
+      "cin_nsid",
+      "cin_bid",
+      "cin_ref"
+    ],
+    "conditional_identifiers": [
+      "cin_enid",
+      "cin_pvid"
+    ],
+    "note": "This is the target authoritative document type. The GitHub browser profile emits cin.node-birth-candidate until the authoritative local birth flow is implemented."
+  },
+  "operational_boundaries": [
+    "The GitHub browser profile emits a cin.node-birth-candidate progress artifact; it is not a cin.node-birth-record.",
+    "The local authoritative birth output must use the reviewed CIN Common Document Model envelope and the approved type-specific schema.",
+    "Neither browser preview nor repository progress commit constitutes Node Birth Authorization, issuer trust, signature, private local registration or independent verification.",
+    "The proposed identifier derivation profile requires project approval and independent interoperability vectors before production use."
+  ],
+  "execution_profiles": {
+    "github_repository": {
+      "id": "cin.node-birth/github-repository/1.0.0",
+      "runner": "cin-github-lobby",
+      "source_profile": "cin.genesis-environment/github-repository/1.0.0",
+      "input_requirement": "Complete Genesis Environment Manifest saved as a public GitHub repository progress record.",
+      "output_status": "PREVIEW_NOT_ISSUED",
+      "authoritative_node_birth": false,
+      "description": "Generates a repository progress candidate only. It does not constitute private local registration, authorization, signature or BORN state."
+    },
+    "local_package": {
+      "id": "cin.node-birth/local-package/1.0.0",
+      "runner": "cin-certificate-runner",
+      "source_profile": "cin.genesis-environment/local-package/1.0.0",
+      "input_requirement": "Complete Genesis Environment Manifest registered in the private local DataRoot.",
+      "output_status": "PREVIEW_NOT_ISSUED",
+      "authoritative_node_birth": false,
+      "description": "Local runner context. Authoritative birth still requires separate authorization, issuer/signature policy, durable record commit and independent verification."
+    }
+  },
+  "default_execution_profile": "local_package",
+  "output_profiles": {
+    "github_repository_candidate": {
+      "document_type": "cin.node-birth-candidate",
+      "schema_version": "1.0.0",
+      "status": "PREVIEW_NOT_ISSUED",
+      "authoritative_node_birth": false,
+      "storage": "public_github_repository_progress_record",
+      "description": "A non-authoritative candidate derived in the browser from the repository Genesis Manifest. It is not a Node Birth Record and must not be used to assert BORN.",
+      "schema_status": "CANDIDATE_PROGRESS_SCHEMA_PENDING",
+      "document_envelope": "NOT_AN_AUTHORITATIVE_CIN_COMMON_DOCUMENT"
+    },
+    "local_package": {
+      "document_type": "cin.node-birth-record",
+      "schema_version": "1.0.0",
+      "required_status": "BORN",
+      "storage": "private_local_storage_after_authorization_and_verification",
+      "description": "The authoritative Node Birth Record output produced by the local CIN birth engine after authorization, signing policy, durable commit, read-back and independent verification.",
+      "schema_status": "TYPE_SPECIFIC_SCHEMA_AND_COMMON_DOCUMENT_ENVELOPE_REVIEW_PENDING"
+    }
+  }
+}
