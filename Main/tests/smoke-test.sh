@@ -4,8 +4,10 @@ ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd)"
 RUNTIME="$ROOT/Main/core/runtime/cin_main.py"
 INSTALLER="$ROOT/Main/installation/linux/install.sh"
 UNINSTALLER="$ROOT/Main/installation/linux/uninstall.sh"
+PACKAGE="$ROOT/Main/installation/linux/package-portable.sh"
 bash -n "$INSTALLER"
 bash -n "$UNINSTALLER"
+bash -n "$PACKAGE"
 python3 "$RUNTIME" --help >/dev/null
 python3 "$RUNTIME" status >/dev/null
 TMP_CONFIG="$(mktemp)"
@@ -19,4 +21,8 @@ assert config["runtime"]["service_name"] == "cin-main"
 assert config["installation"]["client"] == "lindesk-android"
 PY
 rm -f "$TMP_CONFIG"
+if command -v cargo >/dev/null 2>&1; then
+  (cd "$ROOT/Main/runtime/linux-portable" && cargo test)
+  (cd "$ROOT/Main/core/domain" && cargo test)
+fi
 echo "CIN Main smoke checks passed."
