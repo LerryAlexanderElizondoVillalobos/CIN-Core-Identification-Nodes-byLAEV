@@ -4,7 +4,7 @@ set -euo pipefail
 PREFIX="$HOME/.local/share/cin"
 INSTALL_SERVICE=1
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd -- "$SCRIPT_DIR/../../../.." && pwd)"
+REPO_ROOT="$(cd -- "$SCRIPT_DIR/../../.." && pwd)"
 MAIN_SOURCE="$REPO_ROOT/Main"
 
 usage() {
