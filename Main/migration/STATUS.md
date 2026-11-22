@@ -7,6 +7,7 @@ Linux-first installation and runtime. Lindesk Android is the intended installati
 - Portable Linux Rust runtime migrated to `Main/runtime/linux-portable` and renamed to binary `cin-linux-main`.
 - Embedded local web UI moved into `Main/interfaces/local-web`.
 - CIN domain-core Rust crate migrated into `Main/core/domain`; all original source modules and CLI binaries copied, with crate name `cin-core` preserved.
+- Genesis manifest JSON schema migrated into `Main/schemas/` to keep `include_str!` paths within the Main-owned layout.
 - Android/Termux integration copied into `Main/installation/android-termux`, including OAuth, scoped GitHub connector, permission engine, signer interface, workspace and installer.
 - Local pairing/state backend and tests copied into `Main/services/cin-local-backend`.
 - Declarative module registry and CLI implemented under `Main/core/module-manager`, including descriptors for runtime, domain core, local backend, Android bridge and Merkle engine; dependency enablement, platform checks, configuration persistence and unit tests.
