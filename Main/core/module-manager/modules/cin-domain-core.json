@@ -1,0 +1,9 @@
+{
+  "module_id": "cin-domain-core",
+  "name": "CIN Domain Core",
+  "version": "0.1.0",
+  "platform": "linux",
+  "dependencies": [],
+  "enabled_by_default": true,
+  "description": "Document model, validation, lifecycle, Genesis and transactional storage libraries/tools"
+}
