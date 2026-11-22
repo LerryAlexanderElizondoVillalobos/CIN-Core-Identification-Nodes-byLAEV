@@ -1,23 +1,27 @@
 # Main migration status
 
-## Direction
-Linux-first installation/runtime. Lindesk Android is the intended mobile installation/control entry point.
+## Target
+Linux-first installation and runtime. Lindesk Android is the intended installation/control entry point; its concrete transport is not yet verified.
 
-## Completed in this scaffold
-- New Main directory boundary and architecture documentation.
-- User-space Linux install and uninstall scripts.
-- Python standard-library runtime CLI (`init`, `status`, `serve`).
-- Optional systemd user service installation.
-- Configuration sample and non-overwrite behavior.
-- Lindesk integration boundary and transport-neutral request contract.
+## Migrated into Main
+- Portable Linux Rust runtime (server, browser launch integration, lifecycle manager).
+- Local web UI.
+- Rust domain-core crate, including document model, schema validation, lifecycle, Genesis audit/manifest, transactional storage, recovery, and CLI binaries.
+- Linux installer builds/installs runtime and domain tools when Cargo is present.
+- Portable package builder and CI/E2E paths now target Main.
+- Main-specific migration plan and smoke tests.
 
-## Not yet migrated
-Existing application, certificate, Lobby, Termux, local backend, and prototype code remain in their current paths. They must be audited and mapped before relocation/rewrite. The Lindesk transport is specification-only until verified against the actual app capabilities.
+## Transitional copies still present
+- `prototype/linux-runtime` and `prototype/dist`: original runtime source.
+- `prototype/cin-core`: original domain source.
+- `termux-cin`: Android/Termux local backend.
+- `services/cin-local-backend`: local pairing/state backend.
+- `Core Identification Node Github/`: published GitHub Pages Lobby source.
+- `docs/`, `specifications/`, `schemas/`, `examples/`, `research/`: canonical documentation/contracts until ownership moves are completed.
 
-## Next migration steps
-1. Inventory every existing root and nested directory, entrypoint, service, workflow, test and dependency.
-2. Map existing capabilities to Main layers.
-3. Define file-by-file move/retain/rewrite/deprecate decisions.
-4. Implement verified Lindesk-to-Linux installation transport.
-5. Integrate current engines/modules into Main without breaking legacy functionality.
-6. Add tests and Linux installation acceptance validation.
+## Next work
+1. Move Android/Termux and local backend services into Main's integration/service boundaries with compatibility references.
+2. Audit certificate/application assets and Pages workflows; preserve publication paths while migrating source ownership.
+3. Map all remaining root paths and individual files in the migration register.
+4. Add acceptance tests and run Linux CI for the migrated Main tree.
+5. Remove duplicated legacy code only after Main CI passes and all references are updated.
