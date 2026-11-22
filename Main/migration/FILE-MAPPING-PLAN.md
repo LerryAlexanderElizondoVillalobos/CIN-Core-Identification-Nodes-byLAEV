@@ -14,6 +14,10 @@ Inventory snapshot: `main` contained 233 tracked tree entries at audit time. Ful
 | `prototype/cin-core/src/**` (20 tracked entries) | `Main/core/domain/src/**` | Source copied; all module paths preserved |
 | `termux-cin/**` | `Main/installation/android-termux/**` | Source migrated; setup and main README added |
 | `services/cin-local-backend/**` | `Main/services/cin-local-backend/**` | Source and test migrated |
+| `certificates/CIN-GENESIS-ENVIRONMENT.cincert` | `Main/engines/certificate/assets/local/` | Migrated, version 1.0.1 preserved |
+| Pages certificate assets | `Main/engines/certificate/assets/pages/` | Migrated, source versions preserved |
+| Binary Merkle engine | `Main/engines/merkle-tree/` | New standalone Rust engine, proof/root API and tests |
+| Module registry | `Main/core/module-manager/` | Implemented declarative enablement CLI and tests |
 
 ## Main ownership
 - `Main/runtime/linux-portable`: primary Linux runtime, lifecycle and local HTTP server.
