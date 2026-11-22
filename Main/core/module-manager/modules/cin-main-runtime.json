@@ -1,0 +1,9 @@
+{
+  "module_id": "cin-main-runtime",
+  "name": "CIN Main Linux Runtime",
+  "version": "0.2.0",
+  "platform": "linux",
+  "dependencies": [],
+  "enabled_by_default": true,
+  "description": "Primary Linux local web runtime and lifecycle service"
+}
