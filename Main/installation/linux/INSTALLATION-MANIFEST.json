@@ -1,0 +1,11 @@
+{
+  "name": "CIN Main",
+  "version": "0.1.0-scaffold",
+  "target_platform": "linux",
+  "installation_mode": "user-space",
+  "mobile_control_client": "Lindesk Android",
+  "mobile_bridge_status": "specification-only",
+  "runtime": "python3",
+  "service_manager": "systemd-user-optional",
+  "entrypoint": "cin-main"
+}
