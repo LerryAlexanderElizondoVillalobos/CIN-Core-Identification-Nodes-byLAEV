@@ -1,4 +1,4 @@
-name: CIN Linux Portable Local Web Runtime
+name: CIN Main Linux Portable Runtime
 
 on:
   pull_request:
@@ -7,25 +7,21 @@ on:
       - "Main/runtime/linux-portable/**"
       - "Main/core/domain/**"
       - "Main/services/**"
-      - "Main/installation/linux/install.sh"
-      - "Main/installation/linux/uninstall.sh"
+      - "Main/installation/linux/**"
       - "Main/installation/android-termux/**"
-      - "Main/tests/**"
-      - "Main/core/domain/**"
-      - "Main/services/**"
-      - "Main/installation/linux/install.sh"
-      - "Main/installation/linux/uninstall.sh"
-      - "Main/installation/android-termux/**"
-      - "Main/tests/**"
       - "Main/interfaces/local-web/**"
-      - "Main/installation/linux/package-portable.sh"
+      - "Main/tests/**"
       - ".github/workflows/linux-portable-prototype.yml"
   push:
     branches: [main]
     paths:
       - "Main/runtime/linux-portable/**"
+      - "Main/core/domain/**"
+      - "Main/services/**"
+      - "Main/installation/linux/**"
+      - "Main/installation/android-termux/**"
       - "Main/interfaces/local-web/**"
-      - "Main/installation/linux/package-portable.sh"
+      - "Main/tests/**"
       - ".github/workflows/linux-portable-prototype.yml"
   workflow_dispatch:
 
@@ -50,24 +46,26 @@ jobs:
           sudo apt-get install -y build-essential zip
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
-      - name: Cache Rust build
+      - name: Cache Rust builds
         uses: Swatinem/rust-cache@v2
         with:
-          workspaces: Main/runtime/linux-portable
+          workspaces: |
+            Main/runtime/linux-portable
+            Main/core/domain
       - name: Run Main migration smoke suite
         run: bash Main/tests/smoke-test.sh
-
-      - name: Run local web runtime tests
+      - name: Test portable runtime
         working-directory: Main/runtime/linux-portable
         run: cargo test
-      - name: Build Linux runtime
+      - name: Build portable runtime
         working-directory: Main/runtime/linux-portable
         run: cargo build --release
-
-      - name: Test migrated CIN domain core
+      - name: Test domain core
         working-directory: Main/core/domain
         run: cargo test
-
+      - name: Build domain core tools
+        working-directory: Main/core/domain
+        run: cargo build --release
       - name: Verify persistence across separate user processes
         run: |
           set -euo pipefail
@@ -79,7 +77,7 @@ jobs:
           "$BIN" --probe-read | grep -q '^CIN_LOCAL_PERSISTENCE_PROBE_V1$'
           test -s "$CIN_DATA_ROOT/runtime-probe.record"
           test ! -e "$CIN_DATA_ROOT/runtime-probe.record.pending"
-      - name: Assemble extracted-folder ZIP
+      - name: Assemble portable ZIP
         run: bash Main/installation/linux/package-portable.sh Main/runtime/linux-portable/target/release/cin-linux-main
       - name: Verify ZIP layout and checksum
         run: |
