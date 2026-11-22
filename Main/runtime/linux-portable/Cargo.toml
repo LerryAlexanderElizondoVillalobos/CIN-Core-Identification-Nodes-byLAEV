@@ -1,5 +1,5 @@
 [package]
-name = "cin-linux-prototype"
+name = "cin-linux-main"
 version = "0.2.0"
 edition = "2021"
 
