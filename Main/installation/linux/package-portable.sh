@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../../../.." && pwd)"
+ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../../.." && pwd)"
 BIN="${1:-$ROOT/Main/runtime/linux-portable/target/release/cin-linux-main}"
 OUT="$ROOT/dist"
 STAGE="$OUT/CIN-Linux-Portable-x86_64"
