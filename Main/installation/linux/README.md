@@ -4,8 +4,9 @@ Linux is the primary runtime target. The installer works in user space and does 
 
 ## Requirements
 - Linux
-- Python 3.9+ (configuration CLI)
-- Rust/Cargo for compiling the primary Rust runtime and domain tools
+- Python 3.9+ (secondary control CLI)
+- Rust/Cargo for compiling the primary runtime and domain tools
+- Node.js 22+ for the optional local backend service tests/runtime
 - systemd user service is optional
 
 ## Install
@@ -15,19 +16,21 @@ bash Main/installation/linux/install.sh --prefix "$HOME/.local/share/cin"
 
 ## Options
 - `--prefix PATH`: installation directory (default: `$HOME/.local/share/cin`)
-- `--no-build`: skip Rust compilation; only copy source and control CLI
+- `--no-build`: skip Rust compilation; copy source and install control CLI
 - `--no-service`: skip systemd user service setup
 - `--help`: show installer help
 
-The installer copies Main, builds the Rust Linux runtime (cin-linux-main) and the domain command-line tools when Cargo is available, installs launchers in `~/.local/bin`, and optionally enables the systemd user service. It preserves an existing configuration.
+The installer copies Main, builds the Rust Linux runtime (`cin-linux-main`) and domain tools when Cargo is available, installs launchers in `~/.local/bin`, and optionally enables the systemd user service. Existing configuration is preserved.
 
 ## Runtime commands
 ```bash
 cin-main             # launch primary Linux local web runtime
-cin-main-cli status   # show configuration/runtime control status
+cin-main-cli status   # secondary configuration/status CLI
 cin-main-cli init     # initialize configuration
-cin-main-cli serve    # secondary Python status HTTP endpoint
-```
+cin-module list      # list Main modules and enablement
+cin-module enable cin-local-backend
+cin-module disable cin-local-backend
+``
 
 ## Service management
 ```bash
@@ -38,5 +41,5 @@ systemctl --user status cin-main.service
 ## Uninstall
 ```bash
 bash Main/installation/linux/uninstall.sh --prefix "$HOME/.local/share/cin"
-```
-Uninstallation removes the service, launcher binaries, and installed Main source. User configuration is retained unless `--remove-data` is explicitly supplied.
+``
+Uninstallation removes the service, launchers, compiled binaries and installed Main source. User configuration is retained unless `--remove-data` is explicitly supplied.
