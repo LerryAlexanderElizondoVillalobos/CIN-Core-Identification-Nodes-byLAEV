@@ -48,6 +48,11 @@ jobs:
         working-directory: Main/runtime/linux-portable
         run: cargo build --release
 
+      - name: Test migrated CIN domain core
+        working-directory: Main/core/domain
+        run: cargo test
+
+
       - name: Package portable ZIP
         run: bash Main/installation/linux/package-portable.sh Main/runtime/linux-portable/target/release/cin-linux-main
 
