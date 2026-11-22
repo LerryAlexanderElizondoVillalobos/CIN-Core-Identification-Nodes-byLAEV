@@ -1,48 +1,51 @@
 # Migration file mapping plan
 
-This plan tracks the existing repository tree (233 entries at the audit snapshot) into the Linux-first Main architecture.
+Inventory snapshot: `main` contained 233 tracked tree entries at audit time. Full path snapshot and root classifications are in [REPOSITORY-INVENTORY.md](REPOSITORY-INVENTORY.md).
 
-## Moved/copy-migrated with functional source
-| Existing source | Main destination | Status |
+## Source migrated into Main
+| Existing source | Main destination | Migration status |
 |---|---|---|
-| `prototype/linux-runtime/Cargo.toml` | `Main/runtime/linux-portable/Cargo.toml` | Migrated; crate renamed to `cin-linux-main` |
-| `prototype/linux-runtime/src/main.rs` | `Main/runtime/linux-portable/src/main.rs` | Migrated; embedded UI path updated |
-| `prototype/linux-runtime/src/browser.rs` | `Main/runtime/linux-portable/src/browser.rs` | Migrated |
-| `prototype/linux-runtime/src/runtime_lifecycle.rs` | `Main/runtime/linux-portable/src/runtime_lifecycle.rs` | Migrated |
-| `prototype/dist/index.html` | `Main/interfaces/local-web/index.html` | Migrated |
-| `prototype/cin-core/**` | `Main/core/domain/**` | Migrated; package name kept `cin-core` |
+| `prototype/linux-runtime/Cargo.toml` | `Main/runtime/linux-portable/Cargo.toml` | Copied, package renamed to `cin-linux-main` |
+| `prototype/linux-runtime/src/main.rs` | `Main/runtime/linux-portable/src/main.rs` | Copied; embedded UI path updated |
+| `prototype/linux-runtime/src/browser.rs` | `Main/runtime/linux-portable/src/browser.rs` | Copied unchanged |
+| `prototype/linux-runtime/src/runtime_lifecycle.rs` | `Main/runtime/linux-portable/src/runtime_lifecycle.rs` | Copied unchanged |
+| `prototype/dist/index.html` | `Main/interfaces/local-web/index.html` | Copied; embedded in runtime |
+| `prototype/cin-core/Cargo.toml` | `Main/core/domain/Cargo.toml` | Migrated; crate name `cin-core` preserved |
+| `prototype/cin-core/src/**` (20 tracked entries) | `Main/core/domain/src/**` | Source copied; all module paths preserved |
+| `termux-cin/**` | `Main/installation/android-termux/**` | Source migrated; setup and main README added |
+| `services/cin-local-backend/**` | `Main/services/cin-local-backend/**` | Source and test migrated |
 
-## Main destinations
-- `Main/installation/linux`: install/uninstall/package and Linux acceptance.
-- `Main/installation/lindesk`: Android client integration documentation/adapter boundary.
-- `Main/installation/bridge`: request protocol and transport-neutral envelope.
-- `Main/runtime/linux-portable`: primary local Linux runtime.
+## Main ownership
+- `Main/runtime/linux-portable`: primary Linux runtime, lifecycle and local HTTP server.
 - `Main/interfaces/local-web`: embedded UI.
-- `Main/core/domain`: CIN domain crate.
+- `Main/core/domain`: Rust domain library, Genesis/certificate runners, storage/recovery.
 - `Main/core/runtime`: secondary Python control/status CLI.
-- `Main/core/configuration`: configuration.
-- `Main/core/module-manager`: module registration and lifecycle boundary.
-- `Main/engines`: independent domain capabilities.
-- `Main/applications`: application boundary.
-- `Main/storage`: persistent data organization.
-- `Main/system/linux`: Linux integration.
+- `Main/installation/linux`: installer, uninstaller, portable packaging.
+- `Main/installation/android-termux`: Android-side local backend, OAuth, scoped GitHub connector, permission engine, signing interface, workspace integration.
+- `Main/services/cin-local-backend`: local pairing and persistent-state service.
+- `Main/engines`: planned independent engine installation and lifecycle contracts.
+- `Main/applications`: application ownership boundary.
+- `Main/storage`: persistent storage layout.
+- `Main/system/linux`: Linux host integration.
 
-## Retain (temporary, referenced by legacy workflows)
-| Existing root path | Disposition | Reason |
+## Transitional paths retained
+| Source path | Disposition | Reason |
 |---|---|---|
-| `.github/` | KEEP | CI and Pages publication workflows; paths updated where runtime tests migrated |
-| `Core Identification Node Github/` | KEEP | Published Pages source and publication workflow path |
-| `certificates/` | KEEP | Genesis certificate source until engine/application integration is completed |
-| `docs/` | KEEP | Canonical architecture, project, audit and technical documentation |
-| `e2e/` | KEEP | E2E suite; binary target now Main |
-| `examples/` | KEEP | Manifest/document examples |
-| `prototype/` | ARCHIVE/TRANSITION | Original Rust sources kept while compatibility validation runs |
-| `research/` | KEEP | Research/dialogues |
-| `schemas/` and `specifications/` | KEEP | Canonical contracts and schema sources |
-| `scripts/` | KEEP/TRANSITION | CI and existing package scripts retained while Main-owned scripts become authoritative |
-| `services/` | TRANSITION | Local backend and OAuth worker not yet migrated |
-| `termux-cin/` | TRANSITION | Android/Termux service not yet migrated into Main |
-| `tests/` | KEEP | Existing test coverage while paths are migrated |
+| `.github/` | KEEP | workflow, Pages publishing and CI; Linux workflows updated to test Main |
+| `Core Identification Node Github/` | KEEP | Pages publish source remains tied to current publishing workflows |
+| `certificates/` | KEEP | certificate assets pending certificate-engine integration |
+| `docs/` | KEEP | architecture and project docs pending ownership consolidation |
+| `e2e/` | KEEP | test harness retained; runtime binary path updated to Main |
+| `examples/` | KEEP | example payloads |
+| `prototype/linux-runtime`, `prototype/dist` | TRANSITION/ARCHIVE | original runtime mirror kept until Main CI acceptance |
+| `prototype/cin-core` | TRANSITION/ARCHIVE | original domain mirror kept until Main CI acceptance |
+| `research/` | KEEP | research content |
+| `schemas/`, `specifications/` | KEEP | canonical schemas/specs |
+| `scripts/` | KEEP/TRANSITION | existing validators and legacy packager retained |
+| `services/cin-local-backend` | TRANSITION | source copied into Main; original kept until references/tests are reconciled |
+| `termux-cin/` | TRANSITION | source copied into Main; original kept for Android compatibility |
+| `tests/` | KEEP | legacy tests remain during test consolidation |
+| Root docs and CI config | KEEP | repository-level governance, roadmap and project overview |
 
-## Remaining file-level mapping
-Every remaining file receives a later mapping entry including destination, dependency, test evidence, and disposition. No files are removed simply to make the tree look clean. Legacy copies are removed only after Main builds/tests and path references are verified.
+## Removal policy
+No legacy duplicate is removed in this migration branch until Main builds/tests, CI validates migrated packages, and every workflow/path reference has been checked. Copies are intentionally preserved rather than risking destructive moves.
