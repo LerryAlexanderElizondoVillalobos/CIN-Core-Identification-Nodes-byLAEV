@@ -21,7 +21,8 @@ The installer copies Main into `~/.local/share/cin`, builds the Rust local runti
 - `installation/android-termux`: migrated Android/Termux integration and setup.
 - `installation/lindesk` and `installation/bridge`: integration contract boundary; concrete Lindesk transport is not assumed.
 - `services/cin-local-backend`: migrated local pairing/state backend.
-- `engines`, `applications`, `storage`, `system/linux`: functional boundaries and subsystem ownership.
+- `engines`: certificate asset collection and standalone binary Merkle engine; other engines remain planned.
+- `applications`, `storage`, `system/linux`: functional boundaries and subsystem ownership.
 
 ## Build and test
 ```bash
