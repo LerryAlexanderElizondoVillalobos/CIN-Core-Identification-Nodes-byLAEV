@@ -19,7 +19,7 @@ def load_registry():
 def load_config(path):
     if path.exists():
         return json.loads(path.read_text(encoding="utf-8"))
-    return {"enabled": []}
+    return {"enabled": [module_id for module_id, descriptor in load_registry().items() if descriptor.get("enabled_by_default", False)]}
 
 def save_config(path, config):
     path.parent.mkdir(parents=True, exist_ok=True)
