@@ -1,9 +1,11 @@
-# CIN Main runtime
+# CIN Main control CLI
 
-The current runtime scaffold is a Python standard-library CLI with `status`, `init`, and `serve` commands. `serve` provides a local HTTP health/status endpoint intended for Linux service supervision and future mobile bridge integration.
+This Python standard-library CLI is retained as a lightweight configuration and status utility, not the primary Linux web runtime.
 
-Run directly:
 ```bash
-python3 Main/core/runtime/cin_main.py status
-python3 Main/core/runtime/cin_main.py serve
-```
+cin-main-cli status
+cin-main-cli init
+cin-main-cli serve
+``
+
+The primary runtime is the migrated Rust portable application in `Main/runtime/linux-portable`, launched through `cin-main`.
