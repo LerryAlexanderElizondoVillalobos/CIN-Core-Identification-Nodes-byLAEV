@@ -1,0 +1,9 @@
+{
+  "module_id": "cin-local-backend",
+  "name": "CIN Local Backend",
+  "version": "0.3.0",
+  "platform": "linux",
+  "dependencies": ["cin-main-runtime"],
+  "enabled_by_default": false,
+  "description": "Optional local pairing and persistent-state Node.js service"
+}
