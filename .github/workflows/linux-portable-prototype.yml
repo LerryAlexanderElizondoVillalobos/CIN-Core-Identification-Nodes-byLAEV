@@ -20,6 +20,7 @@ on:
       - "Main/runtime/linux-portable/**"
       - "Main/core/domain/**"
       - "Main/core/module-manager/**"
+      - "Main/engines/merkle-tree/**"
       - "Main/services/**"
       - "Main/installation/linux/**"
       - "Main/installation/android-termux/**"
@@ -51,7 +52,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
       - name: Cache Rust builds
@@ -72,11 +72,14 @@ jobs:
       - name: Test domain core
         working-directory: Main/core/domain
         run: cargo test
-      - name: Test Merkle engine
-        working-directory: Main/engines/merkle-tree
-        run: cargo test
       - name: Build domain core tools
         working-directory: Main/core/domain
+        run: cargo build --release
+      - name: Test binary Merkle engine
+        working-directory: Main/engines/merkle-tree
+        run: cargo test
+      - name: Build binary Merkle engine
+        working-directory: Main/engines/merkle-tree
         run: cargo build --release
       - name: Verify persistence across separate user processes
         run: |
