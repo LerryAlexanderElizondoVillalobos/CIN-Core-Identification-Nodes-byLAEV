@@ -21,6 +21,7 @@ on:
       - "Main/runtime/linux-portable/**"
       - "Main/core/domain/**"
       - "Main/core/module-manager/**"
+      - "Main/engines/merkle-tree/**"
       - "Main/services/**"
       - "Main/installation/linux/**"
       - "Main/installation/android-termux/**"
@@ -51,7 +52,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
       - name: Run runtime unit tests
@@ -62,6 +62,9 @@ jobs:
         run: cargo build --release
       - name: Run domain core tests
         working-directory: Main/core/domain
+        run: cargo test
+      - name: Run binary Merkle engine tests
+        working-directory: Main/engines/merkle-tree
         run: cargo test
       - name: Test migrated local service
         working-directory: Main/services/cin-local-backend
