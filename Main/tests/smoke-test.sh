@@ -24,6 +24,7 @@ rm -f "$TMP_CONFIG"
 if command -v cargo >/dev/null 2>&1; then
   (cd "$ROOT/Main/runtime/linux-portable" && cargo test)
   (cd "$ROOT/Main/core/domain" && cargo test)
+  (cd "$ROOT/Main/engines/merkle-tree" && cargo test)
 fi
 if command -v node >/dev/null 2>&1; then
   (cd "$ROOT/Main/services/cin-local-backend" && npm test)
