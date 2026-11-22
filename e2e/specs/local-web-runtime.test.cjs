@@ -7,7 +7,7 @@ const net = require('node:net');
 const { spawn } = require('node:child_process');
 
 const repoRoot = path.resolve(__dirname, '../..');
-const binary = path.join(repoRoot, 'prototype/linux-runtime/target/release/cin-linux-prototype');
+const binary = path.join(repoRoot, 'Main/runtime/linux-portable/target/release/cin-linux-main');
 
 function reserve(port) {
   return new Promise((resolve, reject) => {
