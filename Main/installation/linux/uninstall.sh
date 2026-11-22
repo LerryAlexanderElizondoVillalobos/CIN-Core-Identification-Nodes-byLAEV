@@ -13,7 +13,8 @@ done
 if command -v systemctl >/dev/null; then
   systemctl --user disable --now cin-main.service >/dev/null 2>&1 || true
 fi
-rm -f "$HOME/.config/systemd/user/cin-main.service" "$HOME/.local/bin/cin-main"
+rm -f "$HOME/.config/systemd/user/cin-main.service" "$HOME/.local/bin/cin-main" "$HOME/.local/bin/cin-main-cli"
+rm -f "$PREFIX/bin/cin-linux-main" "$PREFIX/bin/cin-certificate-runner" "$PREFIX/bin/cin-genesis-manifest"
 if command -v systemctl >/dev/null; then systemctl --user daemon-reload >/dev/null 2>&1 || true; fi
 rm -rf "$PREFIX/Main"
 if [[ "$REMOVE_DATA" -eq 1 ]]; then
