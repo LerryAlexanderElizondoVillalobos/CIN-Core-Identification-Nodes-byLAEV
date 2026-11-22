@@ -2,19 +2,20 @@
 
 **Linux is CIN's primary installation and runtime target. Lindesk Android is the intended mobile installation/control entry point.**
 
-Main is the authoritative runtime and installation structure for Linux. It contains the migrated portable Rust runtime, local web interface, CIN domain-core crate, local backend service, and Android/Termux integration source. Original root-level copies remain transitional until all dependencies, tests, and publication workflows are migrated.
+Main is the authoritative runtime and installation structure for Linux. It contains the migrated portable Rust runtime, local web interface, CIN domain-core crate, local backend service, Android/Termux integration source and declarative module registry. Original root-level copies remain transitional until all dependencies, tests, and publication workflows are migrated.
 
 ## Install
 ```bash
 bash Main/installation/linux/install.sh
-``
-The installer copies Main into `~/.local/share/cin`, builds the Rust local runtime and domain tools when Cargo is available, installs launchers, and optionally configures a systemd user service. It does not require root.
+```
+The installer copies Main into `~/.local/share/cin`, builds the Rust local runtime and domain tools when Cargo is available, installs `cin-main`, `cin-main-cli` and `cin-module` launchers, and optionally configures a systemd user service. It does not require root.
 
 ## Main tree
 - `runtime/linux-portable`: primary Rust Linux local runtime and lifecycle.
 - `interfaces/local-web`: embedded local web UI.
 - `core/domain`: document model, lifecycle, schema validation, Genesis audit/manifest, storage/recovery and command-line tools.
 - `core/runtime`: secondary Python control CLI.
+- `core/module-manager`: JSON module registry and CLI for declarative enablement.
 - `core/configuration`: local runtime configuration.
 - `installation/linux`: installer, uninstaller, portable package builder.
 - `installation/android-termux`: migrated Android/Termux integration and setup.
