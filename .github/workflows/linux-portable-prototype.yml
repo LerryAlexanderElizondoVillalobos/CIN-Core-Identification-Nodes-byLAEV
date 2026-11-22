@@ -5,6 +5,18 @@ on:
     branches: [main]
     paths:
       - "Main/runtime/linux-portable/**"
+      - "Main/core/domain/**"
+      - "Main/services/**"
+      - "Main/installation/linux/install.sh"
+      - "Main/installation/linux/uninstall.sh"
+      - "Main/installation/android-termux/**"
+      - "Main/tests/**"
+      - "Main/core/domain/**"
+      - "Main/services/**"
+      - "Main/installation/linux/install.sh"
+      - "Main/installation/linux/uninstall.sh"
+      - "Main/installation/android-termux/**"
+      - "Main/tests/**"
       - "Main/interfaces/local-web/**"
       - "Main/installation/linux/package-portable.sh"
       - ".github/workflows/linux-portable-prototype.yml"
@@ -42,6 +54,9 @@ jobs:
         uses: Swatinem/rust-cache@v2
         with:
           workspaces: Main/runtime/linux-portable
+      - name: Run Main migration smoke suite
+        run: bash Main/tests/smoke-test.sh
+
       - name: Run local web runtime tests
         working-directory: Main/runtime/linux-portable
         run: cargo test
