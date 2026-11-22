@@ -38,4 +38,5 @@ else
   echo "Node.js unavailable; skipping migrated JavaScript checks."
 fi
 python3 "$ROOT/Main/core/module-manager/test-module-manager.py"
+python3 "$ROOT/Main/tests/migration-layout-test.py"
 echo "CIN Main smoke checks passed."
