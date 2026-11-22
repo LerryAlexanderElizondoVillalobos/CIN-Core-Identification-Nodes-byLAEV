@@ -41,6 +41,8 @@ if [[ "$BUILD_RUNTIME" -eq 1 ]] && command -v cargo >/dev/null 2>&1; then
   install -m 0755 "$PREFIX/Main/runtime/linux-portable/target/release/cin-linux-main" "$PREFIX/bin/cin-linux-main"
   echo "Building CIN domain tools..."
   (cd "$PREFIX/Main/core/domain" && cargo build --release)
+  echo "Building CIN binary Merkle engine..."
+  (cd "$PREFIX/Main/engines/merkle-tree" && cargo build --release)
   for tool in cin-certificate-runner cin-genesis-manifest; do
     if [[ -x "$PREFIX/Main/core/domain/target/release/$tool" ]]; then
       install -m 0755 "$PREFIX/Main/core/domain/target/release/$tool" "$PREFIX/bin/$tool"
