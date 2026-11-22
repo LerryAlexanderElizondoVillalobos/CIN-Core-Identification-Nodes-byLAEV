@@ -1,26 +1,48 @@
 # Migration file mapping plan
 
-This plan governs the restructuring of the existing repository into Linux-first CIN Main.
+This plan tracks the existing repository tree (233 entries at the audit snapshot) into the Linux-first Main architecture.
 
-## Destination layers
-- `Main/installation/linux`: bootstrap, install/uninstall, packaging and installation tests.
-- `Main/installation/lindesk`: verified Android client integration docs/adapters.
-- `Main/installation/bridge`: transport-neutral protocol contract and operation envelopes.
-- `Main/core/runtime`: runtime entrypoint, process/service lifecycle and status.
-- `Main/core/configuration`: defaults, schemas and config loading.
-- `Main/core/module-manager`: module discovery, registry, dependencies and lifecycle.
-- `Main/engines`: independently defined cryptographic, ledger, Merkle, permissions and signing capabilities.
-- `Main/applications`: CIN applications and user-facing local workflows.
-- `Main/storage`: persistent data and state layout.
-- `Main/system/linux`: Linux integration, user services and platform helpers.
-- `Main/tests`: Main-specific unit/integration/installer tests.
+## Moved/copy-migrated with functional source
+| Existing source | Main destination | Status |
+|---|---|---|
+| `prototype/linux-runtime/Cargo.toml` | `Main/runtime/linux-portable/Cargo.toml` | Migrated; crate renamed to `cin-linux-main` |
+| `prototype/linux-runtime/src/main.rs` | `Main/runtime/linux-portable/src/main.rs` | Migrated; embedded UI path updated |
+| `prototype/linux-runtime/src/browser.rs` | `Main/runtime/linux-portable/src/browser.rs` | Migrated |
+| `prototype/linux-runtime/src/runtime_lifecycle.rs` | `Main/runtime/linux-portable/src/runtime_lifecycle.rs` | Migrated |
+| `prototype/dist/index.html` | `Main/interfaces/local-web/index.html` | Migrated |
+| `prototype/cin-core/**` | `Main/core/domain/**` | Migrated; package name kept `cin-core` |
 
-## Mapping policy
-1. Preserve current source paths while inventory and migration are in progress.
-2. Each component receives one disposition: KEEP (existing path), MOVE (destination recorded), REWRITE (new implementation required), ARCHIVE (historical source retained), or REMOVE (explicit rationale).
-3. Migration must record source path, destination path, dependencies, test coverage, and behavior parity.
-4. Root-level projects, workflows and research are not deleted simply because Main is created.
-5. Only remove legacy files after migrated behavior has passed validation and any references have been updated.
+## Main destinations
+- `Main/installation/linux`: install/uninstall/package and Linux acceptance.
+- `Main/installation/lindesk`: Android client integration documentation/adapter boundary.
+- `Main/installation/bridge`: request protocol and transport-neutral envelope.
+- `Main/runtime/linux-portable`: primary local Linux runtime.
+- `Main/interfaces/local-web`: embedded UI.
+- `Main/core/domain`: CIN domain crate.
+- `Main/core/runtime`: secondary Python control/status CLI.
+- `Main/core/configuration`: configuration.
+- `Main/core/module-manager`: module registration and lifecycle boundary.
+- `Main/engines`: independent domain capabilities.
+- `Main/applications`: application boundary.
+- `Main/storage`: persistent data organization.
+- `Main/system/linux`: Linux integration.
 
-## Current status
-The new Main scaffold exists. The full repository inventory and per-file mapping are pending follow-up commits.
+## Retain (temporary, referenced by legacy workflows)
+| Existing root path | Disposition | Reason |
+|---|---|---|
+| `.github/` | KEEP | CI and Pages publication workflows; paths updated where runtime tests migrated |
+| `Core Identification Node Github/` | KEEP | Published Pages source and publication workflow path |
+| `certificates/` | KEEP | Genesis certificate source until engine/application integration is completed |
+| `docs/` | KEEP | Canonical architecture, project, audit and technical documentation |
+| `e2e/` | KEEP | E2E suite; binary target now Main |
+| `examples/` | KEEP | Manifest/document examples |
+| `prototype/` | ARCHIVE/TRANSITION | Original Rust sources kept while compatibility validation runs |
+| `research/` | KEEP | Research/dialogues |
+| `schemas/` and `specifications/` | KEEP | Canonical contracts and schema sources |
+| `scripts/` | KEEP/TRANSITION | CI and existing package scripts retained while Main-owned scripts become authoritative |
+| `services/` | TRANSITION | Local backend and OAuth worker not yet migrated |
+| `termux-cin/` | TRANSITION | Android/Termux service not yet migrated into Main |
+| `tests/` | KEEP | Existing test coverage while paths are migrated |
+
+## Remaining file-level mapping
+Every remaining file receives a later mapping entry including destination, dependency, test evidence, and disposition. No files are removed simply to make the tree look clean. Legacy copies are removed only after Main builds/tests and path references are verified.
