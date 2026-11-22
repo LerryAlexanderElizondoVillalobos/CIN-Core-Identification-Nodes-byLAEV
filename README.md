@@ -1,5 +1,10 @@
 # CORE IDENTIFICATION NODES (CIN)
 
+## Linux-first Main migration
+
+CIN is undergoing a staged Main restructuring. Linux is the primary runtime/install target, with Lindesk Android planned as the mobile installation and control entry point. See [Main architecture](Main/README.md) and [migration status](Main/migration/STATUS.md).
+
+
 ## byLAEV — Decentralized Infrastructure Architecture
 
 **An Independent Technological Architecture for Human-Operated Nodes, Specialized Blockchains, Distributed Ledgers and Modular Digital Ecosystems.**
