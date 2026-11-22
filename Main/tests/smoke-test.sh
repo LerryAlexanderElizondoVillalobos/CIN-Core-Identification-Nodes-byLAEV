@@ -25,4 +25,11 @@ if command -v cargo >/dev/null 2>&1; then
   (cd "$ROOT/Main/runtime/linux-portable" && cargo test)
   (cd "$ROOT/Main/core/domain" && cargo test)
 fi
+(cd "$ROOT/Main/services/cin-local-backend" && npm test)
+node --check "$ROOT/Main/installation/android-termux/src/server.js"
+node --check "$ROOT/Main/installation/android-termux/src/github/oauth.js"
+node --check "$ROOT/Main/installation/android-termux/src/github/connector.js"
+node --check "$ROOT/Main/installation/android-termux/src/authorization/permission-engine.js"
+node --check "$ROOT/Main/installation/android-termux/src/signatures/signature-interface.js"
+node --check "$ROOT/Main/installation/android-termux/src/workspace/local-directory.js"
 echo "CIN Main smoke checks passed."
