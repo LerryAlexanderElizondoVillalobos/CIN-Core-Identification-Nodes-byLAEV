@@ -7,6 +7,7 @@ on:
       - "Main/runtime/linux-portable/**"
       - "Main/core/domain/**"
       - "Main/core/module-manager/**"
+      - "Main/engines/merkle-tree/**"
       - "Main/services/**"
       - "Main/installation/linux/**"
       - "Main/installation/android-termux/**"
@@ -59,6 +60,7 @@ jobs:
           workspaces: |
             Main/runtime/linux-portable
             Main/core/domain
+            Main/engines/merkle-tree
       - name: Run Main migration smoke suite
         run: bash Main/tests/smoke-test.sh
       - name: Test portable runtime
@@ -69,6 +71,9 @@ jobs:
         run: cargo build --release
       - name: Test domain core
         working-directory: Main/core/domain
+        run: cargo test
+      - name: Test Merkle engine
+        working-directory: Main/engines/merkle-tree
         run: cargo test
       - name: Build domain core tools
         working-directory: Main/core/domain
