@@ -1,27 +1,34 @@
 # CIN Main — Linux-first installation and runtime
 
-CIN Main is being restructured around **Linux as the primary runtime environment** and **Lindesk on Android as the intended installation/control entry point**.
+**Linux is CIN's primary installation and runtime target. Lindesk Android is the intended mobile installation/control entry point.**
 
-## Roles
-- Linux host: runs CIN, local data, services, and engines.
-- Lindesk Android: initiates and supervises the installation/control workflow. Its transport/API is not assumed; integration remains behind a documented bridge contract until verified.
-- Main: installation lifecycle, runtime configuration, service/module lifecycle, and CLI entry points.
-- Engines and applications: separately installable capabilities that Main manages.
+Main is the authoritative runtime and installation structure for Linux. It now contains the migrated portable Rust runtime, local web interface, and CIN domain-core crate. Existing root-level components remain transitional sources until their dependents and workflows are migrated.
 
-## Status
-This is the initial migration scaffold. It does not replace the existing legacy application tree yet. Existing functionality is retained until each component is inventoried, mapped, migrated, and validated.
-
-## Start here
-- [Installation for Linux](installation/linux/README.md)
-- [Lindesk bridge contract](installation/lindesk/README.md)
-- [Architecture and migration plan](architecture/README.md)
-- [Runtime](core/runtime/README.md)
-- [Configuration](core/configuration/README.md)
-- [Modules](core/module-manager/README.md)
-
-## Local development
-From the repository root:
+## Installation
 ```bash
-bash Main/installation/linux/install.sh --prefix "$HOME/.local/share/cin"
+bash Main/installation/linux/install.sh
 ```
-This installs a user-space copy and creates a user systemd service when systemd is available. It does not require root.
+The installer copies Main into `~/.local/share/cin`, builds the Rust local runtime and domain tools when Cargo is available, installs user launchers, and optionally configures systemd user service. It does not require root.
+
+## Main tree
+- `runtime/linux-portable`: Rust local web runtime and process lifecycle.
+- `interfaces/local-web`: local runtime UI.
+- `core/domain`: document model, lifecycle, schema validation, Genesis manifest and transactional local storage.
+- `core/runtime`: Python control CLI (secondary control/status utility).
+- `core/configuration`: local configuration.
+- `installation/linux`: install, uninstall, portable packaging.
+- `installation/lindesk` and `installation/bridge`: integration specification boundary; no unsupported Lindesk transport assumed.
+- `engines`: planned independent capability boundaries.
+- `applications`: application boundary.
+- `storage`: persistent data layout.
+- `migration`: inventory and move/retain/rewrite plan.
+
+## Build and test
+```bash
+bash Main/tests/smoke-test.sh
+(cd Main/runtime/linux-portable && cargo test && cargo build --release)
+(cd Main/core/domain && cargo test && cargo build --release)
+```
+
+## Existing paths
+The prior Rust prototypes, Android/Termux backend, local backend, published GitHub Pages application and specs remain in their source locations for compatibility during the staged transition. See [migration status](migration/STATUS.md) and [file mapping](migration/FILE-MAPPING-PLAN.md).
