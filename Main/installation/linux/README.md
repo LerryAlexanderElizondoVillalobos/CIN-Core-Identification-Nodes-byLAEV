@@ -1,10 +1,11 @@
 # Linux installation
 
-The initial installer is user-space and designed to be invoked from a Linux shell or from a future verified Lindesk deployment workflow.
+Linux is the primary runtime target. The installer works in user space and does not require root.
 
 ## Requirements
 - Linux
-- Python 3.9+
+- Python 3.9+ (configuration CLI)
+- Rust/Cargo for compiling the primary Rust runtime and domain tools
 - systemd user service is optional
 
 ## Install
@@ -13,14 +14,22 @@ bash Main/installation/linux/install.sh --prefix "$HOME/.local/share/cin"
 ```
 
 ## Options
-- `--prefix PATH`: installation directory (defaults to `$HOME/.local/share/cin`)
-- `--no-service`: do not install a systemd user service
-- `--help`: show usage
+- `--prefix PATH`: installation directory (default: `$HOME/.local/share/cin`)
+- `--no-build`: skip Rust compilation; only copy source and control CLI
+- `--no-service`: skip systemd user service setup
+- `--help`: show installer help
 
-The script copies Main into the destination, creates a user configuration directory and initializes a sample configuration if one does not exist. It avoids overwriting existing configuration.
+The installer copies Main, builds the Rust Linux runtime (cin-linux-main) and the domain command-line tools when Cargo is available, installs launchers in `~/.local/bin`, and optionally enables the systemd user service. It preserves an existing configuration.
+
+## Runtime commands
+```bash
+cin-main             # launch primary Linux local web runtime
+cin-main-cli status   # show configuration/runtime control status
+cin-main-cli init     # initialize configuration
+cin-main-cli serve    # secondary Python status HTTP endpoint
+```
 
 ## Service management
-If systemd user services are available:
 ```bash
 systemctl --user enable --now cin-main.service
 systemctl --user status cin-main.service
@@ -30,4 +39,4 @@ systemctl --user status cin-main.service
 ```bash
 bash Main/installation/linux/uninstall.sh --prefix "$HOME/.local/share/cin"
 ```
-Uninstallation removes the service and installed runtime files, but intentionally leaves user configuration/data unless `--remove-data` is explicitly specified.
+Uninstallation removes the service, launcher binaries, and installed Main source. User configuration is retained unless `--remove-data` is explicitly supplied.
