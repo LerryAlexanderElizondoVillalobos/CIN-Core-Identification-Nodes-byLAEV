@@ -67,6 +67,12 @@ exec python3 "$PREFIX/Main/core/runtime/cin_main.py" "\$@"
 EOF
 chmod 755 "$HOME/.local/bin/cin-main-cli"
 
+cat > "$HOME/.local/bin/cin-module" <<EOF
+#!/usr/bin/env bash
+exec python3 "$PREFIX/Main/core/module-manager/cin_module.py" "\\$@"
+EOF
+chmod 755 "$HOME/.local/bin/cin-module"
+
 if [[ "$INSTALL_SERVICE" -eq 1 ]] && command -v systemctl >/dev/null && systemctl --user >/dev/null 2>&1; then
   mkdir -p "$HOME/.config/systemd/user"
   cat > "$HOME/.config/systemd/user/cin-main.service" <<EOF
