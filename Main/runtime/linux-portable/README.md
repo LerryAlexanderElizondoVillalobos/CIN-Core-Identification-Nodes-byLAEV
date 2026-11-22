@@ -1,8 +1,8 @@
 # CIN Main — Linux Portable Runtime
 
-The Linux portable runtime is the primary local runtime entrypoint under the new Main architecture. It runs the local CIN web interface, exposes local lifecycle/status routes, and keeps persistence outside the extracted runtime package.
+The Rust local runtime is the primary Linux Main entrypoint. It launches a local HTTP server and serves the Main web interface. It is not the Genesis Lobby and does not issue production CIN records or credentials.
 
-## Build and tests
+## Build and test
 ```sh
 cargo test
 cargo build --release
@@ -13,16 +13,14 @@ cargo build --release
 ./target/release/cin-linux-main
 ```
 
-The runtime selects ports 1221, 2112, then an ephemeral loopback port. It binds only to `127.0.0.1`, prints `CIN_URL`, and attempts to open a browser. Data root precedence: `CIN_DATA_ROOT`, `XDG_DATA_HOME/cin`, `HOME/.local/share/cin`.
+Port selection order: 1221, 2112, then ephemeral. Binding is loopback-only (127.0.0.1). The runtime prints CIN_URL and attempts to launch the user's browser. Data root precedence: CIN_DATA_ROOT, XDG_DATA_HOME/cin, HOME/.local/share/cin.
 
 ## Routes
-- GET `/` and `/index.html`: local UI
-- GET `/health`: process health
-- GET `/api/status`: runtime/data root
-- GET `/api/lifecycle`: state/port/uptime/browser
-- POST `/api/runtime/shutdown`: graceful shutdown request
-- POST `/api/probe/write` and GET `/api/probe/read`: non-production persistence probe
+- GET / and /index.html: local web UI.
+- GET /health: process health.
+- GET /api/status: runtime and data root.
+- GET /api/lifecycle: state, port, uptime, browser.
+- POST /api/runtime/shutdown: graceful shutdown.
+- POST /api/probe/write, GET /api/probe/read: development persistence probe.
 
-The probe is only a runtime smoke capability; it is not a production document store. No production certificate issuance, record registration or private signing keys are included.
-
-The original prototype source remains temporarily at `prototype/linux-runtime` until migration acceptance and old CI references are replaced.
+The probe is not a production record store. The runtime does not include certificate issuance, node birth, registration, external signing or private key storage. The old source remains at prototype/linux-runtime temporarily.
