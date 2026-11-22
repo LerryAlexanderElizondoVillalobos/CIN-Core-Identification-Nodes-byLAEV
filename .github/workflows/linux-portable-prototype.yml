@@ -4,16 +4,16 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - "prototype/linux-runtime/**"
-      - "prototype/dist/**"
-      - "scripts/package-linux-zip.sh"
+      - "Main/runtime/linux-portable/**"
+      - "Main/interfaces/local-web/**"
+      - "Main/installation/linux/package-portable.sh"
       - ".github/workflows/linux-portable-prototype.yml"
   push:
     branches: [main]
     paths:
-      - "prototype/linux-runtime/**"
-      - "prototype/dist/**"
-      - "scripts/package-linux-zip.sh"
+      - "Main/runtime/linux-portable/**"
+      - "Main/interfaces/local-web/**"
+      - "Main/installation/linux/package-portable.sh"
       - ".github/workflows/linux-portable-prototype.yml"
   workflow_dispatch:
 
@@ -21,7 +21,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: cin-linux-prototype-${{ github.workflow }}-${{ github.ref }}
+  group: cin-linux-main-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -41,12 +41,12 @@ jobs:
       - name: Cache Rust build
         uses: Swatinem/rust-cache@v2
         with:
-          workspaces: prototype/linux-runtime
+          workspaces: Main/runtime/linux-portable
       - name: Run local web runtime tests
-        working-directory: prototype/linux-runtime
+        working-directory: Main/runtime/linux-portable
         run: cargo test
       - name: Build Linux runtime
-        working-directory: prototype/linux-runtime
+        working-directory: Main/runtime/linux-portable
         run: cargo build --release
       - name: Verify persistence across separate user processes
         run: |
@@ -54,13 +54,13 @@ jobs:
           TEST_HOME="$(mktemp -d)"
           trap 'rm -rf "$TEST_HOME"' EXIT
           export CIN_DATA_ROOT="$TEST_HOME/cin-data"
-          BIN="$GITHUB_WORKSPACE/prototype/linux-runtime/target/release/cin-linux-prototype"
+          BIN="$GITHUB_WORKSPACE/Main/runtime/linux-portable/target/release/cin-linux-main"
           "$BIN" --probe-write
           "$BIN" --probe-read | grep -q '^CIN_LOCAL_PERSISTENCE_PROBE_V1$'
           test -s "$CIN_DATA_ROOT/runtime-probe.record"
           test ! -e "$CIN_DATA_ROOT/runtime-probe.record.pending"
       - name: Assemble extracted-folder ZIP
-        run: bash scripts/package-linux-zip.sh prototype/linux-runtime/target/release/cin-linux-prototype
+        run: bash Main/installation/linux/package-portable.sh Main/runtime/linux-portable/target/release/cin-linux-main
       - name: Verify ZIP layout and checksum
         run: |
           set -euo pipefail
