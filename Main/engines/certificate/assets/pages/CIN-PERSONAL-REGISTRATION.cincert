@@ -1,0 +1,87 @@
+{
+  "certificate_id": "cin:certificate:personal-registration:v1",
+  "certificate_type": "cin.personal-registration",
+  "certificate_version": "1.2.0",
+  "title": "CIN Personal Registration and Credential Certificate (Later Issuance Stage)",
+  "status": "development-candidate",
+  "description": "Later issuance stage. Consumes a verified CIN Node Birth Record, the signed CIN Global Personal Document and Node Marriage agreement, an explicitly verified person-to-node association, and a separate Personal Issuance Authorization to allocate a CIN Personal Number and coordinate issuance of the corresponding CIN Personal Credential. This certificate is not the MetaMask personal-document creation certificate; that is CIN-GLOBAL-PERSONAL-DOCUMENT.cincert.",
+  "execution": {
+    "instruction": "RUN CERTIFICATE",
+    "runner": "cin-certificate-runner",
+    "action": "register-person-and-issue-cin-personal-document"
+  },
+  "input_profile": {
+    "node_birth": {
+      "document_type": "cin.node-birth-record",
+      "required_status": "BORN",
+      "required_reference": "verified_node_birth_record",
+      "required": "The complete authoritative Node Birth Record; a browser preview or PREVIEW_NOT_ISSUED record is insufficient."
+    },
+    "person_node_association": {
+      "document_type": "cin.person-node-association",
+      "required": true,
+      "requirement": "An explicit association event identifying the person record and the target CIN node. It must not be inferred from GitHub login, repository ownership, device possession or environmental metadata."
+    },
+    "authorization": {
+      "document_type": "cin.personal-issuance-authorization",
+      "required": true,
+      "requirement": "A separately verified authorization for the exact personal-registration operation, subject and node scope."
+    }
+  },
+  "processing": {
+    "steps": [
+      "Validate and resolve the referenced authoritative Node Birth Record.",
+      "Validate the explicit person-to-node association event.",
+      "Verify the separate personal-issuance authorization and issuer trust.",
+      "Allocate a CIN Personal Number under the approved allocation profile.",
+      "Create and persist the CIN Personal Registration Record referencing the Node Birth Record.",
+      "Pass the registration record to the Credential Issuer for CIN Personal Credential creation, signature, storage and independent verification."
+    ],
+    "github_operator_role": "The linked GitHub account is recorded only as the operator/actor who initiated the workflow. It is not treated as proof of a person's civil attributes or as the person-node association."
+  },
+  "output_profile": {
+    "registration_document_type": "cin.personal-registration",
+    "registration_schema_version": "1.0.0",
+    "personal_number_field": "cin_personal_number",
+    "credential_document_type": "cin.personal-credential",
+    "credential_schema_version": "1.0.0",
+    "required_references": [
+      "node_birth_record.document_id",
+      "node_birth_record.cin_bid",
+      "person_node_association.document_id",
+      "personal_issuance_authorization.document_id"
+    ],
+    "personal_registration_document_id_field": "personal_registration_document_id",
+    "personal_credential_document_id_field": "personal_credential_document_id",
+    "header_projection_fields": [
+      "cin_personal_number",
+      "cin_personal_registration_id",
+      "cin_personal_credential_id",
+      "personal_registration_status",
+      "personal_credential_status"
+    ],
+    "publication_rule": "Only publish the personal number or credential references after an explicit operator publication decision. The full personal registration document and credential remain in the approved private storage scope by default."
+  },
+  "allocation": {
+    "initial_supported_status": "PERSONAL_REGISTERED_LOCAL",
+    "globally_reserved_status": "PERSONAL_NUMBER_RESERVED",
+    "global_uniqueness_claim": "Not permitted without a verified reservation from a defined coordinating registry.",
+    "algorithm_profile": "Pending dedicated specification and approval; implementations must not invent a number-generation formula."
+  },
+  "credential": {
+    "issuer_profile": "Required",
+    "signer": "External signer interface or separately provisioned signer",
+    "signature_status_before_signing": "NOT_SIGNED",
+    "verification": "Independent schema, digest, signature, issuer trust, authorization and reference checks",
+    "private_key_policy": "No private signing key may be embedded in this certificate, the Lobby, the repository or the portable package."
+  },
+  "operational_boundaries": [
+    "Node Birth and Personal Registration are distinct lifecycle events.",
+    "The CIN Personal Number is not the CIN-NID and is not derived by treating the Node Birth Record as a person's attributes.",
+    "A GitHub account link authenticates the operator for repository operations; it does not register a person.",
+    "A local allocation must not be represented as globally unique or reserved.",
+    "A hash is not a signature, authorization, proof of personhood or proof of factual truth.",
+    "The full personal registration record and credential must not be committed to a public repository unless the operator explicitly selects and confirms the fields intended for public disclosure.",
+    "The certificate is a declarative candidate; it does not itself provide the allocator, authorization authority, signer or credential verifier."
+  ]
+}
