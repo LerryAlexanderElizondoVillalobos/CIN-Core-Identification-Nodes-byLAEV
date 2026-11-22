@@ -4,17 +4,17 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - "prototype/linux-runtime/**"
-      - "prototype/dist/**"
-      - "scripts/package-linux-zip.sh"
+      - "Main/runtime/linux-portable/**"
+      - "Main/interfaces/local-web/**"
+      - "Main/installation/linux/package-portable.sh"
       - "e2e/**"
       - ".github/workflows/linux-desktop-e2e.yml"
   push:
     branches: [main]
     paths:
-      - "prototype/linux-runtime/**"
-      - "prototype/dist/**"
-      - "scripts/package-linux-zip.sh"
+      - "Main/runtime/linux-portable/**"
+      - "Main/interfaces/local-web/**"
+      - "Main/installation/linux/package-portable.sh"
       - "e2e/**"
       - ".github/workflows/linux-desktop-e2e.yml"
   workflow_dispatch:
@@ -41,15 +41,15 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
 
       - name: Run runtime unit tests
-        working-directory: prototype/linux-runtime
+        working-directory: Main/runtime/linux-portable
         run: cargo test
 
       - name: Build local web runtime
-        working-directory: prototype/linux-runtime
+        working-directory: Main/runtime/linux-portable
         run: cargo build --release
 
       - name: Package portable ZIP
-        run: bash scripts/package-linux-zip.sh prototype/linux-runtime/target/release/cin-linux-prototype
+        run: bash Main/installation/linux/package-portable.sh Main/runtime/linux-portable/target/release/cin-linux-main
 
       - name: Verify package checksum and layout
         run: |
