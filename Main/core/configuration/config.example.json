@@ -1,0 +1,15 @@
+{
+  "runtime": {
+    "bind": "127.0.0.1",
+    "port": 8765,
+    "service_name": "cin-main"
+  },
+  "installation": {
+    "prefix": "~/.local/share/cin",
+    "client": "lindesk-android",
+    "bridge_status": "specification-only"
+  },
+  "modules": {
+    "enabled": []
+  }
+}
