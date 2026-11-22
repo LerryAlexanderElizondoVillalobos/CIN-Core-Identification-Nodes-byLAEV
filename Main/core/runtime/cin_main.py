@@ -33,7 +33,7 @@ def cmd_init(args):
     if args.config.exists() and not args.force:
         print(f"Config already exists: {args.config} (use --force to replace)")
         return
-    template = Path(__file__).resolve().parents[1] / "configuration" / "config.example.json"
+    template = Path(__file__).resolve().parents[2] / "core" / "configuration" / "config.example.json"
     args.config.write_text(template.read_text(encoding="utf-8"), encoding="utf-8")
     print(f"Initialized configuration: {args.config}")
 
