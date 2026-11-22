@@ -1,11 +1,19 @@
 [package]
-name = "cin-domain-core"
+name = "cin-core"
 version = "0.1.0"
 edition = "2021"
 license = "MIT"
 
 [lib]
 path = "src/lib.rs"
+
+[[bin]]
+name = "cin-certificate-runner"
+path = "src/bin/cin-certificate-runner.rs"
+
+[[bin]]
+name = "cin-genesis-manifest"
+path = "src/bin/cin-genesis-manifest.rs"
 
 [dependencies]
 serde = { version = "1", features = ["derive"] }
