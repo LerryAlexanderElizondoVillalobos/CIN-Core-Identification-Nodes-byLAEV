@@ -5,6 +5,8 @@ echo "[CIN Main] Testing and building Linux runtime"
 (cd "$ROOT/runtime/linux-portable" && cargo test && cargo build --release)
 echo "[CIN Main] Testing and building domain core"
 (cd "$ROOT/core/domain" && cargo test && cargo build --release)
+echo "[CIN Main] Testing and building Merkle engine"
+(cd "$ROOT/engines/merkle-tree" && cargo test && cargo build --release)
 echo "[CIN Main] Testing module manager"
 python3 "$ROOT/core/module-manager/test-module-manager.py"
 echo "[CIN Main] Testing local service"
