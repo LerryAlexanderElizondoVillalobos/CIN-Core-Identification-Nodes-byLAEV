@@ -229,6 +229,8 @@ Dependency direction:
 
 ## 6. Historical preservation and migration policy
 
+**Current branch state:** historical snapshots of `prototype/cin-core/` and `prototype/linux-runtime/` are present under `HISTORIAL/prototypes/`. Main copies are present at `Main/core/` and `Main/bootstrap/linux-runtime/` respectively. The original source paths remain unchanged. The Linux runtime copy is transitional and still requires application-service, authoritative-storage and Lobby integration. The GitHub Pages Lobby has not yet been copied into HISTORIAL or integrated into Main.
+
 The following existing material is migration input and must be inventoried before any move:
 - `prototype/cin-core/` Rust prototype and its current build/test references;
 - `prototype/linux-runtime/` Linux/Tauri feasibility prototype;
