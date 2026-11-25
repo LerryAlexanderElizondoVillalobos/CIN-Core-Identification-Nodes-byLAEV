@@ -266,7 +266,7 @@ Every module and feature follows the same gates:
 
 Evidence gates are **Specified → Implemented → Tested → Integrated and validated**. Documentation checks alone do not prove runtime behavior.
 
-## 8. Directory creation and migration phases
+## 8. Directory creation and migration phases\n\n**Execution alignment:** the repository's existing `CIN_MASTER_IMPLEMENTATION_WORKPLAN.md` P0–P12 gates remain the detailed dependency authority. This reorganization does not bypass P0 runtime/data-root decisions, P2 storage acceptance or P3 cryptography/trust requirements. The copied Genesis code is a preserved first vertical slice with its documented prototype limits; it is not production Genesis certification.
 
 ### R0 — Baseline and archive map
 Deliverables: inventory, baseline commit reference, migration register and HISTORIAL policy.
