@@ -40,7 +40,7 @@ Package verification → portable extraction and launch → environment audit �
 | `communication/` | Local API and Lindesk bridge | Defined local communication contract |
 | `system/linux/` | Linux platform adapters | Linux environment/filesystem adapter |
 
-## Architectural rules
+## Current implementation layout\n\nThe first Rust implementation is consolidated in `Main/core/` as one crate. Its current internal modules include document envelopes/validation, schema validation, DataRoot, local storage, recovery inspection, lifecycle transitions and Genesis. The root-level directory map expresses longer-term ownership boundaries; do not duplicate these modules into parallel implementations until an extraction Issue defines the interface and migration. The portable runtime and published web Lobby remain separate migration inputs for now.\n\n## Architectural rules
 
 1. Genesis Manifest, Node Birth Record and personal-registration credential are distinct artifacts.
 2. Package verification, extraction, node birth, personal registration and network admission are distinct lifecycle events.
