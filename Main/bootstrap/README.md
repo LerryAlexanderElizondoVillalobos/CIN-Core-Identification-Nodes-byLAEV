@@ -4,7 +4,7 @@
 
 Owns the portable CIN package lifecycle: package metadata/origin verification, extraction layout, launch orchestration and handoff into application services.
 
-The existing Linux runtime is currently a separate prototype at `prototype/linux-runtime/`. Its HTTP/browser shell and local persistence probe are not yet the authoritative CIN bootstrap or record store. Preserve it while Main's runtime decision and acceptance tests are completed.
+A preserved copy of the existing Linux runtime prototype is present at `Main/bootstrap/linux-runtime/`; its original source remains at `prototype/linux-runtime/`, and a historical snapshot is retained under `HISTORIAL/prototypes/linux-runtime/`. This is a migration copy, not yet the authoritative CIN bootstrap or record store. Its HTTP/browser shell and local persistence probe must be integrated with Main/core through explicit application services before it can be called the CIN Linux Lobby.
 
 First functional slice:
 1. consume a versioned package manifest and archive;
