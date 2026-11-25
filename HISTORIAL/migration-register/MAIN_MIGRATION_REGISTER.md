@@ -16,7 +16,8 @@
 
 - H-001: the source crate has a historical snapshot at `HISTORIAL/prototypes/cin-core/` and a copy at `Main/core/`. The Main copy includes core exports, typed errors, lifecycle model, DataRoot, document envelope/validation, JSON Schema validator, storage repository/transactional store, recovery inspection, Genesis audit/manifest and both CLI runners. Original source remains at `prototype/cin-core/`. This is a ported copy, not yet CI-accepted.
 - Added `.github/workflows/main-core.yml` to run format, Clippy, check and unit tests against Main/core on PRs/pushes to main.
-- H-002: the Linux runtime has both a historical snapshot at `HISTORIAL/prototypes/linux-runtime/` and a preserved prototype copy at `Main/bootstrap/linux-runtime/`; the original source remains at `prototype/linux-runtime/`. The Main copy is not yet integrated with Main/core.\n- H-003: the GitHub Pages Lobby remains at `Core Identification Node Github/`; its archival snapshot and UI integration are still pending.
+- H-002: the Linux runtime has both a historical snapshot at `HISTORIAL/prototypes/linux-runtime/` and a preserved prototype copy at `Main/bootstrap/linux-runtime/`; the original source remains at `prototype/linux-runtime/`. The Main copy is not yet integrated with Main/core.
+- H-003: the GitHub Pages Lobby remains at `Core Identification Node Github/`; its archival snapshot and UI integration are still pending.
 
 ## Required fields for each future entry
 
@@ -35,4 +36,4 @@
 
 The repository already documents a portable ZIP execution model, package verification, Environment Audit, Genesis Manifest, separate Node Birth Record, separate personal registration and credential issuance, evidence provenance, profile/history and Main Lobby reconstruction. These contracts are migration inputs and must not be replaced by a simplified three-certificate flow without an explicit ADR.
 
-The current prototype paths are not moved by this register. They remain in place until their build and CI dependencies are migrated and parity is demonstrated.
+Original prototype paths remain in place. Historical snapshots and Main copies are preserved separately; source paths are not deleted until their build and CI dependencies are migrated and parity is demonstrated.
