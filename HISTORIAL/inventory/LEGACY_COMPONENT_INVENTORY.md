@@ -25,7 +25,7 @@
 - recovery inspection helper is currently test-gated;
 - no complete birth, personal registration, production signing, evidence, profile or Lobby implementation is proven by this crate alone.
 
-**Migration action:** copied the current crate source into `Main/core/` on the reorganization branch. Original source remains unchanged at its prior path. CI acceptance pending.
+**Migration action:** a historical snapshot exists at `HISTORIAL/prototypes/cin-core/`, and the current source modules have been copied into `Main/core/` on the reorganization branch. Original source remains unchanged at its prior path. CI acceptance pending.
 
 ## B. Linux local runtime prototype
 
@@ -41,7 +41,7 @@
 
 **Important boundary:** the runtime probe is not the CIN authoritative TransactionalStore and does not demonstrate Genesis or node-record persistence. The runtime must remain preserved until a new bootstrap/application integration replaces it.
 
-**Migration action:** keep source in place; inspect all UI/API consumers and run existing Linux E2E/packaging workflows before adapting it into `Main/bootstrap/` and `Main/lobby/`.
+**Migration action:** a historical snapshot exists at `HISTORIAL/prototypes/linux-runtime/` and a preserved prototype copy exists at `Main/bootstrap/linux-runtime/`. The original source remains at `prototype/linux-runtime/`. Inspect all UI/API consumers and run the Main-specific and existing Linux E2E/packaging workflows before integrating the runtime with Main/application and Main/lobby.
 
 ## C. GitHub Pages Genesis Lobby
 
