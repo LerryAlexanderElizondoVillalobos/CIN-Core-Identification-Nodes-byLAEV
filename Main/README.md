@@ -1,23 +1,25 @@
 # CIN Main
 
-**Mission:** build a Linux user-mode application that can run in a Linux desktop or virtualized Linux environment, reach a functional Lobby, and install dedicated engines from that Lobby.
+**Mission:** build a Linux user-mode application that runs inside supported Linux distributions, including distributions provided by the Lindesk Android APK environment, reaches a functional Lobby, and installs dedicated engines from that Lobby.
 
 ## Binding product direction
 
-1. Linux user mode only. CIN runs as an ordinary user-space process and does not require a custom kernel, kernel module, privileged daemon, or host operating-system replacement.
-2. Linux desktop and virtualization compatibility. The runtime must work within supported Linux desktop environments and Linux guests hosted by virtualization platforms. The exact Lindesk integration and virtualization targets will be specified in the environment contract before implementation.
-3. Lobby as the first complete user-facing destination. The initial product path ends when the user can launch CIN, reach the Lobby, inspect available engine packages, and install/manage engines through the engine manager.
-4. Engines are installable capabilities. The base runtime provides the lifecycle and integration contract; dedicated engines are separately packaged and installed components.
-5. Clean foundation. Previous implementations, languages, dependencies, and architecture decisions are historical references only. Nothing is inherited by default.
+1. Linux user mode only. CIN runs as an ordinary user-space process inside a Linux distribution. It does not require a custom kernel, kernel module, privileged daemon, or host operating-system replacement.
+2. Lindesk-on-Android compatibility. CIN must run inside a Linux distribution provided by the Lindesk Android APK. The expected chain is Android -> Lindesk -> Linux distribution -> CIN Main -> Lobby.
+3. Virtualization/isolation awareness. The exact mechanism Lindesk uses to provide Linux is not assumed. Main detects available user-space capabilities and does not presume a full virtual machine, root access, systemd, or direct Android APIs.
+4. Additional Linux compatibility. Keep the runtime portable to conventional Linux desktop and virtualized Linux environments where practical, without compromising the required Lindesk execution path.
+5. Lobby as the first complete user-facing destination. The user must be able to launch CIN, reach the Lobby, inspect available engine packages, and install/manage engines through the engine manager.
+6. Engines are installable capabilities. The base runtime provides the lifecycle and integration contract; dedicated engines are separately packaged and installed components.
+7. Clean foundation. Previous implementations, languages, dependencies, and architecture decisions are historical references only. Nothing is inherited by default.
 
 ## Runtime path
 
-Linux user process -> environment detection and compatibility layer -> local runtime services -> engine package manager -> Lobby.
+Android host -> Lindesk APK -> Linux distribution/environment -> CIN Linux user-mode runtime -> local services -> engine package manager -> Lobby.
 
 ## Scope boundary
 
-The first milestone is not a complete global network, certificate ecosystem, or domain-specific engine suite. It is a working Linux user-mode host that reaches the Lobby and can install a first demonstrator engine through a defined package lifecycle.
+The first milestone is a working Linux user-mode host in the Lindesk-provided Linux environment that reaches the Lobby and can install a first demonstrator engine. This is not an Android-native CIN APK and does not require CIN to control the host Android system.
 
 ## Design and implementation sequence
 
-See ARCHITECTURE.md, RUNTIME.md, ENVIRONMENT.md, ENGINE_SYSTEM.md, LOBBY.md, and ROADMAP.md. The implementation language and concrete virtualization integrations remain open until selected deliberately; no previous stack is presumed.
+See ARCHITECTURE.md, RUNTIME.md, ENVIRONMENT.md, ENGINE_SYSTEM.md, LOBBY.md, and ROADMAP.md. The implementation language and concrete Lindesk integration details remain open until the environment is inspected; no previous stack is presumed.
