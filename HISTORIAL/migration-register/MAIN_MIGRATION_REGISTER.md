@@ -4,7 +4,7 @@
 
 | ID | Current source | Intended archive location | Candidate Main owner | Initial disposition | Required evidence before removal |
 |---|---|---|---|---|---|
-| H-001 | `prototype/cin-core/` | `HISTORIAL/prototypes/cin-core/` | Multiple domain modules; assign file by file | ADAPT / REFERENCE pending inspection | Rust tests, dependency map, consumer search, behavior parity |
+| H-001 | `prototype/cin-core/` | Original preserved at source path; archive snapshot deferred until Main parity | `Main/core/` | PORTED to Main branch; CI acceptance pending | Main/core CI, source/consumer audit, behavior parity; only then archive/remove old path |
 | H-002 | `prototype/linux-runtime/` | `HISTORIAL/prototypes/linux-runtime/` | `Main/bootstrap/`, `Main/application/`, `Main/system/linux/`, `Main/lobby/` | ADAPT pending runtime review | Build, launch, close/reopen, persistence and package tests |
 | H-003 | `Core Identification Node Github/` | `HISTORIAL/prototypes/genesis-lobby/` | `Main/lobby/` and `Main/bootstrap/` | REFERENCE / ADAPT pending asset and workflow review | Asset inventory, route/link audit, behavior comparison |
 | H-004 | Existing CI workflows | `HISTORIAL/superseded-documentation/` only when replaced | `.github/workflows/` | KEEP ACTIVE | Replacement workflow passes same and expanded checks |
