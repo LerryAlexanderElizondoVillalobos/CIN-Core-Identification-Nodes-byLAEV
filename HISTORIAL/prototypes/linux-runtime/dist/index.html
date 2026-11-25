@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CIN — Local Web Runtime</title>
+<style>
+:root{color-scheme:dark;font-family:Inter,system-ui,sans-serif;background:#101827;color:#eef2f7}
+*{box-sizing:border-box}body{max-width:900px;margin:7vh auto;padding:0 22px}
+main{background:#1b293b;border:1px solid #35465d;border-radius:18px;padding:30px}
+h1{margin-top:0}p{line-height:1.6;color:#c5d0df}
+.status{display:flex;align-items:center;gap:10px;padding:12px 14px;background:#111e30;border-radius:10px}
+.dot{width:9px;height:9px;border-radius:50%;background:#eab308}
+button{padding:12px 17px;margin:14px 8px 8px 0;border:0;border-radius:9px;background:#dce7f5;color:#102033;font-weight:700;cursor:pointer}
+button.secondary{background:#34465f;color:#f4f7fb}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#0c1421;border-radius:10px;padding:16px;min-height:85px;color:#d9e5f4}
+small{color:#9aabc0}
+</style>
+</head>
+<body>
+<main>
+<h1>CIN — Portable Linux Runtime</h1>
+<p>Local web interface served by the CIN runtime. The service binds to loopback only and does not require an external network connection.</p>
+<div class="status"><span class="dot" id="dot"></span><span id="status">Connecting to local runtime…</span></div>
+<button id="write">Write persistence probe</button>
+<button class="secondary" id="read">Read persisted probe</button>
+<pre id="output">No operation executed.</pre>
+<small>Prototype v0.2.0 · Local HTTP · 127.0.0.1 · No production credentials or personal data</small>
+</main>
+<script>
+const statusEl=document.getElementById('status');
+const output=document.getElementById('output');
+async function request(path,options={}) {
+  const response=await fetch(path,{cache:'no-store',...options});
+  const body=await response.text();
+  if(!response.ok) throw new Error(body || response.statusText);
+  return body;
+}
+async function refreshStatus(){
+  try {
+    const value=await request('/api/status');
+    statusEl.textContent=value;
+    document.getElementById('dot').style.background='#22c55e';
+  } catch(error) {
+    statusEl.textContent='Local runtime unavailable: '+error.message;
+    document.getElementById('dot').style.background='#ef4444';
+  }
+}
+async function run(path,options){
+  output.textContent='Working…';
+  try { output.textContent=await request(path,options); }
+  catch(error) { output.textContent='Operation failed: '+error.message; }
+}
+document.getElementById('write').addEventListener('click',()=>run('/api/probe/write',{method:'POST'}));
+document.getElementById('read').addEventListener('click',()=>run('/api/probe/read'));
+refreshStatus();
+</script>
+</body>
+</html>
