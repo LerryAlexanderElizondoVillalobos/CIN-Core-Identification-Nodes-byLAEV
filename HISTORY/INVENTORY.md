@@ -4,9 +4,8 @@
 - Source branch: `main`
 - Source commit: `cf5b2761ba324fe97d1d1068e976ae0874949b41`
 - Source tree: `b956be3b2bd3f2d38ac98d802bb82b323d7a8fef`
-- Migration: path relocation using original Git blob objects.
-- Tracked files preserved: **176**
-- Archived workflow files: **9** (moved under `HISTORY/.github/workflows/`, outside GitHub's active workflow discovery path).
+- Tracked files relocated: **176**
+- Archived GitHub Actions workflow files: **9** (now under `HISTORY/.github/workflows/`, outside GitHub's active workflow discovery path).
 
 ## Preservation manifest
 
@@ -55,7 +54,7 @@
 | `Core Identification Node Github/index.html` | `HISTORY/Core Identification Node Github/index.html` | `6e543aac985d4d5c573fdd361a6412279944f764` | 18109 |
 | `Core Identification Node Github/manifest.webmanifest` | `HISTORY/Core Identification Node Github/manifest.webmanifest` | `13814b7f6785a140e7b68862fbf1cdb1a9be711d` | 541 |
 | `Core Identification Node Github/service-worker.js` | `HISTORY/Core Identification Node Github/service-worker.js` | `33c0357bd52382c7a14de986c2a34aa8c9725a19` | 2390 |
-| `HISTORY/README.md` | `HISTORY/RESET_PREPARATION/README.md` | `a7a9b2544c9c8b0150a2735d2e95165ebff89a77` | 786 |
+| `HISTORY/README.md` | `HISTORY/RESET_PREPARATION/ORIGINAL_README.md` | `a7a9b2544c9c8b0150a2735d2e95165ebff89a77` | 786 |
 | `LICENSE.md` | `HISTORY/LICENSE.md` | `45b2b44b7b5dc175227ddf6250b0896c567ac551` | 9115 |
 | `README.md` | `HISTORY/README.md` | `4446c468de229d0419251f12b199c6407be692b7` | 61515 |
 | `ROADMAP.md` | `HISTORY/ROADMAP.md` | `7a3f419b608a8fe9a0d824bce24591574a3fcce7` | 10487 |
@@ -191,4 +190,4 @@
 
 ## Integrity
 
-Every archived path points to the exact blob SHA recorded in the source tree. The archive commit will descend from the source commit, preserving the original Git history. This inventory covers all tracked files at the source commit, not untracked local files or external storage.
+Every archived path is mapped to the original Git blob SHA. The archive descends from the source commit, retaining original Git history. This inventory covers tracked files at the source commit; it does not include untracked local files or external storage.
