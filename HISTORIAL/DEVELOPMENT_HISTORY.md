@@ -2,15 +2,15 @@
 
 ## Superseded development cycle
 
-The previous Main reorganization, prototype migrations, Linux runtime copies, prior directory plan, CI additions and associated implementation decisions are considered superseded for the new development cycle.
+All development before the new Main strategy is retained as historical material. This includes previous architecture proposals, prototypes, implementation branches, merged changes and unmerged pull requests.
 
-They remain preserved in Git history and in the development branch:
+The previous Main reorganization and migration proposals are superseded. Their code and decisions are not presumed reusable or authoritative for the new Main.
 
-- Branch: `architecture/main-reorganization`
-- Draft PR: [#46 — Establish Main and migrate the existing Rust core foundation](https://github.com/LerryAlexanderElizondoVillalobos/CIN-Core-Identification-Nodes-byLAEV/pull/46)
-- Follow-up issue: [#47 — Audit and migrate the portable Linux runtime](https://github.com/LerryAlexanderElizondoVillalobos/CIN-Core-Identification-Nodes-byLAEV/issues/47)
+## Pull request archive
 
-The branch and PR are retained as historical records, not as the active implementation direction. Nothing from that cycle should be merged into the new Main by default.
+The complete inventory of pull requests returned by the repository listing is maintained in [PULL_REQUESTS/README.md](PULL_REQUESTS/README.md).
+
+At the time of this archival pass, GitHub reported **zero open pull requests** for this repository. All listed pull requests were already closed. Merged pull requests remain merged; unmerged pull requests remain closed. Closing a pull request does not delete its branch, commits, reviews or discussion.
 
 ## New development cycle
 
@@ -20,4 +20,4 @@ The new architecture, directory structure, product boundaries, workflows and imp
 
 ## Preservation rule
 
-Do not delete the historical branch, its commits, old pull requests, prototypes or previous documentation as part of starting the new Main. They are retained for traceability and selective reference.
+Do not delete historical branches, commits, old pull requests, prototypes or previous documentation as part of starting the new Main. They are retained for traceability and selective reference.
