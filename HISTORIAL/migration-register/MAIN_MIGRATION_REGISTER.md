@@ -12,7 +12,7 @@
 | H-006 | Existing schemas, examples and test vectors | Archive only superseded versions | `specifications/`, `Main/documents/` | KEEP / VERSION | Schema compatibility and consumer migration |
 | H-007 | Existing architecture and lifecycle specifications | Superseded copies only | `Documentation/` and `docs/` | KEEP AS SOURCE OF TRUTH UNTIL SUCCESSOR REVIEW | ADR, successor review and link validation |
 
-## Required fields for each future entry
+## Migration activity recorded on `architecture/main-reorganization`\n\n- H-001: copied the Rust crate manifest and current source modules from `prototype/cin-core/` into `Main/core/`. The copied slice includes core exports, typed errors, lifecycle model, DataRoot, document envelope/validation, JSON Schema validator, storage repository/transactional store, recovery inspection, Genesis audit/manifest and both existing CLI runners. Source paths remain intact. This is a ported copy, not yet accepted or proven behavior-equivalent.\n- Added `.github/workflows/main-core.yml` to run format, Clippy, check and unit tests against Main/core on PRs/pushes to main.\n- H-002 and H-003 remain preserved in their existing paths; no runtime or Pages files have been moved.\n\n## Required fields for each future entry
 
 - Source path and source commit.
 - Archive path and archive commit.
