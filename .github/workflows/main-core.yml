@@ -1,0 +1,42 @@
+name: CIN Main Core
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "Main/core/**"
+      - ".github/workflows/main-core.yml"
+  push:
+    branches: [main]
+    paths:
+      - "Main/core/**"
+      - ".github/workflows/main-core.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cin-main-core-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  rust-core:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Install stable Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - name: Check formatting
+        run: cargo fmt --manifest-path Main/core/Cargo.toml --all -- --check
+      - name: Run Clippy
+        run: cargo clippy --manifest-path Main/core/Cargo.toml --all-targets -- -D warnings
+      - name: Compile
+        run: cargo check --manifest-path Main/core/Cargo.toml --all-targets
+      - name: Unit tests
+        run: cargo test --manifest-path Main/core/Cargo.toml --all-targets
