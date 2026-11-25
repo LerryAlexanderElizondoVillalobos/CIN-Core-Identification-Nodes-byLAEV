@@ -55,7 +55,7 @@ impl MerkleTree {
     }
 
     pub fn leaf_count(&self) -> usize {
-        self.levels.first().map_or(0, Vec::len)
+        if self.levels.len() == 1 && self.levels[0].len() == 1 && self.levels[0][0] == hash_empty() { 0 } else { self.levels.first().map_or(0, Vec::len) }
     }
 
     pub fn proof(&self, leaf_index: usize) -> Option<MerkleProof> {
