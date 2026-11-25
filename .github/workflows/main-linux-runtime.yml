@@ -1,0 +1,40 @@
+name: CIN Main Linux Runtime Prototype
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "Main/bootstrap/linux-runtime/**"
+      - "Main/bootstrap/dist/**"
+      - ".github/workflows/main-linux-runtime.yml"
+  push:
+    branches: [main]
+    paths:
+      - "Main/bootstrap/linux-runtime/**"
+      - "Main/bootstrap/dist/**"
+      - ".github/workflows/main-linux-runtime.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cin-main-linux-runtime-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  linux-runtime:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+      - name: Run runtime tests
+        working-directory: Main/bootstrap/linux-runtime
+        run: cargo test
+      - name: Build runtime
+        working-directory: Main/bootstrap/linux-runtime
+        run: cargo build --release
