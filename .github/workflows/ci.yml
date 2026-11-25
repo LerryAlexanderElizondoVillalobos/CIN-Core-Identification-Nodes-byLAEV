@@ -1,110 +1,21 @@
 name: CIN Continuous Integration
 
+# Automatic CI is intentionally paused while Main is rebuilt from a clean
+# foundation. Keep manual dispatch available for an explicitly requested
+# diagnostic run; no legacy Lobby or certificate tests run in this phase.
 on:
-  pull_request:
-    branches: [main]
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
   contents: read
 
-concurrency:
-  group: cin-ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
-  repository-validation:
-    name: Repository and documentation validation
+  paused:
+    name: Automatic validation paused for Main reset
     runs-on: ubuntu-latest
     steps:
-      - name: Check out source
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-        with:
-          persist-credentials: false
-      - name: Validate repository baseline
+      - name: Report reset state
         run: |
-          set -euo pipefail
-          test -s README.md
-          test -s CONTRIBUTING.md
-          test -s docs/project/PROJECT_STATUS_AND_ROADMAP.md
-          test -d docs
-          test -d specifications
-          test -d .github/workflows
-          echo "Repository baseline is present."
-      - name: Validate Markdown references
-        run: python3 scripts/ci/validate_repository.py
-
-  workflow-syntax:
-    name: Workflow YAML syntax
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out source
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-        with:
-          persist-credentials: false
-      - name: Parse workflow YAML
-        run: |
-          ruby -e 'require "yaml"; Dir.glob(".github/workflows/*.yml").each { |path| YAML.load_file(path); puts "Valid YAML: #{path}" }'
-
-  cin-lobby-validation:
-    name: CIN Lobby and certificate validation
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out source
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-        with:
-          persist-credentials: false
-      - name: Check Lobby JavaScript syntax
-        run: |
-          set -euo pipefail
-          node --check "Core Identification Node Github/cin-github-lobby.js"
-          node --check "Core Identification Node Github/cin-github-config.js"
-          node --check "Core Identification Node Github/service-worker.js"
-          cp "services/cin-github-oauth-worker/src/index.js" /tmp/cin-github-oauth-worker.mjs
-          node --check /tmp/cin-github-oauth-worker.mjs
-      - name: Validate certificates and Lobby wiring
-        run: |
-          python3 - <<'PY'
-          import json
-          import pathlib
-          import re
-
-          root = pathlib.Path("Core Identification Node Github")
-          genesis = json.loads((root / "CIN-GENESIS-ENVIRONMENT.cincert").read_text())
-          birth = json.loads((root / "CIN-NODE-BIRTH.cincert").read_text())
-          personal = json.loads((root / "CIN-PERSONAL-REGISTRATION.cincert").read_text())
-          config = (root / "cin-github-config.js").read_text()
-          lobby_js = (root / "cin-github-lobby.js").read_text()
-          html = (root / "index.html").read_text()
-          worker = pathlib.Path("services/cin-github-oauth-worker/src/index.js").read_text()
-          service_worker = (root / "service-worker.js").read_text()
-
-          assert genesis["certificate_type"] == "cin.genesis-environment"
-          assert "github_repository" in genesis["execution_profiles"]
-          assert birth["certificate_type"] == "cin.node-birth"
-          assert birth["output_profiles"]["github_repository_candidate"]["document_type"] == "cin.node-birth-candidate"
-          assert birth["output_profiles"]["local_package"]["document_type"] == "cin.node-birth-record"
-          assert personal["certificate_type"] == "cin.personal-registration"
-          assert personal["input_profile"]["person_node_association"]["required"] is True
-          assert personal["input_profile"]["authorization"]["required"] is True
-
-          assert 'id="connectGithubButton"' in html
-          assert 'src="./cin-github-lobby.js"' in html
-          assert 'src="./cin-github-config.js"' in html
-          assert "1458540194" in config
-          assert "CIN_GITHUB_APP_CLIENT_SECRET" in worker
-          assert "cin-github-lobby.js" in service_worker
-          assert "PREVIEW_NOT_ISSUED" in lobby_js
-          assert "cin.node-birth-candidate" not in lobby_js  # the output type is loaded from Certificate 2
-
-          ids = set(re.findall(r'id="([^"]+)"', html))
-          referenced = set(re.findall(r'\$\("([^"]+)"\)', lobby_js))
-          missing = sorted(referenced - ids)
-          assert not missing, f"Lobby JavaScript references missing HTML IDs: {missing}"
-
-          assert "localStorage" not in lobby_js
-          assert not re.search(r'setItem\([^,]*(accessToken|token)', lobby_js, re.I)
-          print("CIN Lobby, certificates, public configuration and browser storage boundaries are valid.")
-          PY
+          echo "CIN Main reset is in progress."
+          echo "Legacy validation suites are intentionally not executed."
+          echo "Re-enable CI only after the new Main baseline and acceptance scope are approved."
