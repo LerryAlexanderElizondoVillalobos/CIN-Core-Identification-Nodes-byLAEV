@@ -210,7 +210,8 @@
     $("generateBirthButton").disabled=!connected || !genesisManifest;
   }
 
-  function disconnect() {\n    fetch((cfg.localBackendUrl||"http://127.0.0.1:8787")+"/v1/session/disconnect",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"}).catch(()=>{});
+  function disconnect() {
+    fetch((cfg.localBackendUrl||"http://127.0.0.1:8787")+"/v1/session/disconnect",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"}).catch(()=>{});
     accessToken=null; tokenExpiresAt=0; operator=null;
     renderConnection();
     setStatus("githubStatus","Disconnected. No GitHub token is stored in browser storage.","info");
