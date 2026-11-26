@@ -110,7 +110,7 @@ jobs:
           test -x /home/cin-test/.local/opt/cin-main-lobby/AppDir/AppRun
           test -f /home/cin-test/.local/share/applications/cin.desktop
           test -f /home/cin-test/.local/share/icons/hicolor/256x256/apps/cin.png
-          if sh /tmp/cin-installer-test/CIN-Debian13-Installer/install-user.sh; then echo "Root install was unexpectedly accepted"; exit 1; fi
+          if sh /tmp/cin-deb-installer/opt/cin-installer/install-user.sh "$PWD/dist/CIN.deb"; then echo "Root install was unexpectedly accepted"; exit 1; fi
           touch /home/cin-test/.local/opt/cin-main-lobby/AppDir/previous-install.test
           mkdir -p /tmp/cin-broken-installer
           cp dist/CIN.deb /tmp/cin-broken-installer/
