@@ -6,8 +6,9 @@ on:
     paths:
       - "MAIN/app/launcher/**"
       - "MAIN/app/settings/deployment/**"
-      - "MAIN/app/settings/network_connectivity.py"
+      - "MAIN/app/settings/network_access.py"
       - "MAIN/tests/settings/**"
+      - "MAIN/app/settings/network_access.py"
       - "MAIN/installer/linux/**"
       - "MAIN/packaging/deb/**"
       - "MAIN/docs/settings/**"
@@ -87,6 +88,7 @@ jobs:
           dpkg-deb --extract dist/CIN.deb /tmp/cin-package-inspect
           test -f /tmp/cin-package-inspect/opt/cin-main-lobby/cin_main.py
           test -f /tmp/cin-package-inspect/opt/cin-main-lobby/settings/deployment/engine.py
+          test -f /tmp/cin-package-inspect/opt/cin-main-lobby/settings/network_access.py
           bash -n dist/install-user.sh
           bash -n dist/uninstall-user.sh
       - name: Upload package candidate
