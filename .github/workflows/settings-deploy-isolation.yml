@@ -76,9 +76,17 @@ jobs:
           APPIMAGE_EXTRACT_AND_RUN: "1"
           GDK_BACKEND: x11
         run: |
-          dbus-run-session -- xvfb-run -a "dist/Core_Identification_Nodes-${{ matrix.arch }}.AppImage" --run --smoke-test
+          dbus-run-session -- xvfb-run -a "dist/Core_Identification_Nodes-aarch64.AppImage" --run --smoke-test
       - name: Build Debian ARM64 package
         run: bash MAIN/installer/linux/build-deb-arm64.sh
+      - name: Validate Debian ARM64 package payload
+        run: |
+          set -euo pipefail
+          DEB="dist/Core_Identification_Nodes-arm64.deb"
+          test -s "$DEB"
+          test "$(dpkg-deb -f "$DEB" Architecture)" = "arm64"
+          dpkg-deb --contents "$DEB" | grep -q '/opt/cin/AppDir/AppRun'
+          dpkg-deb --contents "$DEB" | grep -q '/usr/bin/cin-main-lobby'
       - name: Upload ARM64 AppImage
         uses: actions/upload-artifact@v4
         with:
