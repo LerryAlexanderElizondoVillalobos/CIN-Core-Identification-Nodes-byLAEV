@@ -16,6 +16,9 @@ OUTPUT_PATH="$OUTPUT_DIR/CIN.deb"
 
 install -d "$PACKAGE_ROOT/opt/cin-main-lobby" "$OUTPUT_DIR"
 install -m 0644 MAIN/app/launcher/cin_main.py "$PACKAGE_ROOT/opt/cin-main-lobby/cin_main.py"
+if [[ -d MAIN/app/settings ]]; then
+  cp -a MAIN/app/settings "$PACKAGE_ROOT/opt/cin-main-lobby/"
+fi
 dpkg-deb --build --root-owner-group "$PACKAGE_ROOT" "$OUTPUT_PATH"
 
 install -m 0755 MAIN/installer/linux/install-user.sh "$OUTPUT_DIR/install-user.sh"
