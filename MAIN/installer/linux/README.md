@@ -1,22 +1,30 @@
-# Core Identification Nodes — Linux AppImage
+# Core Identification Nodes — Linux ARM64 packages
 
-**Official Linux format:** AppImage  
-**Build targets:** x86_64 and AArch64  
-**Installation model:** graphical, per-user, no root and no sudo.
+**Release architecture:** ARM64 / AArch64 only  
+**Portable installer:** AppImage, graphical and per-user  
+**Debian package:** .deb, for Debian/Ubuntu ARM64 systems
 
-## First launch
+## Supported execution environments
 
-1. Download the AppImage matching the computer's CPU architecture.
-2. In the file manager, open Properties → Permissions and enable execution if the download is not already executable. Wording varies by desktop.
-3. Double-click the AppImage.
-4. Choose **Install for this user** or **Run without installing**.
-5. The installer copies the self-contained AppImage to `~/Applications`, creates a desktop launcher in `~/.local/share/applications`, and launches CIN Main Lobby.
+CIN targets Linux ARM64 systems, whether installed directly on ARM64 hardware or inside an ARM64 virtual machine. The guest operating system must expose an ARM64 userspace and a compatible Linux kernel. Virtualization itself is not a requirement. An x86_64 guest or host is not a supported target for this release.
 
-The user-facing flow does not use a terminal, root, sudo, dpkg, apt, or administrator authentication. No system directories are modified.
+The AppImage is the recommended distribution for user-mode installation. It installs under ~/Applications, creates a launcher under ~/.local/share/applications, and does not require root, sudo, apt, dpkg, or administrator authentication. If the downloaded file is not marked executable, enable execution in the file manager's Properties → Permissions panel.
 
-## Uninstall
+## AppImage installation
 
-Run the per-user uninstaller from the desktop user's application launcher or execute `~/.local/bin/cin-uninstall`. It removes the installed AppImage and desktop launcher while preserving CIN user data and configuration.
+1. Download Core_Identification_Nodes-aarch64.AppImage.
+2. Mark the file executable if the desktop environment has not done so.
+3. Double-click it.
+4. Select **Install for this user** or **Run without installing**.
+5. The installed launcher opens CIN Main Lobby.
+
+Uninstall the per-user copy with ~/.local/bin/cin-uninstall. CIN user data and configuration are preserved.
+
+## Debian package
+
+Download Core_Identification_Nodes-arm64.deb only on Debian/Ubuntu ARM64. It installs the AppImage payload under /opt/cin and adds a system desktop entry.
+
+**Important privilege distinction:** a conventional Debian package installation through apt, dpkg, or a graphical package manager requires administrator authorization because it writes to system locations. The installed CIN application itself runs as the logged-in user and does not require root. If absolutely no administrator authentication is available, use the AppImage instead; a normal .deb cannot provide a true system package installation without those privileges.
 
 ## Included application
 
@@ -26,8 +34,6 @@ The distribution includes Main Lobby, Settings, the Deploy engine, and the CIN n
 
 The network switch is application-scoped. It may report OFF only when the current Linux system actually enforces the CIN scope policy. Systems without the required systemd user manager/cgroup support must show the control as unavailable; CIN must not imply that host-wide network access was disabled.
 
-## Portability
+## Release validation
 
-AppImage is intended for mainstream Linux distributions. CIN builds separate x86_64 and AArch64 artifacts. Alpine/musl, old glibc environments, unsupported architectures, and headless systems are not part of the initial release target. Each supported artifact must pass clean-environment runtime tests before publication.
-
-The first release is not considered complete merely because the AppImage file was generated. GTK4/PyGObject libraries and introspection metadata must work from the bundled payload without requiring host-installed Python, PyGObject, or GTK.
+A generated file is not considered a release until the ARM64 build passes source tests, payload inspection, GTK4/PyGObject runtime tests, graphical first-run installation, Main Lobby navigation, and uninstall validation. The Debian package must also report Architecture: arm64 and pass dpkg-deb metadata and contents checks.
