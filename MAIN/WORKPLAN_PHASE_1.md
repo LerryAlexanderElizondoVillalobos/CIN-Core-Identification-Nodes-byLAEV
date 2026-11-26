@@ -2,7 +2,9 @@
 
 ## Milestone objective
 
-Deliver a real, downloadable Debian package named `CIN.deb` that can be installed by the project operator in a Debian-compatible Linux ARM64 environment. The installed application must open the native CIN Main Lobby and demonstrate navigation to the informational Settings screen and back.
+Deliver a downloadable `CIN.deb` application payload and a user-space installer bundle. A normal desktop user must be able to install, launch, navigate, update and remove CIN without root privileges, `sudo`, system package-manager installation or writes to system directories.
+
+The installed application must open the native CIN Main Lobby and demonstrate navigation to the informational Settings screen and back.
 
 This milestone is an installer and application-bootstrap milestone. It does not claim that the founding certificate engines, node creation, Enter, Import or the CIN Package Engine are implemented.
 
@@ -10,13 +12,15 @@ This milestone is an installer and application-bootstrap milestone. It does not 
 
 - **UI:** GTK 4 native desktop interface through Python GObject Introspection (`python3-gi`).
 - **Application language:** Python 3.
-- **Package:** Debian `.deb`, initially named `CIN.deb`.
-- **Package architecture:** `all`, because the application code is architecture-independent Python. GTK 4 and Python are installed from the target distribution's native package repositories. The intended qualification target remains Linux ARM64 / AArch64.
+- **Package:** Debian `.deb` application payload named `CIN.deb`.
+- **Package architecture:** `all`, because the application code is architecture-independent Python.
+- **Runtime prerequisites:** Python 3, PyGObject and GTK 4 must already be available to the user from the target Linux distribution. The installer checks these prerequisites and does not install system dependencies.
+- **Installation model:** extract the Debian archive with `dpkg-deb --extract` and copy the application into the current user's XDG home-directory space. Do not use `apt install`, `dpkg -i`, root shells or `sudo`.
+- **User paths:** application under `~/.local/opt/cin-main-lobby`, launcher under `~/.local/bin`, desktop entry under `~/.local/share/applications`.
 - **Runtime:** system Python 3 and GTK 4; no Electron, Chromium, WebKit, embedded browser, remote assets or application network dependency.
-- **Installation:** Debian package manager installs application files and desktop integration. The application itself runs as the logged-in user and does not request root privileges.
-- **User data:** future persistent node data belongs under the user's XDG data directory and must not be removed by application upgrades or package removal.
+- **User data:** future persistent node data belongs under the user's XDG data directory and must not be removed by application upgrades or application uninstall.
 
-The Debian package is a system-managed installation artifact; this is distinct from the privilege model of the running application. A `.deb` installation normally requires administrator authorization through the package manager.
+The `.deb` is used as a portable payload container, not registered as a system package. This is intentional: standard system-wide Debian package installation normally requires administrator authorization and is not the CIN user installation model.
 
 ## Screen behavior included in this milestone
 
@@ -44,28 +48,29 @@ Both screens must support resizing and reflow. The Settings content may scroll v
 | CIN-INS-02 | Lobby screen | Lobby UI and actions | Required content appears; Enter and Import disabled |
 | CIN-INS-03 | Settings screen | Informational Settings UI | All required information appears accurately |
 | CIN-INS-04 | Navigation | Settings and Back handlers | Repeated Lobby → Settings → Lobby navigation succeeds |
-| CIN-INS-05 | Debian package layout | Package control, launcher and desktop entry | `dpkg-deb` builds and inspects `CIN.deb` |
-| CIN-INS-06 | Dependency declaration | GTK4 and Python runtime dependencies | Package manager resolves dependencies from distribution repositories |
-| CIN-INS-07 | GitHub Actions CI | Source, package and UI smoke-test workflow | Workflow installs package in a clean Ubuntu environment and launches it under Xvfb |
-| CIN-INS-08 | Downloadable artifact | Workflow artifact named `CIN-deb-installer` containing `CIN.deb` | Artifact uploaded only after successful build, installation and navigation smoke test |
-| CIN-INS-09 | ARM64 operator qualification | Manual installation and launch test | Operator installs on target Linux ARM64 / AArch64 environment and reports results |
+| CIN-INS-05 | Debian payload | Architecture-independent `CIN.deb` containing application files under `/opt/cin-main-lobby` | `dpkg-deb` builds and extracts the payload |
+| CIN-INS-06 | User-space installer | Installer and uninstaller scripts | Installs only under the current user's home directory and refuses root execution |
+| CIN-INS-07 | GitHub Actions CI | Source, package and UI smoke-test workflow | Runs the user installer as an unprivileged account and launches under Xvfb |
+| CIN-INS-08 | Downloadable artifact | `CIN-deb-installer` containing `CIN.deb`, `install-user.sh` and `uninstall-user.sh` | Uploaded only after successful x86_64 and ARM64 runtime tests |
+| CIN-INS-09 | ARM64 operator qualification | Manual installation and launch test | Operator installs on target Linux ARM64 / AArch64 without root and reports results |
 
 ## GitHub Actions pipeline
 
 1. Check out the repository.
 2. Run Python source-contract tests.
-3. Install GTK 4, Python GI bindings, Xvfb and Debian packaging tools on the CI runner.
-4. Stage the application into the Debian package tree.
-5. Build `dist/CIN.deb` with `dpkg-deb`.
-6. Inspect package metadata, file list, architecture and dependencies.
-7. Validate the desktop entry.
-8. Install the package in the clean CI environment.
-9. Launch the installed executable under a virtual X display.
-10. Execute the application smoke test, which traverses Lobby → Settings → Lobby repeatedly.
-11. Purge the package in CI.
-12. Upload `CIN.deb` as a downloadable workflow artifact on successful non-PR runs.
+3. Provision GTK 4, Python GI bindings, Xvfb and Debian packaging tools on disposable CI runners. CI provisioning may use runner administrator permissions; this is not part of the user installer.
+4. Build `dist/CIN.deb` and the user-space install/uninstall scripts.
+5. Inspect package metadata and payload.
+6. Download the artifact on x86_64 and ARM64 runners.
+7. Provision CI runtime prerequisites.
+8. Run `install-user.sh` as the unprivileged CI user.
+9. Verify all installed application paths are under that user's home directory.
+10. Launch the installed executable under a virtual X display.
+11. Execute the application smoke test, traversing Lobby → Settings → Lobby.
+12. Run the user-space uninstaller and verify application files are removed.
+13. Upload the bundle as a downloadable workflow artifact on successful non-PR runs.
 
-A successful CI run proves the package builds, installs and passes the automated UI navigation smoke test on the CI host. It does not prove execution on every ARM64 Linux distribution or Android-hosted Linux environment. Those require operator/device qualification.
+The workflow must not use `apt install ./CIN.deb` or `dpkg -i` to install CIN. The CI runner may use privileged package installation only to provision its own test dependencies.
 
 ## Download and installation test
 
@@ -73,27 +78,31 @@ After a successful workflow run:
 1. Open the repository's Actions tab.
 2. Open the successful `CIN Main — Build, Test and Package Debian Installer` run.
 3. Download the `CIN-deb-installer` artifact.
-4. Extract the artifact to obtain `CIN.deb`.
-5. On a Debian-compatible ARM64 system, install with the system package manager, for example `sudo apt install ./CIN.deb`.
-6. Launch `cin-main` from the application menu or terminal.
+4. Extract the artifact ZIP to obtain `CIN.deb`, `install-user.sh` and `uninstall-user.sh`.
+5. As the normal desktop user, run `bash install-user.sh ./CIN.deb`.
+6. Launch `~/.local/bin/cin-main` or select CIN Main Lobby from the user's application menu.
 7. Open Settings, inspect the information and use Back to return.
-8. Repeat the navigation and restart the application.
-9. Test offline startup after installation.
+8. Repeat navigation and restart the application.
+9. Test offline startup.
+10. Remove CIN with `bash uninstall-user.sh`, as the same user.
 
-The package's architecture is currently `all`; the ARM64 qualification concerns the target system's ability to provide the declared Python and GTK4 dependencies.
+No step in the user installation or removal procedure requires root privileges or `sudo`.
 
 ## Definition of done
 
 The milestone is complete only when:
-- GitHub Actions produces a downloadable `CIN.deb`.
-- The package installs cleanly on the qualified target.
+- GitHub Actions produces the downloadable user installer bundle.
+- The installer runs as a normal user and refuses root execution.
+- All installed application files remain under the user's home directory.
+- No system package database or system directories are modified by CIN's installer.
 - The installed application opens the Lobby.
 - Settings opens as a distinct screen.
 - Back returns to the Lobby repeatedly.
 - The application starts without an Internet connection.
 - Enter and Import remain visibly unavailable.
 - The Create entry accurately reports that node/certificate workflows are not yet implemented.
-- The operator confirms the manual installation and screen test.
+- The uninstaller removes application files without deleting future CIN user data.
+- The operator confirms the manual installation and screen test on the ARM64 target.
 
 ## Deferred scope
 
