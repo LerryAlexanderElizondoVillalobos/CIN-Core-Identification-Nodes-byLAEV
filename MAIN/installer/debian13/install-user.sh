@@ -59,7 +59,7 @@ cat > "$LAUNCHER_TMP" <<EOF
 #!/bin/sh
 set -eu
 APP="$APP_HOME/AppDir"
-exec "$APP/AppRun" --run "\$@"
+exec "\$APP/AppRun" --run "\$@"
 EOF
 chmod 0755 "$LAUNCHER_TMP"
 [ -f "$HERE/uninstall-user.sh" ] || fail "uninstall-user.sh is missing from the installer bundle."
