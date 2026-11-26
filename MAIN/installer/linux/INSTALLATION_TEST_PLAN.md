@@ -1,13 +1,13 @@
-# CIN Linux AppImage — Acceptance Test Plan
+# CIN Linux ARM64 — Acceptance Test Plan
 
-## Artifacts
+## Release artifacts
 
-- `Core_Identification_Nodes-x86_64.AppImage`
-- `Core_Identification_Nodes-aarch64.AppImage`
+- Core_Identification_Nodes-aarch64.AppImage
+- Core_Identification_Nodes-arm64.deb
 
-Each artifact must be built and tested on its matching architecture.
+Both artifacts target ARM64 / AArch64 Linux only. Test on native ARM64 hardware and at least one ARM64 virtual machine. The guest must expose an ARM64 kernel/userspace; x86_64 emulation is not an accepted target.
 
-## 1. Payload inspection
+## 1. AppImage payload inspection
 
 Verify the AppImage contains:
 - AppRun entry point
@@ -17,27 +17,40 @@ Verify the AppImage contains:
 - Deploy engine and network controller modules
 - desktop integration metadata and icon
 
-## 2. First-run installation
+## 2. Rootless graphical installation
 
-On a clean supported Linux desktop:
-- Download the matching AppImage.
+On a clean supported ARM64 Linux desktop:
+- Download the AArch64 AppImage.
 - Enable executable permission in the file manager if required.
 - Double-click it.
 - Confirm the graphical welcome installer appears.
 - Select Install for this user.
-- Confirm installation under `~/Applications`.
-- Confirm desktop entry under `~/.local/share/applications`.
-- Confirm no root, sudo, password prompt, terminal, package manager, or system directory modification occurs.
+- Confirm installation under ~/Applications.
+- Confirm desktop entry under ~/.local/share/applications.
+- Confirm no root, sudo, administrator password, terminal, package manager, or system directory modification occurs.
+
+Also test Run without installing.
 
 ## 3. Main Lobby
 
 Open the installed desktop entry. Verify Main Lobby is the first application screen and Settings navigation works in both directions.
 
-## 4. Deploy
+## 4. Debian package
 
-Verify the local manifest can be generated. Remote deployment must remain unavailable until the genuine publisher public key and signed official manifest are independently provisioned. Never trust a key delivered by the same downloaded manifest.
+- Verify dpkg-deb reports Architecture: arm64.
+- Verify the package contains the AArch64 AppImage, desktop entry, and icon.
+- Install on a disposable Debian/Ubuntu ARM64 system using the graphical package manager.
+- Confirm administrator authorization is requested for the conventional system installation.
+- Launch CIN and verify it runs as the logged-in user, not as root.
+- Remove the package and verify package files are removed.
 
-## 5. Network control
+The .deb is not a rootless installation method. Rootless users must use the AppImage.
+
+## 5. Deploy
+
+Verify the Deploy engine is present. Component-level updates must remain unavailable until an AppImage-aware signed replacement updater, genuine publisher public key, and signed official manifest are provisioned and verified.
+
+## 6. Network control
 
 On supported systemd environments:
 - Verify CIN's own process scope is the only scope affected.
@@ -46,12 +59,10 @@ On supported systemd environments:
 - Toggle ON and verify CIN access returns.
 - On unsupported systems, confirm the UI reports unavailable rather than claiming enforcement.
 
-## 6. Uninstall and data preservation
+## 7. Uninstall and data preservation
 
-Run `~/.local/bin/cin-uninstall`. Verify the installed AppImage and desktop launcher are removed. Verify user data and publisher trust configuration are preserved.
+Run ~/.local/bin/cin-uninstall. Verify the installed AppImage and desktop launcher are removed. Verify user data and publisher trust configuration are preserved.
 
-## 7. Distribution matrix
+## 8. Release decision
 
-Test clean desktop environments on supported architectures, prioritizing Ubuntu, Debian, Fedora, and Linux Mint. Record distribution release, glibc version, architecture, GTK runtime behavior, installer result, and Main Lobby smoke-test result.
-
-Do not publish until all required matrix tests pass.
+Do not publish until ARM64 source tests, AppImage payload inspection, graphical rootless installation, Main Lobby runtime, Debian package metadata, and package contents checks pass. Record hardware/VM, distribution release, kernel, glibc, desktop environment, and all test outcomes.
