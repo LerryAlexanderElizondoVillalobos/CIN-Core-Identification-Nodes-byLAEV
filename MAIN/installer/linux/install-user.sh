@@ -30,7 +30,7 @@ trap 'rm -rf "$TEMP_DIR"' EXIT
 dpkg-deb --extract "$PACKAGE" "$TEMP_DIR"
 test -f "$TEMP_DIR/opt/cin-main-lobby/cin_main.py" || { echo "Unexpected CIN.deb payload." >&2; exit 1; }
 install -d "$APP_DIR" "$BIN_DIR" "$APPS_DIR"
-install -m 0644 "$TEMP_DIR/opt/cin-main-lobby/cin_main.py" "$APP_DIR/cin_main.py"
+cp -a "$TEMP_DIR/opt/cin-main-lobby/." "$APP_DIR/"
 cat > "$BIN_DIR/cin-main" <<EOF
 #!/bin/sh
 exec "$PYTHON_BIN" "$APP_DIR/cin_main.py" "\$@"
