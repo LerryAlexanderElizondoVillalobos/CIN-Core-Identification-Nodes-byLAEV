@@ -3,11 +3,12 @@
 import os
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 
 import gi
 gi.require_version("Gtk", "4.0")
-from gi.repository import Gtk, Gio
+from gi.repository import Gtk, Gio, GLib
 
 APP_NAME = "Core Identification Nodes"
 APPIMAGE_NAME = "Core_Identification_Nodes.AppImage"
@@ -17,6 +18,7 @@ class Installer(Gtk.Application):
     def __init__(self):
         super().__init__(application_id="bylaev.cin.appimage.installer",
                          flags=Gio.ApplicationFlags.NON_UNIQUE)
+        self.smoke_test = "--smoke-test" in sys.argv[1:]
 
     def do_activate(self):
         window = Gtk.ApplicationWindow(application=self, title=APP_NAME)
@@ -51,6 +53,13 @@ class Installer(Gtk.Application):
         page.append(note)
         window.set_child(page)
         window.present()
+        if self.smoke_test:
+            GLib.timeout_add(500, self.finish_smoke_test)
+
+    def finish_smoke_test(self):
+        print("PASS: CIN graphical first-run installer window opened.")
+        self.quit()
+        return GLib.SOURCE_REMOVE
 
     def source_appimage(self):
         source = os.environ.get("APPIMAGE")
@@ -148,4 +157,5 @@ class Installer(Gtk.Application):
 
 
 if __name__ == "__main__":
-    raise SystemExit(Installer().run([]))
+    arguments = [arg for arg in sys.argv[1:] if arg != "--smoke-test"]
+    raise SystemExit(Installer().run([sys.argv[0], *arguments]))
