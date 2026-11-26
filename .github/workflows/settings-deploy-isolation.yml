@@ -33,6 +33,7 @@ jobs:
           python3 -m compileall -q MAIN/app MAIN/installer/linux/appimage_installer.py
           bash -n MAIN/installer/linux/AppRun
           bash -n MAIN/installer/linux/build-appimage.sh
+          bash -n MAIN/installer/linux/build-deb-arm64.sh
 
   build-appimage:
     needs: source-tests
