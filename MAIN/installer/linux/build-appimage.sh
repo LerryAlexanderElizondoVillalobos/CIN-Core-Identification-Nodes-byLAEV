@@ -60,7 +60,7 @@ test -s "$APPDIR/usr/share/icons/hicolor/256x256/apps/cin-main-lobby.png"
 
 # PyGObject loads typelib metadata dynamically; ELF dependency scanning alone
 # does not discover these files. Bundle the complete typelib directory.
-GI_DIR="/usr/lib/$([ "$APPIMAGE_ARCH" = x86_64 ] && echo x86_64-linux-gnu || echo aarch64-linux-gnu)/girepository-1.0"
+GI_DIR="/usr/lib/aarch64-linux-gnu/girepository-1.0"
 if [[ ! -d "$GI_DIR" ]]; then
   echo "GTK introspection metadata not found at $GI_DIR" >&2
   exit 1
@@ -70,7 +70,7 @@ find "$GI_DIR" -maxdepth 1 -type f -name '*.typelib' -exec install -m 0644 {} "$
 
 # Explicitly seed GTK's dynamically loaded libraries and modules. linuxdeploy
 # then resolves their transitive ELF dependencies into the AppDir.
-LIB_DIR="/usr/lib/$([ "$APPIMAGE_ARCH" = x86_64 ] && echo x86_64-linux-gnu || echo aarch64-linux-gnu)"
+LIB_DIR="/usr/lib/aarch64-linux-gnu"
 for pattern in libgtk-4.so* libgdk-4.so* libgsk-4.so* libgraphene-1.0.so*; do
   while IFS= read -r -d '' library; do
     install -m 0644 "$library" "$APPDIR/usr/lib/$(basename "$library")"
