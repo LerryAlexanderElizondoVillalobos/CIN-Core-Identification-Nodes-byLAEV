@@ -4,7 +4,7 @@ CIN EPM provides two Linux editions over one shared POSIX Shell engine:
 - **Terminal:** minimal, no graphical dependencies.
 - **Desktop:** minimal Tk presentation; delegates all analysis to the same engine.
 
-## Version 0.2.0 — adaptive environment detection
+## Version 0.2.1 — adaptive environment detection and test-suite repair
 Detects distribution, kernel family, architecture, Lindesk/Termux/container markers, process visibility, cgroup visibility, GUI session, Python/PyGObject/GTK, systemd system/user availability, D-Bus, OpenSSL and iproute2.
 
 Compatibility output distinguishes blocking prerequisites from environmental limitations. Missing systemd user services are not treated as proof that all Linux execution is impossible. They remain a limitation for any Lobby feature whose service contract requires them.
