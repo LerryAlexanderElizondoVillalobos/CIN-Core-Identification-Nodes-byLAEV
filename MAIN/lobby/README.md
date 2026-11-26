@@ -1,21 +1,31 @@
 # CIN Main Lobby
 
-The Main Lobby is installed with CIN Main and coordinates the three founding certificate processes.
+## First-screen specification
 
-## Process sequence
+The application opens the Main Lobby and displays the exact heading:
 
-1. **Genesis Environment Certificate:** audit the permitted environment, generate and validate the Genesis Environment Manifest, and register it as the first logical CIN record in private local storage.
-2. **CIN Node Birth Certificate:** import the complete registered Genesis Manifest, derive identifiers under the approved profile, obtain Node Birth Authorization, create the distinct Node Birth Record, commit and independently verify it.
-3. **CIN Global Personal Document and Node Marriage Certificate:** consume the authoritative Node Birth Record, derive the personal-document identifier, request explicit external signing of the association, verify the signer and persist the document and agreement separately.
+**Welcome to Core Identification Nodes**
 
-The later CIN Personal Registration and Credential certificate is a subsequent issuance phase, not one of these three founding processes.
+The screen contains three visible actions:
 
-## Lobby responsibilities
+1. **Create** — enabled. Opens the initial node-creation flow.
+2. **Enter** — visible but inactive in the first milestone.
+3. **Import** — visible but inactive in the first milestone.
 
-- Present the actual lifecycle state.
-- Orchestrate dedicated certificate modules.
-- Show candidate, authorized, registered, signed, issued and verified states distinctly.
-- Rebuild its header from persisted records after restart.
-- Keep the UI separate from record authority and certificate verification logic.
+The Lobby must not present Enter or Import as operational until their workflows exist.
 
-No missing or preview record may be presented as an authoritative completed process.
+## Create action — first increment
+
+The Create action opens a dedicated initial creation view. For the first increment, this can be a functional navigation shell with a return path to the Lobby. It must not invent node identifiers, certificates, authorization, signatures or completed records.
+
+Subsequent increments will implement the three founding processes inside this Create flow:
+
+1. Genesis Environment Certificate and Genesis Environment Manifest.
+2. CIN Node Birth Certificate and authoritative Node Birth Record.
+3. CIN Global Personal Document and Node Marriage Certificate.
+
+## Lifecycle boundary
+
+Launching or installing the Lobby does not create a node. Clicking Create enters the creation flow; node birth is only complete after the relevant certificate process is implemented and its authoritative record is persisted and verified.
+
+The CIN Package Engine is Phase 2 and is not part of the Main Lobby.
