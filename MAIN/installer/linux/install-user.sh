@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# This is a per-user bootstrap. It must never require root, sudo, dpkg -i,
+# apt, systemd, a user service manager, or cgroup delegation.
 if [[ "${EUID:-$(id -u)}" -eq 0 ]]; then
-  echo "Run this installer as your normal desktop user, not as root." >&2
+  echo "Run this installer as your normal user, never as root." >&2
   exit 1
 fi
 
@@ -12,19 +14,12 @@ if [[ -z "$PACKAGE" || ! -f "$PACKAGE" ]]; then
   exit 2
 fi
 
-for command_name in dpkg-deb python3 openssl systemctl systemd-run; do
+for command_name in dpkg-deb python3 openssl; do
   command -v "$command_name" >/dev/null || {
     echo "Missing required command: $command_name" >&2
     exit 1
   }
 done
-
-# CIN's network switch is enforced on its dedicated systemd user scope.
-# Refuse a misleading partial installation when the user manager is unavailable.
-if ! systemctl --user show-environment >/dev/null 2>&1; then
-  echo "CIN requires an active systemd user manager for its application-scoped network switch." >&2
-  exit 1
-fi
 
 python3 - <<'PY'
 try:
@@ -68,11 +63,11 @@ fi
 rm -rf "$BACKUP_DIR"
 install -m 0755 "$INSTALLER_PAYLOAD/uninstall-user.sh" "$APP_DIR/uninstall-user.sh"
 
+# Run directly in the user's session. Optional OS-level network isolation is
+# handled by the Settings capability controller and may report unavailable.
 cat > "$BIN_DIR/cin-main" <<EOF
 #!/bin/sh
-# Run CIN in its dedicated systemd user scope. IPAddressDeny is applied only
-# to this scope, leaving the host and all other applications unaffected.
-exec systemd-run --user --scope --unit=cin-main-lobby -- "$PYTHON_BIN" "$APP_DIR/cin_main.py" "\$@"
+exec "$PYTHON_BIN" "$APP_DIR/cin_main.py" "$@"
 EOF
 chmod 0755 "$BIN_DIR/cin-main"
 
@@ -80,7 +75,7 @@ cat > "$APPS_DIR/cin-main.desktop" <<EOF
 [Desktop Entry]
 Type=Application
 Name=Core Identification Nodes
-Comment=CIN Main Lobby — Deploy and application-scoped network control
+Comment=CIN Main Lobby — Deploy and user-space controls
 Exec=$BIN_DIR/cin-main
 Icon=applications-system
 Terminal=false
@@ -90,5 +85,9 @@ EOF
 chmod 0644 "$APPS_DIR/cin-main.desktop"
 
 echo "Core Identification Nodes installed for $(id -un) under $HOME/.local."
-echo "Deploy engine and CIN-scoped network switch are included."
+echo "No administrator privileges, system package installation, or systemd user manager were used."
+if [[ -z "${DISPLAY:-}" && -z "${WAYLAND_DISPLAY:-}" ]]; then
+  echo "Notice: no graphical session was detected. Installation is complete; launch CIN from a Lindesk graphical session."
+fi
+echo "CIN network isolation is enabled only when the host exposes a supported per-user policy backend."
 echo "Official code deployment remains unavailable until the publisher key and signed official manifest are independently provisioned."
