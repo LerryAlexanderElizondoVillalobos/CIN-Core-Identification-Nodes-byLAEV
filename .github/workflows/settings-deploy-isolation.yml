@@ -1,26 +1,18 @@
-name: CIN Settings — Official Code Deployment and Installer
+name: CIN — Official Core Identification Nodes Debian Package
 
 on:
   push:
-    branches: [main, "stage/settings-deploy-network-isolation"]
+    branches: [main]
     paths:
-      - "MAIN/app/launcher/**"
-      - "MAIN/app/settings/deployment/**"
-      - "MAIN/app/settings/network_access.py"
-      - "MAIN/tests/settings/**"
+      - "MAIN/app/**"
+      - "MAIN/tests/**"
       - "MAIN/installer/linux/**"
       - "MAIN/packaging/deb/**"
-      - "MAIN/docs/settings/**"
+      - "MAIN/deploy/**"
       - ".github/workflows/settings-deploy-isolation.yml"
   pull_request:
     paths:
-      - "MAIN/app/launcher/**"
-      - "MAIN/app/settings/deployment/**"
-      - "MAIN/app/settings/network_access.py"
-      - "MAIN/tests/settings/**"
-      - "MAIN/installer/linux/**"
-      - "MAIN/packaging/deb/**"
-      - "MAIN/docs/settings/**"
+      - "MAIN/**"
       - ".github/workflows/settings-deploy-isolation.yml"
   workflow_dispatch:
 
@@ -28,26 +20,22 @@ permissions:
   contents: read
 
 concurrency:
-  group: cin-deploy-${{ github.workflow }}-${{ github.ref }}
+  group: cin-official-deb-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   source-tests:
-    name: Deployment engine and application contract tests
+    name: Source, Deploy and application contract tests
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
-      - name: Run application contract tests
-        run: python3 -m unittest MAIN.tests.test_application_contract -v
-      - name: Run deployment engine tests
-        env:
-          PYTHONPATH: MAIN/app
-        run: python3 -m unittest discover -s MAIN/tests/settings -p "test_*.py" -v
+      - name: Run all CIN source tests
+        run: python3 -m unittest discover -s MAIN/tests -v
       - name: Validate Python syntax
         run: python3 -m compileall -q MAIN/app
 
-  runtime-qualification:
-    name: GTK runtime on ${{ matrix.runner }}
+  network-runtime:
+    name: CIN-scoped network isolation on ${{ matrix.runner }}
     needs: source-tests
     strategy:
       fail-fast: false
@@ -56,124 +44,128 @@ jobs:
     runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v4
-      - name: Install CI-only GTK and display dependencies
+      - name: Install CI-only systemd and GTK test dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y python3 python3-gi gir1.2-gtk-4.0 xvfb dbus-x11
-      - name: Start the runner's systemd user manager
+      - name: Start the CI user's systemd manager
         run: |
           sudo loginctl enable-linger "$(id -un)"
           sudo systemctl start "user@$(id -u).service"
-      - name: Verify non-root user manager can toggle CIN scope network policy
-        run: |
-          export XDG_RUNTIME_DIR="/run/user/$(id -u)"
-          export DBUS_SESSION_BUS_ADDRESS="unix:path=$XDG_RUNTIME_DIR/bus"
-          python3 MAIN/tests/settings/network_user_scope_runtime_check.py
-      - name: Verify CIN-scoped network denial leaves host networking available
+          echo "XDG_RUNTIME_DIR=/run/user/$(id -u)" >> "$GITHUB_ENV"
+          echo "DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u)/bus" >> "$GITHUB_ENV"
+      - name: Verify non-root user manager can toggle scope network policy
+        run: python3 MAIN/tests/settings/network_user_scope_runtime_check.py
+      - name: Verify denied CIN scope does not affect host networking
         run: sudo python3 MAIN/tests/settings/network_scope_runtime_check.py
-      - name: Run Lobby and Settings navigation smoke test
+      - name: Run native Lobby and Settings smoke test
         env:
           GDK_BACKEND: x11
           PYTHONPATH: MAIN/app
-        run: xvfb-run -a dbus-run-session -- python3 MAIN/app/launcher/cin_main.py --smoke-test
+        run: xvfb-run -a python3 MAIN/app/launcher/cin_main.py --smoke-test
 
-  build-deb:
-    name: Build and inspect CIN.deb
-    needs: [source-tests, runtime-qualification]
+  build-package:
+    name: Build and inspect Core_Identification_Nodes.deb
+    needs: [source-tests, network-runtime]
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
-      - name: Install Debian packaging tools
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y dpkg-dev
-      - name: Build CIN.deb
+      - name: Install CI-only Debian build tools
+        run: sudo apt-get update && sudo apt-get install -y dpkg-dev
+      - name: Build the official Debian package
         run: bash MAIN/installer/linux/build-deb.sh dist
-      - name: Inspect Debian payload
+      - name: Validate exact package identity and capabilities
         run: |
           set -euo pipefail
-          test -s dist/CIN.deb
-          test "$(dpkg-deb --field dist/CIN.deb Architecture)" = "all"
-          dpkg-deb --field dist/CIN.deb Package Version Architecture
-          dpkg-deb --contents dist/CIN.deb
-          dpkg-deb --extract dist/CIN.deb /tmp/cin-package-inspect
-          test -f /tmp/cin-package-inspect/opt/cin-main-lobby/cin_main.py
-          test -f /tmp/cin-package-inspect/opt/cin-main-lobby/settings/deployment/engine.py
-          test -f /tmp/cin-package-inspect/opt/cin-main-lobby/settings/network_access.py
-          bash -n dist/install-user.sh
-          bash -n dist/uninstall-user.sh
-      - name: Upload package candidate
+          PACKAGE=dist/Core_Identification_Nodes.deb
+          test -s "$PACKAGE"
+          test "$(dpkg-deb --field "$PACKAGE" Package)" = "core-identification-nodes"
+          test "$(dpkg-deb --field "$PACKAGE" Architecture)" = "all"
+          dpkg-deb --field "$PACKAGE" Version Architecture
+          dpkg-deb --extract "$PACKAGE" /tmp/cin-official-package
+          test -f /tmp/cin-official-package/opt/cin-main-lobby/cin_main.py
+          test -f /tmp/cin-official-package/opt/cin-main-lobby/settings/deployment/engine.py
+          test -f /tmp/cin-official-package/opt/cin-main-lobby/settings/network_access.py
+          python3 -m compileall -q /tmp/cin-official-package/opt/cin-main-lobby
+          ! find /tmp/cin-official-package -type f -name '*.pyc' | grep .
+          bash -n MAIN/installer/linux/install-user.sh
+          bash -n MAIN/installer/linux/uninstall-user.sh
+          ! grep -Eq '^[[:space:]]*sudo[[:space:]]|[;&|][[:space:]]*sudo[[:space:]]|apt(-get)?[[:space:]]+install|dpkg[[:space:]]+-i' MAIN/installer/linux/install-user.sh
+          sha256sum "$PACKAGE"
+      - name: Upload internal package candidate for installation qualification
         uses: actions/upload-artifact@v4
         with:
-          name: cin-deploy-candidate
-          path: |
-            dist/CIN.deb
-            dist/install-user.sh
-            dist/uninstall-user.sh
+          name: cin-official-deb-candidate
+          path: dist/Core_Identification_Nodes.deb
           if-no-files-found: error
           retention-days: 3
 
-  install-test:
-    name: Bootstrap install and migration test
-    needs: build-deb
+  install-qualification:
+    name: Install, launch, toggle network and uninstall
+    needs: build-package
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
-          name: cin-deploy-candidate
+          name: cin-official-deb-candidate
           path: dist
-      - name: Provision CI-only runtime dependencies
+      - name: Provision CI-only runtime prerequisites
         run: |
           sudo apt-get update
-          sudo apt-get install -y python3 python3-gi gir1.2-gtk-4.0 xvfb dbus-x11 openssl
-      - name: Simulate prior installation and preserve operator data
+          sudo apt-get install -y python3 python3-gi gir1.2-gtk-4.0 xvfb openssl
+          sudo loginctl enable-linger "$(id -un)"
+          sudo systemctl start "user@$(id -u).service"
+          echo "XDG_RUNTIME_DIR=/run/user/$(id -u)" >> "$GITHUB_ENV"
+          echo "DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u)/bus" >> "$GITHUB_ENV"
+      - name: Prepare previous installation and persistent operator data
         run: |
           mkdir -p "$HOME/.local/opt/cin-main-lobby" "$HOME/.local/share/cin-main-lobby" "$HOME/.config/cin-main-lobby"
           echo old-build > "$HOME/.local/opt/cin-main-lobby/old.txt"
-          echo keep-me > "$HOME/.local/share/cin-main-lobby/operator-data.txt"
-          echo keep-key-config > "$HOME/.config/cin-main-lobby/operator-config.txt"
-      - name: Install new bootstrap package as unprivileged user
+          echo preserve-data > "$HOME/.local/share/cin-main-lobby/operator-data.txt"
+          echo preserve-config > "$HOME/.config/cin-main-lobby/operator-config.txt"
+      - name: Install as normal user without sudo
         run: |
           set -euo pipefail
           test "$(id -u)" -ne 0
-          bash dist/install-user.sh "$PWD/dist/CIN.deb"
+          bash MAIN/installer/linux/install-user.sh "$PWD/dist/Core_Identification_Nodes.deb"
           test -f "$HOME/.local/opt/cin-main-lobby/cin_main.py"
           test -f "$HOME/.local/opt/cin-main-lobby/settings/deployment/engine.py"
+          test -f "$HOME/.local/opt/cin-main-lobby/settings/network_access.py"
           test ! -e "$HOME/.local/opt/cin-main-lobby/old.txt"
-          grep -q keep-me "$HOME/.local/share/cin-main-lobby/operator-data.txt"
-          grep -q keep-key-config "$HOME/.config/cin-main-lobby/operator-config.txt"
+          grep -q preserve-data "$HOME/.local/share/cin-main-lobby/operator-data.txt"
+          grep -q preserve-config "$HOME/.config/cin-main-lobby/operator-config.txt"
           test -x "$HOME/.local/bin/cin-main"
-      - name: Launch installed application
+          test -f "$HOME/.local/share/applications/cin-main.desktop"
+      - name: Launch installed application and exercise Deploy/network UI contract
         env:
           GDK_BACKEND: x11
-          PYTHONPATH: ${{ github.workspace }}/MAIN/app
-        run: xvfb-run -a dbus-run-session -- "$HOME/.local/bin/cin-main" --smoke-test
-      - name: Uninstall application without deleting operator data
+        run: xvfb-run -a "$HOME/.local/bin/cin-main" --smoke-test
+      - name: Uninstall application while preserving operator data
         if: always()
         run: |
-          if [[ -f dist/uninstall-user.sh ]]; then bash dist/uninstall-user.sh; fi
+          if [ -f MAIN/installer/linux/uninstall-user.sh ]; then
+            bash MAIN/installer/linux/uninstall-user.sh
+          fi
           test ! -e "$HOME/.local/opt/cin-main-lobby"
           test ! -e "$HOME/.local/bin/cin-main"
           test -f "$HOME/.local/share/cin-main-lobby/operator-data.txt"
           test -f "$HOME/.config/cin-main-lobby/operator-config.txt"
 
-  publish:
-    name: Publish qualified CIN-deb-installer
-    needs: install-test
+  publish-official-package:
+    name: Publish the single official Debian artifact
+    needs: install-qualification
     if: success() && github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: cin-deploy-candidate
+          name: cin-official-deb-candidate
           path: dist
-      - uses: actions/upload-artifact@v4
+      - name: Publish only Core_Identification_Nodes.deb
+        uses: actions/upload-artifact@v4
         with:
-          name: CIN-deb-installer
-          path: |
-            dist/CIN.deb
-            dist/install-user.sh
-            dist/uninstall-user.sh
+          name: Core_Identification_Nodes.deb
+          path: dist/Core_Identification_Nodes.deb
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 90
