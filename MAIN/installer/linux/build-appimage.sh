@@ -56,7 +56,7 @@ if [[ ! -d "$GI_DIR" ]]; then
   exit 1
 fi
 mkdir -p "$APPDIR/usr/lib/girepository-1.0"
-for typelib in Gtk-4.0 Gdk-4.0 Gio-2.0 GLib-2.0 GObject-2.0 Pango-1.0 cairo-1.0 GdkPixbuf-2.0 Graphene-1.0; do
+for typelib in Gtk-4.0 Gdk-4.0 Gsk-4.0 Gio-2.0 GioUnix-2.0 GLib-2.0 GModule-2.0 GObject-2.0 Pango-1.0 cairo-1.0 GdkPixbuf-2.0 Graphene-1.0; do
   file="$GI_DIR/$typelib.typelib"
   [[ ! -f "$file" ]] || install -m 0644 "$file" "$APPDIR/usr/lib/girepository-1.0/"
 done
@@ -65,7 +65,7 @@ export APPIMAGE_EXTRACT_AND_RUN=1
 LIB_ARGS=()
 while IFS= read -r library; do LIB_ARGS+=(--library "$library"); done < <(find "$APPDIR/usr/lib/cin-main" "$APPDIR/usr/lib/cin-appimage-installer" -type f -name '*.so*')
 linuxdeploy --appdir "$APPDIR" --executable "$APPDIR/usr/lib/cin-main/cin-main" \
-  --executable "$APPDIR/usr/lib/cin-appimage-installer/cin-appimage-installer" "\${LIB_ARGS[@]}" \
+  --executable "$APPDIR/usr/lib/cin-appimage-installer/cin-appimage-installer" "${LIB_ARGS[@]}" \
   --desktop-file "$APPDIR/usr/share/applications/cin-main-lobby.desktop" \
   --icon-file "$APPDIR/usr/share/icons/hicolor/scalable/apps/cin-main-lobby.svg" \
   --output appimage
