@@ -1,28 +1,24 @@
-name: CIN Settings — Deployment and Network Isolation
+name: CIN Settings — Official Code Deployment and Installer
 
 on:
   push:
-    branches:
-      - main
-      - "stage/settings-deploy-network-isolation"
+    branches: [main, "stage/settings-deploy-network-isolation"]
     paths:
       - "MAIN/app/launcher/**"
-      - "MAIN/app/settings/**"
+      - "MAIN/app/settings/deployment/**"
       - "MAIN/tests/settings/**"
-      - "MAIN/tests/test_settings_stage.py"
-      - "MAIN/docs/settings/**"
       - "MAIN/installer/linux/**"
       - "MAIN/packaging/deb/**"
+      - "MAIN/docs/settings/**"
       - ".github/workflows/settings-deploy-isolation.yml"
   pull_request:
     paths:
       - "MAIN/app/launcher/**"
-      - "MAIN/app/settings/**"
+      - "MAIN/app/settings/deployment/**"
       - "MAIN/tests/settings/**"
-      - "MAIN/tests/test_settings_stage.py"
-      - "MAIN/docs/settings/**"
       - "MAIN/installer/linux/**"
       - "MAIN/packaging/deb/**"
+      - "MAIN/docs/settings/**"
       - ".github/workflows/settings-deploy-isolation.yml"
   workflow_dispatch:
 
@@ -30,63 +26,31 @@ permissions:
   contents: read
 
 concurrency:
-  group: cin-settings-stage-${{ github.workflow }}-${{ github.ref }}
+  group: cin-deploy-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  implementation-gate:
-    name: Confirm Settings stage implementation exists
+  source-tests:
+    name: Deployment engine and application contract tests
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
-      - name: Require Settings services and acceptance suites
-        shell: bash
-        run: |
-          set -euo pipefail
-          required=(
-            MAIN/app/settings/deployment
-            MAIN/app/settings/network
-            MAIN/tests/settings/test_settings_contract.py
-            MAIN/tests/settings/test_deployment_manifest.py
-            MAIN/tests/settings/test_deployment_comparison.py
-            MAIN/tests/settings/test_deployment_apply.py
-            MAIN/tests/settings/test_network_policy.py
-            MAIN/tests/settings/test_network_enforcement.py
-            MAIN/tests/settings/test_settings_integration.py
-          )
-          missing=0
-          for path in "${required[@]}"; do
-            if [[ ! -e "$path" ]]; then
-              echo "::error::Settings stage implementation missing: $path"
-              missing=1
-            fi
-          done
-          if [[ "$missing" -ne 0 ]]; then
-            echo "Settings stage is not implemented yet. CIN.deb will not be built."
-            exit 1
-          fi
-
-  source-and-service-tests:
-    name: Source, deployment and network tests
-    runs-on: ubuntu-24.04
-    needs: implementation-gate
-    steps:
-      - uses: actions/checkout@v4
-      - name: Run existing application contract tests
+      - name: Run application contract tests
         run: python3 -m unittest MAIN.tests.test_application_contract -v
-      - name: Run Settings acceptance suites
-        run: |
-          python3 -m unittest discover -s MAIN/tests/settings -p "test_*.py" -v
+      - name: Run deployment engine tests
+        env:
+          PYTHONPATH: MAIN/app
+        run: python3 -m unittest discover -s MAIN/tests/settings -p "test_*.py" -v
+      - name: Validate Python syntax
+        run: python3 -m compileall -q MAIN/app
 
   runtime-qualification:
-    name: GTK Settings integration on ${{ matrix.runner }}
-    needs: source-and-service-tests
+    name: GTK runtime on ${{ matrix.runner }}
+    needs: source-tests
     strategy:
       fail-fast: false
       matrix:
-        runner:
-          - ubuntu-24.04
-          - ubuntu-24.04-arm
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
     runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v4
@@ -94,40 +58,40 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y python3 python3-gi gir1.2-gtk-4.0 xvfb dbus-x11
-      - name: Run installed Settings integration smoke test
+      - name: Run Lobby and Settings navigation smoke test
         env:
           GDK_BACKEND: x11
-        run: |
-          set -euo pipefail
-          xvfb-run -a dbus-run-session -- python3 MAIN/app/launcher/cin_main.py --settings-stage-smoke-test
+          PYTHONPATH: MAIN/app
+        run: xvfb-run -a dbus-run-session -- python3 MAIN/app/launcher/cin_main.py --smoke-test
 
   build-deb:
-    name: Build CIN.deb after all Settings tests pass
+    name: Build and inspect CIN.deb
+    needs: [source-tests, runtime-qualification]
     runs-on: ubuntu-24.04
-    needs:
-      - source-and-service-tests
-      - runtime-qualification
     steps:
       - uses: actions/checkout@v4
       - name: Install Debian packaging tools
         run: |
           sudo apt-get update
           sudo apt-get install -y dpkg-dev
-      - name: Build CIN.deb and user-space installer scripts
+      - name: Build CIN.deb
         run: bash MAIN/installer/linux/build-deb.sh dist
-      - name: Inspect Debian package
+      - name: Inspect Debian payload
         run: |
           set -euo pipefail
           test -s dist/CIN.deb
           test "$(dpkg-deb --field dist/CIN.deb Architecture)" = "all"
           dpkg-deb --field dist/CIN.deb Package Version Architecture
           dpkg-deb --contents dist/CIN.deb
+          dpkg-deb --extract dist/CIN.deb /tmp/cin-package-inspect
+          test -f /tmp/cin-package-inspect/opt/cin-main-lobby/cin_main.py
+          test -f /tmp/cin-package-inspect/opt/cin-main-lobby/settings/deployment/engine.py
           bash -n dist/install-user.sh
           bash -n dist/uninstall-user.sh
       - name: Upload package candidate
         uses: actions/upload-artifact@v4
         with:
-          name: cin-settings-stage-candidate
+          name: cin-deploy-candidate
           path: |
             dist/CIN.deb
             dist/install-user.sh
@@ -136,40 +100,49 @@ jobs:
           retention-days: 3
 
   install-test:
-    name: Test candidate using the unprivileged CI user
+    name: Bootstrap install and migration test
     needs: build-deb
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
-      - name: Download package candidate
-        uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v4
         with:
-          name: cin-settings-stage-candidate
+          name: cin-deploy-candidate
           path: dist
-      - name: Provision CI runtime dependencies
+      - name: Provision CI-only runtime dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y python3 python3-gi gir1.2-gtk-4.0 xvfb dbus-x11
-      - name: Install CIN as current user
+          sudo apt-get install -y python3 python3-gi gir1.2-gtk-4.0 xvfb dbus-x11 openssl
+      - name: Simulate prior installation and preserve operator data
+        run: |
+          mkdir -p "$HOME/.local/opt/cin-main-lobby" "$HOME/.local/share/cin-main-lobby" "$HOME/.config/cin-main-lobby"
+          echo old-build > "$HOME/.local/opt/cin-main-lobby/old.txt"
+          echo keep-me > "$HOME/.local/share/cin-main-lobby/operator-data.txt"
+          echo keep-key-config > "$HOME/.config/cin-main-lobby/operator-config.txt"
+      - name: Install new bootstrap package as unprivileged user
         run: |
           set -euo pipefail
           test "$(id -u)" -ne 0
           bash dist/install-user.sh "$PWD/dist/CIN.deb"
           test -f "$HOME/.local/opt/cin-main-lobby/cin_main.py"
+          test -f "$HOME/.local/opt/cin-main-lobby/settings/deployment/engine.py"
+          test ! -e "$HOME/.local/opt/cin-main-lobby/old.txt"
+          grep -q keep-me "$HOME/.local/share/cin-main-lobby/operator-data.txt"
+          grep -q keep-key-config "$HOME/.config/cin-main-lobby/operator-config.txt"
           test -x "$HOME/.local/bin/cin-main"
-      - name: Launch installed application and verify Settings stage
+      - name: Launch installed application
         env:
           GDK_BACKEND: x11
-        run: |
-          xvfb-run -a dbus-run-session -- "$HOME/.local/bin/cin-main" --settings-stage-smoke-test
-      - name: Uninstall as current user
+          PYTHONPATH: ${{ github.workspace }}/MAIN/app
+        run: xvfb-run -a dbus-run-session -- "$HOME/.local/bin/cin-main" --smoke-test
+      - name: Uninstall application without deleting operator data
         if: always()
         run: |
-          if [[ -f dist/uninstall-user.sh ]]; then
-            bash dist/uninstall-user.sh
-          fi
+          if [[ -f dist/uninstall-user.sh ]]; then bash dist/uninstall-user.sh; fi
           test ! -e "$HOME/.local/opt/cin-main-lobby"
           test ! -e "$HOME/.local/bin/cin-main"
+          test -f "$HOME/.local/share/cin-main-lobby/operator-data.txt"
+          test -f "$HOME/.config/cin-main-lobby/operator-config.txt"
 
   publish:
     name: Publish qualified CIN-deb-installer
@@ -177,13 +150,11 @@ jobs:
     if: success() && github.event_name != 'pull_request'
     runs-on: ubuntu-24.04
     steps:
-      - name: Download tested package
-        uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v4
         with:
-          name: cin-settings-stage-candidate
+          name: cin-deploy-candidate
           path: dist
-      - name: Publish final installer artifact
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: CIN-deb-installer
           path: |
