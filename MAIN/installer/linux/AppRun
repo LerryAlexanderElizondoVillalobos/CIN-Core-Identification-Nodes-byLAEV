@@ -2,6 +2,8 @@
 set -eu
 HERE="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
 export GI_TYPELIB_PATH="$HERE/usr/lib/girepository-1.0${GI_TYPELIB_PATH:+:$GI_TYPELIB_PATH}"
+export GTK_PATH="$HERE/usr/lib/gtk-4.0${GTK_PATH:+:$GTK_PATH}"
+export GSETTINGS_SCHEMA_DIR="$HERE/usr/share/glib-2.0/schemas"
 if [ "${1:-}" = "--run" ]; then
     shift
     if command -v systemd-run >/dev/null 2>&1 && systemctl --user show-environment >/dev/null 2>&1; then
