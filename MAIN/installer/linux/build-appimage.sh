@@ -87,14 +87,18 @@ fi
 chmod -R a+rX "$APPDIR"
 mkdir -p "$BUILD/appimage-output"
 export APPIMAGE_EXTRACT_AND_RUN=1
+# GTK is loaded dynamically by GI typelibs, so seed only the four GTK
+# runtime libraries. linuxdeploy follows their ELF dependencies recursively.
+# Avoid passing every PyInstaller .so/data file: some bundled resources carry
+# .so-like names but are not deployable ELF objects.
 LIB_ARGS=()
-while IFS= read -r -d '' library; do
-  # PyInstaller bundles data files next to extension modules. Only hand ELF
-  # shared objects to linuxdeploy; a filename suffix alone is not proof.
+for library in "$APPDIR"/usr/lib/libgtk-4.so* "$APPDIR"/usr/lib/libgdk-4.so* \
+               "$APPDIR"/usr/lib/libgsk-4.so* "$APPDIR"/usr/lib/libgraphene-1.0.so*; do
+  [[ -f "$library" ]] || continue
   if readelf -h "$library" >/dev/null 2>&1; then
     LIB_ARGS+=(--library "$library")
   fi
-done < <(find "$APPDIR/usr/lib" -type f -name '*.so*' -print0)
+done
 
 (cd "$BUILD/appimage-output" && linuxdeploy --appdir "$APPDIR" \
   --executable "$APPDIR/usr/lib/cin-main/cin-main" \
