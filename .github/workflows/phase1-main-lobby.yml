@@ -1,4 +1,4 @@
-name: CIN Phase 1 — Adaptive Main Lobby and Settings
+name: CIN Main — Build, Test and Package Debian Installer
 
 on:
   push:
@@ -15,99 +15,73 @@ permissions:
   contents: read
 
 concurrency:
-  group: cin-phase1-${{ github.workflow }}-${{ github.ref }}
+  group: cin-main-deb-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  screen-contract:
-    name: Validate Lobby, Settings and navigation specifications
-    runs-on: ubuntu-latest
+  source-tests:
+    name: Validate source and application contract
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run source contract tests
+        run: python3 -m unittest discover -s MAIN/tests -v
+
+  build-test-package:
+    name: Build and test CIN Debian package
+    runs-on: ubuntu-24.04
+    needs: source-tests
     steps:
       - uses: actions/checkout@v4
 
-      - name: Check required project documents
-        run: |
-          set -euo pipefail
-          test -f MAIN/README.md
-          test -f MAIN/WORKPLAN_PHASE_1.md
-          test -f MAIN/ROADMAP.md
-          test -f MAIN/installer/linux/README.md
-          test -f MAIN/lobby/README.md
-          test -f MAIN/lobby/SETTINGS.md
-
-      - name: Validate both screen contracts and navigation
-        shell: python
-        run: |
-          from pathlib import Path
-
-          plan = Path("MAIN/WORKPLAN_PHASE_1.md").read_text(encoding="utf-8")
-          installer = Path("MAIN/installer/linux/README.md").read_text(encoding="utf-8")
-          lobby = Path("MAIN/lobby/README.md").read_text(encoding="utf-8")
-          settings = Path("MAIN/lobby/SETTINGS.md").read_text(encoding="utf-8")
-          docs = "\n".join((plan, installer, lobby, settings))
-
-          required = (
-              "Welcome to the Main Lobby",
-              "Core Identification Nodes",
-              "Create",
-              "Enter",
-              "Import",
-              "Settings",
-              "Application Information",
-              "Current Capabilities",
-              "Linux ARM64 / AArch64",
-              "Back to Main Lobby",
-              "landscape",
-              "portrait",
-              "flat",
-              "text-only",
-              "repository",
-              "© 2026 Core Identification Nodes byLAEV. All rights reserved.",
-          )
-          missing = [item for item in required if item.casefold() not in docs.casefold()]
-          if missing:
-              raise SystemExit("Missing screen requirements: " + ", ".join(missing))
-
-          if "only active primary action" not in installer:
-              raise SystemExit("Create must be the only active primary Lobby action")
-
-          if "return to the Lobby" not in installer:
-              raise SystemExit("Settings Back navigation must return to the Lobby")
-
-          if "must reflow" not in lobby:
-              raise SystemExit("Both screens must require responsive layout reflow")
-
-          if "pretend toggles" not in settings:
-              raise SystemExit("Settings must explicitly exclude nonfunctional preference controls")
-
-          print("PASS: Lobby, Settings and two-way navigation requirements are documented.")
-          print("NOTE: this checks documentation contracts, not a compiled application or runtime UI.")
-
-  package-build:
-    name: Build Linux package when packaging scaffold exists
-    runs-on: ubuntu-latest
-    needs: screen-contract
-    if: ${{ hashFiles('MAIN/packaging/deb/DEBIAN/control') != '' }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install packaging tools
+      - name: Install native GTK runtime and packaging tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y dpkg-dev
+          sudo apt-get install -y python3 python3-gi gir1.2-gtk-4.0 xvfb dbus-x11 dpkg-dev desktop-file-utils
 
-      - name: Build and inspect ARM64 Debian package
-        shell: bash
+      - name: Prepare Debian package tree
         run: |
           set -euo pipefail
-          grep -Eq '^Architecture: arm64$' MAIN/packaging/deb/DEBIAN/control
-          mkdir -p dist
-          dpkg-deb --build --root-owner-group MAIN/packaging/deb dist/cin-main-lobby_0.1.0_arm64.deb
-          dpkg-deb --info dist/cin-main-lobby_0.1.0_arm64.deb
-          dpkg-deb --contents dist/cin-main-lobby_0.1.0_arm64.deb
+          chmod 0755 MAIN/packaging/deb/usr/bin/cin-main
+          chmod 0755 MAIN/packaging/deb/DEBIAN/postinst
+          chmod 0755 MAIN/packaging/deb/DEBIAN/postrm
+          install -d MAIN/packaging/deb/usr/lib/cin-main-lobby
+          install -m 0644 MAIN/app/launcher/cin_main.py MAIN/packaging/deb/usr/lib/cin-main-lobby/cin_main.py
+          install -d dist
 
-      - uses: actions/upload-artifact@v4
+      - name: Build Debian package
+        run: |
+          set -euo pipefail
+          dpkg-deb --build --root-owner-group MAIN/packaging/deb dist/CIN.deb
+          dpkg-deb --info dist/CIN.deb
+          dpkg-deb --contents dist/CIN.deb
+          dpkg-deb --field dist/CIN.deb Package Version Architecture Depends
+
+      - name: Validate desktop entry
+        run: desktop-file-validate MAIN/packaging/deb/usr/share/applications/cin-main.desktop
+
+      - name: Install package in CI environment
+        run: |
+          sudo apt-get install -y ./dist/CIN.deb
+          dpkg-query -W cin-main-lobby
+
+      - name: Launch installed application and test two-screen navigation
+        env:
+          GDK_BACKEND: x11
+        run: |
+          set -euo pipefail
+          xvfb-run -a dbus-run-session -- /usr/bin/cin-main --smoke-test
+
+      - name: Verify package removal
+        if: always()
+        run: |
+          sudo dpkg --purge cin-main-lobby || true
+
+      - name: Upload installable Debian package
+        if: success() && github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v4
         with:
-          name: cin-main-lobby-arm64-deb
-          path: dist/*.deb
+          name: CIN-deb-installer
+          path: dist/CIN.deb
           if-no-files-found: error
+          retention-days: 30
