@@ -16,7 +16,7 @@ CIN Main is delivered in two consecutive installation phases:
 
 ### 2.1 Installation scope
 
-The installer is a per-user Linux application installer. It must not require root privileges for normal installation, launch, update or removal. It must not install system-wide daemons, modify system package databases, or require `sudo` as part of its normal path.
+The first downloadable milestone is a Debian `.deb` package named `CIN.deb`, installed and managed by the target system's Debian package manager. Installing or removing files under system directories normally requires administrator authorization through that package manager. This installation-time authorization is separate from application execution: the Lobby runs as the logged-in user and must not request root privileges. The package must not install system-wide daemons. Future distribution formats may provide a fully per-user installer, but they are not part of this first `.deb` milestone.
 
 Default XDG locations (respect the corresponding environment variables when set):
 
@@ -34,14 +34,15 @@ Application binaries, configuration, cache and node records must remain separate
 
 ### 2.2 Installation sequence
 
-1. Obtain the CIN release ZIP, Package Manifest and detached signature.
-2. Verify archive size and SHA-256 digest against the manifest.
-3. Validate the manifest and detached Ed25519 signature using the configured publisher trust source.
-4. Extract the verified package into a versioned release directory.
-5. Check the declared runtime prerequisites and prepare the user-level directory structure.
-6. Install or update the user launcher and desktop entry.
-7. Start CIN Main Lobby.
-8. Preserve the release verification result and installation metadata for later inspection.
+1. Obtain the `CIN.deb` release artifact from a successful GitHub Actions workflow.
+2. Inspect package metadata, architecture and declared dependencies.
+3. Install the package through the Debian package manager.
+4. Resolve Python 3, Python GI bindings and GTK 4 from the target distribution.
+5. Register the `cin-main` launcher and desktop entry.
+6. Start CIN Main Lobby as the logged-in user.
+7. Keep future persistent node data outside replaceable application files.
+
+Release signature verification and a detached publisher trust chain are not implemented by this first build pipeline. They remain a release-engineering requirement before treating public downloads as authenticated production releases.
 
 Package verification, extraction, application installation and node birth are separate events. A successfully installed application is not a born node.
 
@@ -49,7 +50,7 @@ Package verification, extraction, application installation and node birth are se
 
 The archived Package Manifest v1 is the starting specification unless a successor is approved. It defines UTF-8 JSON, RFC 8785 JCS canonicalization, SHA-256 for the ZIP, Ed25519 detached signatures and independently provisioned publisher trust. The public key included inside an untrusted package cannot authenticate that same package.
 
-The existing manifest describes a ZIP distribution. A different archive format requires a versioned package-manifest specification change; it must not be silently substituted.
+The archived manifest describes a ZIP distribution and is not used to authenticate this initial Debian package. The `.deb` distribution must receive its own versioned release-authentication contract before signed production publication.
 
 ## 3. Main Lobby included in Phase 1
 
