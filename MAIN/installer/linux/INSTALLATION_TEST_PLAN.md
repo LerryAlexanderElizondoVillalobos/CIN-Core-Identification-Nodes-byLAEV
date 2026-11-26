@@ -59,7 +59,7 @@ Generate the local manifest and verify that component hashes and build fingerpri
 Verify an application replacement preserves `~/.local/share/cin-main-lobby` and `~/.config/cin-main-lobby`. Uninstall using:
 
 ```bash
-bash MAIN/installer/linux/uninstall-user.sh
+bash ~/.local/opt/cin-main-lobby/uninstall-user.sh
 ```
 
 Verify application files and launcher are removed while user data and publisher configuration remain.
