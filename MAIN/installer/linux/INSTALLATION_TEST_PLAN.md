@@ -1,126 +1,96 @@
-# CIN.deb — Operator Installation and Acceptance Test
+# CIN.deb — User-Space Installation and Acceptance Test
 
 ## Purpose
 
-This checklist records the first manual installation of the CIN Main Lobby package on the operator's actual Linux environment. CI validation and device qualification are separate results.
+Verify that a normal desktop user can install, launch, navigate and remove CIN without root privileges or `sudo`.
 
-## 1. Record the target environment
-
-Before installation, record:
+## 1. Record target environment
 
 - Distribution and release:
 - CPU architecture (`uname -m`):
-- Debian package architecture (`dpkg --print-architecture`):
-- Desktop environment or Android-hosted Linux environment:
-- Display session (`echo "$XDG_SESSION_TYPE"`):
-- GTK 4 availability:
+- Package architecture (`dpkg --print-architecture`):
+- Desktop environment:
+- Display session:
+- Python 3 version:
+- GTK 4 and PyGObject availability:
 - Test date:
 
-The intended ARM64 target reports `aarch64` from `uname -m` and `arm64` from `dpkg --print-architecture`.
+## 2. Obtain the release artifact
 
-## 2. Obtain the package
+1. Open the repository Actions page.
+2. Select the latest successful **CIN Main — Build, Test and Package Debian Installer** run.
+3. Confirm source tests, package build and x86_64/ARM64 user-space runtime qualification passed.
+4. Download and extract the `CIN-deb-installer` artifact.
+5. Confirm it contains `CIN.deb`, `install-user.sh` and `uninstall-user.sh`.
 
-1. Open the repository's GitHub Actions page.
-2. Select the latest successful run of **CIN Main — Build, Test and Package Debian Installer**.
-3. Confirm that source tests, package build, x86_64 runtime qualification and ARM64 runtime qualification succeeded.
-4. Download the **CIN-deb-installer** artifact.
-5. Extract the artifact ZIP and locate `CIN.deb`.
+## 3. Install as a normal user
 
-Do not install a candidate artifact from a failed or incomplete workflow run.
-
-## 3. Inspect and install
-
-Inspect the package:
+Do not use a root shell, `sudo`, `apt install` or `dpkg -i`.
 
 ```bash
-dpkg-deb --info CIN.deb
-dpkg-deb --field CIN.deb Package Version Architecture Depends
+bash install-user.sh ./CIN.deb
 ```
 
-Expected package metadata:
-- Package: `cin-main-lobby`
-- Version: `0.1.0`
-- Architecture: `all`
-- GTK 4 and Python GI dependencies declared.
-
-Install using the Debian package manager:
-
-```bash
-sudo apt install ./CIN.deb
-```
-
-Confirm installation:
-
-```bash
-dpkg-query -W cin-main-lobby
-command -v cin-main
-```
-
-## 4. Launch and test the Lobby
-
-Launch from the desktop application menu or run:
-
-```bash
-cin-main
-```
+Expected paths:
+- `~/.local/opt/cin-main-lobby/cin_main.py`
+- `~/.local/bin/cin-main`
+- `~/.local/share/applications/cin-main.desktop`
 
 Verify:
-- The application opens a native desktop window.
-- The Lobby displays **Welcome to the Main Lobby**.
-- The subtitle displays **Core Identification Nodes**.
-- Create, Enter and Import are visible.
-- Enter and Import are disabled.
-- Create opens an informational message that accurately states node creation and certificate issuance are not implemented in this milestone.
-- The repository link is clickable.
-- The copyright footer is visible.
+```bash
+test -f "$HOME/.local/opt/cin-main-lobby/cin_main.py"
+test -x "$HOME/.local/bin/cin-main"
+test -f "$HOME/.local/share/applications/cin-main.desktop"
+```
 
-## 5. Test Settings navigation
+## 4. Launch and inspect the Lobby
 
-1. Select the Settings icon.
-2. Confirm that a distinct Settings screen appears.
-3. Confirm Application Information, Current Capabilities and Project Repository sections are visible.
-4. Confirm the target platform and offline startup information are displayed.
-5. Select the Back arrow.
-6. Confirm that the Main Lobby returns.
-7. Repeat the Settings → Back cycle at least five times.
-8. Resize the window and repeat the navigation in landscape and portrait layouts where the environment permits.
+```bash
+~/.local/bin/cin-main
+```
+
+Verify the native Lobby, required text, disabled Enter and Import controls, informational Create entry, copyright footer and repository link.
+
+## 5. Test Settings
+
+1. Open Settings.
+2. Inspect application information and capability status.
+3. Use Back to return to the Lobby.
+4. Repeat the cycle at least five times.
+5. Resize the window and test portrait/landscape layouts where supported.
 
 ## 6. Restart and offline test
 
-1. Close the application normally.
-2. Disconnect the network.
-3. Launch `cin-main` again.
-4. Confirm that the Lobby opens without network access.
-5. Open Settings and return to the Lobby.
-6. Restore network connectivity after the test.
+Close CIN, disconnect the network, launch it again and repeat Lobby → Settings → Lobby. The application screens must not require network access; only opening the repository link requires connectivity.
 
-The repository link requires connectivity when activated; the two application screens must not require network access to render.
-
-## 7. Removal test
-
-If this is a disposable test installation, remove the application:
+## 7. Uninstall as the same user
 
 ```bash
-sudo apt remove cin-main-lobby
+bash uninstall-user.sh
 ```
 
-Do not use package purge as the normal uninstall instruction once persistent CIN user records exist. Application removal must not delete user node data.
+Verify:
+```bash
+test ! -e "$HOME/.local/opt/cin-main-lobby"
+test ! -e "$HOME/.local/bin/cin-main"
+test ! -e "$HOME/.local/share/applications/cin-main.desktop"
+```
 
 ## 8. Acceptance record
 
 | Test | Result | Notes |
 |---|---|---|
-| Package metadata inspection | Pending | |
-| Package installation | Pending | |
+| User-space installer runs without sudo | Pending | |
+| Application installed under home directory | Pending | |
+| No system paths modified by installer | Pending | |
 | Native Lobby launch | Pending | |
 | Settings screen opens | Pending | |
 | Back returns to Lobby | Pending | |
 | Five navigation cycles | Pending | |
-| Landscape/portrait layout | Pending | |
-| Application restart | Pending | |
+| Layout resizing/orientation | Pending | |
 | Offline startup | Pending | |
-| Application removal | Pending | |
+| User-space uninstall succeeds | Pending | |
 
 **Overall result:** Pending operator test.
 
-A successful CI run does not fill this acceptance record automatically. The operator must record the result from the actual target device.
+A successful CI run does not replace the operator's manual test on the actual target environment.
