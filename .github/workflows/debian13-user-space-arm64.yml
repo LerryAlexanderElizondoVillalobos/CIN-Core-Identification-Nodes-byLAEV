@@ -164,31 +164,30 @@ jobs:
           git checkout --orphan "$DOWNLOAD_BRANCH"
           git rm -rf . >/dev/null 2>&1 || true
           find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
-          cp "$RUNNER_TEMP/cin-public-downloads/README.md" ./README.md 2>/dev/null || true
           cp -a "$RUNNER_TEMP/cin-public-downloads/." .
           cat > README.md <<'CIN_DOWNLOADS_README'
-# CIN — Debian 13 ARM64 downloads
-
-Public, stable download files for Debian 13 (Trixie) ARM64 / AArch64.
-
-- [CIN.deb](CIN.deb) — native ARM64 package payload with embedded per-user installer.
-- [CIN-Debian13-Installer.zip](CIN-Debian13-Installer.zip) — convenience bundle.
-- [SHA256SUMS](SHA256SUMS) — checksums.
-- Package content listings are included for inspection.
-
-Install as the regular user; do not use sudo, apt install, or dpkg -i:
-
-```sh
-tmp="$(mktemp -d)"
-dpkg-deb --extract ./CIN.deb "$tmp"
-sh "$tmp/opt/cin-installer/install-user.sh" "$PWD/CIN.deb"
-result=$?
-rm -rf "$tmp"
-exit "$result"
-```
-
-Files are published from the validated Debian 13 ARM64 workflow.
-CIN_DOWNLOADS_README
+          # CIN — Debian 13 ARM64 downloads
+          
+          Public, stable download files for Debian 13 (Trixie) ARM64 / AArch64.
+          
+          - [CIN.deb](CIN.deb) — native ARM64 package payload with embedded per-user installer.
+          - [CIN-Debian13-Installer.zip](CIN-Debian13-Installer.zip) — convenience bundle.
+          - [SHA256SUMS](SHA256SUMS) — checksums.
+          - Package content listings are included for inspection.
+          
+          Install as the regular user; do not use sudo, apt install, or dpkg -i:
+          
+          ```sh
+          tmp="$(mktemp -d)"
+          dpkg-deb --extract ./CIN.deb "$tmp"
+          sh "$tmp/opt/cin-installer/install-user.sh" "$PWD/CIN.deb"
+          result=$?
+          rm -rf "$tmp"
+          exit "$result"
+          ```
+          
+          Files are published from the validated Debian 13 ARM64 workflow.
+          CIN_DOWNLOADS_README
           git add CIN.deb CIN-Debian13-Installer.zip SHA256SUMS CIN.deb.contents.txt CIN-Debian13-Installer.contents.txt README.md
           git commit -m "Publish validated CIN ARM64 downloads"
           git push --force origin "HEAD:$DOWNLOAD_BRANCH"
