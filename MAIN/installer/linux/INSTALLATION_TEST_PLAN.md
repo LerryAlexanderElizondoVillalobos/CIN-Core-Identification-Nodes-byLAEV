@@ -37,7 +37,7 @@ Open the installed launcher. Verify Main Lobby is the initial screen and Setting
 ## 4. Debian ARM64 package
 
 - Run `dpkg-deb --info` and confirm `Architecture: arm64`.
-- Inspect contents and confirm the AppImage payload and desktop launcher are present.
+- Inspect contents and confirm the native relocatable AppDir under `/opt/cin/AppDir`, its Main Lobby launcher, GTK runtime, and desktop entry are present.
 - Install in a disposable Debian/Ubuntu ARM64 test environment with administrator authorization.
 - Launch CIN as a normal logged-in user.
 - Remove using the package manager and confirm package files are removed.
