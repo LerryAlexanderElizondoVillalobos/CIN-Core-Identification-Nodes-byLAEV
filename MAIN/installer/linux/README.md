@@ -6,15 +6,15 @@ Install CIN Main for the current Linux user without requiring root privileges fo
 
 ## Target locations
 
-- Versioned releases: `$XDG_DATA_HOME/../opt/cin/releases/<version>/` (default `~/.local/opt/cin/releases/<version>/`).
-- Active release: `~/.local/opt/cin/current`.
+- Versioned releases: `${CIN_INSTALL_HOME:-$HOME/.local/opt/cin}/releases/<version>/`.
+- Active release: `${CIN_INSTALL_HOME:-$HOME/.local/opt/cin}/current`.
 - Launcher: `$XDG_BIN_HOME/cin` when configured, otherwise `~/.local/bin/cin`.
 - Desktop entry: `$XDG_DATA_HOME/applications/cin.desktop` (default `~/.local/share/applications/cin.desktop`).
 - Persistent node data: `$XDG_DATA_HOME/cin/`.
 - Configuration: `$XDG_CONFIG_HOME/cin/`.
 - Cache: `$XDG_CACHE_HOME/cin/`.
 
-The implementation must resolve XDG base directories correctly rather than hardcoding home paths when the user has configured alternatives.
+The installer root is configurable through `CIN_INSTALL_HOME`; the launcher, desktop entry, configuration, data and cache use the appropriate XDG base directories.
 
 ## Installer flow
 
