@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import hashlib
 import json
-import os
 import shutil
 import subprocess
 import tempfile
@@ -37,6 +36,13 @@ def _canonical(value: Any) -> bytes:
     return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
 
 
+def _relative_component_path(value: str) -> Path:
+    path = Path(value)
+    if not value or path.is_absolute() or ".." in path.parts or "." in path.parts:
+        raise DeploymentError(f"Invalid component path: {value!r}")
+    return path
+
+
 def sha256_file(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as stream:
@@ -56,7 +62,14 @@ def fingerprint(manifest: dict) -> str:
 def local_manifest(root: Path = APP_DIR) -> dict:
     components = []
     if root.exists():
-        for path in sorted(p for p in root.rglob("*") if p.is_file() and ".deploy-staging" not in p.parts):
+        files = (
+            path for path in root.rglob("*")
+            if path.is_file()
+            and "__pycache__" not in path.parts
+            and path.suffix != ".pyc"
+            and ".deploy-staging" not in path.parts
+        )
+        for path in sorted(files):
             rel = path.relative_to(root).as_posix()
             components.append({"path": rel, "sha256": sha256_file(path), "size": path.stat().st_size})
     body = {"schema": MANIFEST_VERSION, "application": APP_ID, "components": components}
@@ -125,6 +138,8 @@ def stage_and_apply(proposal: dict, remote: dict, confirmed: bool, root: Path = 
         raise DeploymentError("Installed build changed after comparison; check again.")
     entries = {x["path"]: x for x in remote.get("components", [])}
     changes = proposal["additions"] + proposal["replacements"]
+    removals = [_relative_component_path(path) for path in proposal["removals"]]
+    change_paths = [_relative_component_path(item["path"]) for item in changes]
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     root.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="cin-deploy-", dir=str(root.parent)) as tmp:
@@ -132,10 +147,7 @@ def stage_and_apply(proposal: dict, remote: dict, confirmed: bool, root: Path = 
         backup = Path(tmp) / "backup"
         stage.mkdir()
         backup.mkdir()
-        for item in changes:
-            rel = Path(item["path"])
-            if rel.is_absolute() or ".." in rel.parts:
-                raise DeploymentError("Manifest contains an invalid component path.")
+        for item, rel in zip(changes, change_paths):
             url = entries[item["path"]].get("url")
             if not url or not url.startswith("https://"):
                 raise DeploymentError(f"Missing HTTPS component URL: {item['path']}")
@@ -150,12 +162,11 @@ def stage_and_apply(proposal: dict, remote: dict, confirmed: bool, root: Path = 
             shutil.copytree(root, backup, dirs_exist_ok=True)
         try:
             root.mkdir(parents=True, exist_ok=True)
-            for rel in proposal["removals"]:
+            for rel in removals:
                 target = root / rel
                 if target.is_file():
                     target.unlink()
-            for item in changes:
-                rel = Path(item["path"])
+            for rel in change_paths:
                 target = root / rel
                 target.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy2(stage / rel, target)
