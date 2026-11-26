@@ -46,7 +46,7 @@ Launch:
 Uninstall:
 
 ```bash
-bash MAIN/installer/linux/uninstall-user.sh
+bash ~/.local/opt/cin-main-lobby/uninstall-user.sh
 ```
 
 The Debian archive is a portable application payload. Do not install it with `sudo dpkg -i` or `apt install`.
