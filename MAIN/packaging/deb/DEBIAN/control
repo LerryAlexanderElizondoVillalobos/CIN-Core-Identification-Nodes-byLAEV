@@ -5,7 +5,7 @@ Priority: optional
 Architecture: all
 Depends: python3 (>= 3.10), python3-gi, gir1.2-gtk-4.0
 Maintainer: Core Identification Nodes byLAEV
-Description: CIN Main Lobby desktop application
- Lightweight native GTK4 application with the CIN Main Lobby and
- informational Settings screen. The application is architecture-independent
- Python code and uses the target system GTK4 runtime.
+Description: CIN Main Lobby user-space application payload
+ This Debian archive contains the architecture-independent Python application
+ payload. Use the included install-user.sh to extract it into the current
+ user's home directory. Do not install it with apt or dpkg -i.
