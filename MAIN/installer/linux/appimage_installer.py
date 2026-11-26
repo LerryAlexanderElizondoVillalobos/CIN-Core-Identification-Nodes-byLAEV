@@ -71,11 +71,11 @@ class Installer(Gtk.Application):
 
             applications = Path.home() / ".local/share/applications"
             applications.mkdir(parents=True, exist_ok=True)
-            icons = Path.home() / ".local/share/icons/hicolor/scalable/apps"
+            icons = Path.home() / ".local/share/icons/hicolor/256x256/apps"
             icons.mkdir(parents=True, exist_ok=True)
-            icon = icons / "cin-main-lobby.svg"
+            icon = icons / "cin-main-lobby.png"
             appdir = os.environ.get("APPDIR")
-            bundled_icon = (Path(appdir) / "usr/share/icons/hicolor/scalable/apps/cin-main-lobby.svg"
+            bundled_icon = (Path(appdir) / "usr/share/icons/hicolor/256x256/apps/cin-main-lobby.png"
                             if appdir else None)
             if bundled_icon and bundled_icon.is_file():
                 shutil.copy2(bundled_icon, icon)
