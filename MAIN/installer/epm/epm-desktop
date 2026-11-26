@@ -1,5 +1,5 @@
 #!/bin/sh
-EPM_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+EPM_DIR=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
 if ! command -v python3 >/dev/null 2>&1; then
     echo "CIN EPM Desktop requires Python 3 with Tk support. Terminal does not." >&2
     exit 3
