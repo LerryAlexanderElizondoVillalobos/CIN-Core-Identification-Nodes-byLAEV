@@ -43,7 +43,8 @@ Version: 0.4.0
 Section: utils
 Priority: optional
 Architecture: arm64
-Maintainer: LAEV
+Depends: libc6 (>= 2.35), libstdc++6
+Maintainer: LAEV <lerryalexelizondo@users.noreply.github.com>
 Description: Core Identification Nodes Main Lobby
  User-space runtime for the CIN Main Lobby on Linux ARM64.
 EOF
