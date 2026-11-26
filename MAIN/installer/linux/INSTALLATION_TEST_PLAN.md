@@ -21,7 +21,12 @@ The payload must include:
 Do not use root, `sudo`, `apt install` or `dpkg -i`.
 
 ```bash
-bash MAIN/installer/linux/install-user.sh ./Core_Identification_Nodes.deb
+tmp="$(mktemp -d)"
+dpkg-deb --extract ./Core_Identification_Nodes.deb "$tmp"
+bash "$tmp/opt/cin-installer/install-user.sh" "$PWD/Core_Identification_Nodes.deb"
+result=$?
+rm -rf "$tmp"
+exit "$result"
 ```
 
 Expected application paths:
