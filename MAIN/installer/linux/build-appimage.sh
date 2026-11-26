@@ -5,9 +5,8 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 cd "$ROOT"
 ARCH="$(uname -m)"
 case "$ARCH" in
-  x86_64) APPIMAGE_ARCH=x86_64 ;;
   aarch64|arm64) APPIMAGE_ARCH=aarch64 ;;
-  *) echo "Unsupported build architecture: $ARCH" >&2; exit 2 ;;
+  *) echo "CIN is currently released only for Linux ARM64; detected: $ARCH" >&2; exit 2 ;;
 esac
 
 for tool in python3 linuxdeploy readelf rsvg-convert desktop-file-validate; do
