@@ -79,20 +79,12 @@ jobs:
           test -n "$(find squashfs-root/usr/lib -name 'libgtk-4.so*' -print -quit)"
           rm -rf squashfs-root
           sha256sum "$APPIMAGE"
-      - name: Provision CI user systemd manager for scoped network test
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y xvfb dbus-x11
-          sudo loginctl enable-linger "$(id -un)"
-          sudo systemctl start "user@$(id -u).service"
-          echo "XDG_RUNTIME_DIR=/run/user/$(id -u)" >> "$GITHUB_ENV"
-          echo "DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u)/bus" >> "$GITHUB_ENV"
       - name: Smoke-test bundled Main Lobby inside the AppImage
         env:
           APPIMAGE_EXTRACT_AND_RUN: "1"
           GDK_BACKEND: x11
         run: |
-          xvfb-run -a "dist/Core_Identification_Nodes-${{ matrix.arch }}.AppImage" --run --smoke-test
+          dbus-run-session -- xvfb-run -a "dist/Core_Identification_Nodes-${{ matrix.arch }}.AppImage" --run --smoke-test
       - name: Upload architecture-specific AppImage
         uses: actions/upload-artifact@v4
         with:
