@@ -4,7 +4,7 @@ CIN Main is built in **two sequential phases**. The first phase delivers the ins
 
 ## Phase 1 — Main Lobby Installer
 
-Build a Linux per-user installer whose sole product is the **CIN Main Lobby** and its required runtime and foundational components.
+Build a Debian package (.deb) targeting **arm64 / AArch64** whose sole product is the **CIN Main Lobby** and its required runtime and foundational components. The package targets Debian-compatible ARM64 Linux userspaces, including Android-hosted environments such as LinDesk, and conventional ARM64 Linux. Virtualization is optional; the same package must be qualified in both virtualized and non-virtualized profiles.
 
 After installation, the Lobby provides the three founding certificate processes:
 
@@ -39,7 +39,7 @@ Initial package families include dedicated certificate engines, Ledgers, Binary 
 
 - Phase 1 installs the Main Lobby only; it does not install the Package Engine.
 - Phase 2 installs the Package Engine; it does not replace or reinstall the Main Lobby.
-- Both installers operate in the current Linux user's space without requiring root for normal use.
+- The Phase 1 package is installed inside the selected Debian-compatible ARM64 userspace; virtualization is optional and not required by CIN Main.
 - Application files, configuration, cache and persistent node records remain separate.
 - Installation is not node birth; node birth occurs through the Lobby's certificate process.
 - The Genesis Manifest and Node Birth Record remain distinct documents.
