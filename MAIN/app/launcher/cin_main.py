@@ -167,13 +167,17 @@ class CinMainWindow(Gtk.ApplicationWindow):
 
 
     def add_network_control(self, parent, compact=False):
-        state = self.network.status()
+        try:
+            state = self.network.status()
+        except NetworkConnectivityError:
+            state = "unavailable"
         enabled = state == "enabled"
-        button = Gtk.Button(label="Turn network off" if enabled else "Turn network on")
+        button = Gtk.Button(label="Turn network off" if enabled else "Turn network on" if state == "disabled" else "Network control unavailable")
         button.add_css_class("destructive-action" if enabled else "suggested-action")
+        button.set_sensitive(state in ("enabled", "disabled"))
         button.connect("clicked", lambda _button: self.toggle_network())
         parent.append(button)
-        status = Gtk.Label(label="Network: ON" if enabled else "Network: OFF")
+        status = Gtk.Label(label="Network: ON" if enabled else "Network: OFF" if state == "disabled" else "Network status unavailable")
         status.set_xalign(0.5 if compact else 0)
         status.add_css_class("dim-label")
         parent.append(status)
