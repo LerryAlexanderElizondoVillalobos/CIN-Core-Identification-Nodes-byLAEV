@@ -10,31 +10,30 @@ case "$ARCH" in
   *) echo "Unsupported build architecture: $ARCH" >&2; exit 2 ;;
 esac
 
-for tool in python3 pip3 linuxdeploy; do
+for tool in python3 linuxdeploy; do
   command -v "$tool" >/dev/null || { echo "Missing build dependency: $tool" >&2; exit 1; }
 done
-if ! command -v appimagetool >/dev/null && [[ -z "${APPIMAGETOOL:-}" ]]; then
-  echo "appimagetool is required (set APPIMAGETOOL or add it to PATH)." >&2
-  exit 1
-fi
 
 BUILD="$ROOT/build/appimage"
 APPDIR="$BUILD/AppDir"
 DIST="$ROOT/dist"
 rm -rf "$BUILD" "$DIST"
-mkdir -p "$APPDIR/usr/bin" "$APPDIR/usr/share/applications" "$APPDIR/usr/share/icons/hicolor/scalable/apps" "$DIST"
+mkdir -p "$APPDIR/usr/bin" "$APPDIR/usr/share/applications" "$APPDIR/usr/share/icons/hicolor/scalable/apps" "$DIST" "$BUILD/venv"
 
-python3 -m pip install --user --upgrade pyinstaller
-python3 -m PyInstaller --noconfirm --clean --onefile --name cin-main \
+python3 -m venv --system-site-packages "$BUILD/venv"
+PYTHON="$BUILD/venv/bin/python"
+"$PYTHON" -m pip install --upgrade pip pyinstaller
+"$PYTHON" -m PyInstaller --noconfirm --clean --onefile --name cin-main \
   --paths MAIN/app --collect-all gi --collect-all cairo \
   MAIN/app/launcher/cin_main.py
-python3 -m PyInstaller --noconfirm --clean --onefile --name cin-appimage-installer \
+"$PYTHON" -m PyInstaller --noconfirm --clean --onefile --name cin-appimage-installer \
   --collect-all gi --collect-all cairo MAIN/installer/linux/appimage_installer.py
 
 install -m 0755 dist/cin-main "$APPDIR/usr/bin/cin-main"
 install -m 0755 dist/cin-appimage-installer "$APPDIR/usr/bin/cin-appimage-installer"
 install -m 0755 MAIN/installer/linux/AppRun "$APPDIR/AppRun"
 install -m 0644 MAIN/installer/linux/cin-main-lobby.desktop "$APPDIR/usr/share/applications/cin-main-lobby.desktop"
+install -m 0644 MAIN/installer/linux/cin-main-lobby.svg "$APPDIR/usr/share/icons/hicolor/scalable/apps/cin-main-lobby.svg"
 cp -a MAIN/app/settings "$APPDIR/usr/share/cin-main-lobby-settings"
 
 # Bundle GTK introspection metadata used by PyGObject. linuxdeploy resolves ELF
@@ -54,6 +53,7 @@ export APPIMAGE_EXTRACT_AND_RUN=1
 linuxdeploy --appdir "$APPDIR" --executable "$APPDIR/usr/bin/cin-main" \
   --executable "$APPDIR/usr/bin/cin-appimage-installer" \
   --desktop-file "$APPDIR/usr/share/applications/cin-main-lobby.desktop" \
+  --icon-file "$APPDIR/usr/share/icons/hicolor/scalable/apps/cin-main-lobby.svg" \
   --output appimage
 mkdir -p "$DIST"
 find "$ROOT" -maxdepth 1 -type f -name '*.AppImage' -exec mv {} "$DIST/Core_Identification_Nodes-$APPIMAGE_ARCH.AppImage" \;
