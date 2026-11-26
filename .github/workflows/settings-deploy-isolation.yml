@@ -8,7 +8,6 @@ on:
       - "MAIN/app/settings/deployment/**"
       - "MAIN/app/settings/network_access.py"
       - "MAIN/tests/settings/**"
-      - "MAIN/app/settings/network_access.py"
       - "MAIN/installer/linux/**"
       - "MAIN/packaging/deb/**"
       - "MAIN/docs/settings/**"
@@ -17,6 +16,7 @@ on:
     paths:
       - "MAIN/app/launcher/**"
       - "MAIN/app/settings/deployment/**"
+      - "MAIN/app/settings/network_access.py"
       - "MAIN/tests/settings/**"
       - "MAIN/installer/linux/**"
       - "MAIN/packaging/deb/**"
