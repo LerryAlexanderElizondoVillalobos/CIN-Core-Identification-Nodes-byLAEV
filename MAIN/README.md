@@ -33,7 +33,7 @@ Uninstall with `~/.local/bin/cin-uninstall`. User data and configuration are pre
 
 ## Deploy
 
-The Deploy engine is included in the application. Remote deployment must remain disabled until the AppImage-aware replacement flow, the genuine publisher Ed25519 public key, and the signed official manifest are provisioned and verified. The engine must not apply component changes to an immutable mounted AppImage.
+The Deploy engine is included in the application. The Deploy engine is included, but component-level updates remain disabled until an AppImage-aware signed replacement updater, the genuine publisher Ed25519 public key, and the signed official manifest are provisioned and verified. The engine must not apply component changes to an immutable mounted AppImage.
 
 ## Network switch
 
