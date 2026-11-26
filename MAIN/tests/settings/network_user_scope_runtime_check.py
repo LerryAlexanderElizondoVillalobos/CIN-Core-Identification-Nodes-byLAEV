@@ -39,12 +39,15 @@ def main():
 
         run(["set-property", "--runtime", UNIT, "IPAddressDeny=any"], env)
         denied = run(["show", UNIT, "--property=IPAddressDeny", "--value"], env).stdout.strip()
-        if denied != "any":
-            raise RuntimeError(f"User manager did not apply IPAddressDeny=any: {denied!r}")
+        # systemd normalizes the 'any' token to the equivalent IPv4/IPv6 CIDRs.
+        denied_networks = set(denied.split())
+        if denied != "any" and not {"0.0.0.0/0", "::/0"}.issubset(denied_networks):
+            raise RuntimeError(f"User manager did not apply full IP denial: {denied!r}")
 
         run(["set-property", "--runtime", UNIT, "IPAddressDeny="], env)
         restored = run(["show", UNIT, "--property=IPAddressDeny", "--value"], env).stdout.strip()
-        if restored in ("any", "0.0.0.0/0 ::/0"):
+        restored_networks = set(restored.split())
+        if restored == "any" or {"0.0.0.0/0", "::/0"}.issubset(restored_networks):
             raise RuntimeError("User manager did not restore CIN network access.")
 
         print("PASS: non-root systemd user manager can disable and restore CIN scope networking.")
