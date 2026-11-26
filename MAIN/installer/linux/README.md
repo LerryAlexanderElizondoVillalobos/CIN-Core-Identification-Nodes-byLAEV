@@ -9,7 +9,12 @@
 Run as the normal desktop user:
 
 ```bash
-bash MAIN/installer/linux/install-user.sh ./Core_Identification_Nodes.deb
+tmp="$(mktemp -d)"
+dpkg-deb --extract ./Core_Identification_Nodes.deb "$tmp"
+bash "$tmp/opt/cin-installer/install-user.sh" "$PWD/Core_Identification_Nodes.deb"
+result=$?
+rm -rf "$tmp"
+exit "$result"
 ```
 
 The installer checks Python 3, PyGObject, GTK 4, OpenSSL, `dpkg-deb`, and the systemd user manager. It refuses root execution and refuses a partial installation when the dedicated CIN network-scope service cannot be launched.
