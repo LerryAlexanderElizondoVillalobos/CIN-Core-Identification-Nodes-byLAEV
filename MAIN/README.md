@@ -1,38 +1,51 @@
 # Core Identification Nodes — Linux ARM64
 
-**Release target:** Linux ARM64 / AArch64 only  
-**Recommended user-mode installer:** AppImage  
-**Additional package:** Debian .deb for Debian/Ubuntu ARM64
+**Release architecture:** ARM64 / AArch64 only  
+**Supported execution:** ARM64 Linux on physical hardware or an ARM64 virtual machine  
+**Primary format:** AppImage — graphical per-user installation, no root and no sudo  
+**Additional format:** Debian ARM64 package (.deb)
 
-CIN supports ARM64 hardware and ARM64 virtual machines. Virtualization is optional; the guest must expose an ARM64 Linux userspace and compatible kernel. x86_64 is not a target of this release.
+## Distribution files
 
-## Downloads
+- `Core_Identification_Nodes-aarch64.AppImage` — recommended; user-space installation to `~/Applications`, no administrator access.
+- `Core_Identification_Nodes-arm64.deb` — conventional Debian package for Debian/Ubuntu ARM64 systems. Installation through apt, dpkg, GDebi, Discover or another package manager requires administrator authorization.
 
-- Core_Identification_Nodes-aarch64.AppImage — portable graphical installer; per-user installation without root or sudo.
-- Core_Identification_Nodes-arm64.deb — conventional Debian package for ARM64.
+The application itself does not require virtualization. It runs on compatible ARM64 Linux installations whether they are on physical ARM64 hardware or inside an ARM64 virtual machine. An x86_64 virtual machine or CPU-emulation layer is not an ARM64 target.
 
-## AppImage installation (no root)
+## AppImage installation (recommended)
 
-1. Download the AArch64 AppImage.
-2. If needed, enable execution in file Properties → Permissions.
-3. Double-click the file.
-4. Select **Install for this user** or **Run without installing**.
-5. CIN installs under ~/Applications and creates a launcher in ~/.local/share/applications. Main Lobby opens after installation.
+1. Download `Core_Identification_Nodes-aarch64.AppImage`.
+2. If the desktop environment requests it, enable execution in the file's Properties → Permissions.
+3. Double-click the AppImage.
+4. Choose **Install for this user** or **Run without installing**.
 
-Uninstall with ~/.local/bin/cin-uninstall. User data and configuration are preserved.
+The graphical installer copies the AppImage to `~/Applications`, creates the desktop entry and icon in the user's home directory, and opens CIN Main Lobby. It does not invoke a terminal, root, sudo, apt, dpkg or administrator authentication. It does not write to system directories.
 
-## Debian package privilege requirement
+Uninstall the per-user launcher with `~/.local/bin/cin-uninstall`. User data and configuration are preserved.
 
-A conventional .deb installation via a graphical package manager, apt, or dpkg requires administrator authorization to write to /opt and system application directories. The CIN application runs as the logged-in user after installation. If the machine must remain entirely rootless, use the AppImage; a standard Debian package cannot perform system-wide package installation without administrator privileges.
+## Debian package installation
 
-## Included capabilities
+Install `Core_Identification_Nodes-arm64.deb` using the distribution's graphical package installer or package manager. This is a conventional ARM64 Debian package and normally requires administrator authentication because it installs the application under `/opt` and registers a system-wide launcher.
 
-- Main Lobby as the initial screen.
-- Settings with navigation back to Lobby.
-- Deploy engine included; remote component updates remain disabled until an AppImage-aware signed replacement updater, genuine publisher Ed25519 public key, and signed official manifest are provisioned and verified.
-- CIN-only network controller, enforced only where the user's systemd user scope and cgroup policy are supported.
-- Graphical first-run installer and portable run option for AppImage.
+After installation, launch **Core Identification Nodes** from the application menu. Remove it using the distribution's package manager.
 
-## Release validation
+## Included application
 
-The release is not complete until ARM64 source tests, AppImage payload inspection, clean-environment GTK4/PyGObject runtime tests, GUI installation, Lobby navigation, and uninstall validation pass. The .deb must report Architecture: arm64 and pass dpkg-deb metadata and payload checks.
+- CIN Main Lobby as the initial screen.
+- Settings and navigation back to Main Lobby.
+- Deploy engine included; component-level remote updates remain disabled until an AppImage-aware signed replacement updater, genuine publisher Ed25519 public key and signed official manifest are provisioned and verified.
+- CIN-only network ON/OFF controller. Enforcement is available only when the user's systemd scope and cgroup policy support it. If unsupported, CIN must report the control as unavailable rather than claim isolation.
+
+## Release acceptance requirements
+
+A generated file is not an official release until it passes:
+1. Source tests and Python/shell syntax checks.
+2. ARM64/AArch64 architecture validation of both packages.
+3. AppImage payload inspection and GTK4/PyGObject runtime validation.
+4. Graphical AppImage installation without root or sudo.
+5. Main Lobby launch and Settings navigation.
+6. Debian package metadata and payload inspection.
+7. ARM64 virtual-machine and physical-device smoke tests where hardware is available.
+8. Supported network-scope OFF/ON tests and uninstall validation.
+
+See [Linux AppImage migration](installer/linux/APPIMAGE_MIGRATION.md) and the [installation acceptance test plan](installer/linux/INSTALLATION_TEST_PLAN.md).
