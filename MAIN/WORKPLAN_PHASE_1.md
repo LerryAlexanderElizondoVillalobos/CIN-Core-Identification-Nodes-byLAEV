@@ -1,109 +1,108 @@
-# Phase 1 Workplan — First Installable CIN Main Release
+# Phase 1 Workplan — Core Identification Nodes Official Debian Package
 
 ## Milestone objective
 
-Deliver one downloadable `CIN-Linux-Installer.zip` artifact. It contains the `CIN.deb` application payload, user-space installer, uninstaller, instructions and checksums. The inner `.deb` is not a separate operator download. A normal desktop user must be able to install, launch, navigate, update and remove CIN without root privileges, `sudo`, system package-manager installation or writes to system directories.
+Deliver one downloadable file: Core_Identification_Nodes.deb, Debian package version 0.3.0, package name core-identification-nodes, architecture all. The single archive contains the CIN application, the user-space installer and uninstaller, the Deploy engine, and the application-scoped network controller.
 
-The installed application must open the native CIN Main Lobby and demonstrate navigation to the informational Settings screen and back.
+The normal desktop user must be able to extract and run the embedded installer without root privileges, sudo, system package registration or writes to system directories. CIN must open Main Lobby first and demonstrate Settings navigation and the network OFF/ON policy from inside its dedicated systemd user scope.
 
-This milestone is an installer and application-bootstrap milestone. It does not claim that the founding certificate engines, node creation, Enter, Import or the CIN Package Engine are implemented.
+This milestone does not claim that the founding certificate engines, node creation, Enter, Import or the CIN Package Engine are implemented.
 
-## Technology decision
+## Technology and installation decisions
 
-- **UI:** GTK 4 native desktop interface through Python GObject Introspection (`python3-gi`).
-- **Application language:** Python 3.
-- **Package:** Debian `.deb` application payload named `CIN.deb`.
-- **Package architecture:** `all`, because the application code is architecture-independent Python.
-- **Runtime prerequisites:** Python 3, PyGObject and GTK 4 must already be available to the user from the target Linux distribution. The installer checks these prerequisites and does not install system dependencies.
-- **Installation model:** extract the Debian archive with `dpkg-deb --extract` and copy the application into the current user's XDG home-directory space. Do not use `apt install`, `dpkg -i`, root shells or `sudo`.
-- **User paths:** application under `~/.local/opt/cin-main-lobby`, launcher under `~/.local/bin`, desktop entry under `~/.local/share/applications`.
-- **Runtime:** system Python 3 and GTK 4; no Electron, Chromium, WebKit, embedded browser, remote assets or application network dependency.
-- **User data:** future persistent node data belongs under the user's XDG data directory and must not be removed by application upgrades or application uninstall.
+- UI: GTK 4 native desktop interface through Python GObject Introspection.
+- Application language: Python 3.
+- Official file: Core_Identification_Nodes.deb.
+- Debian package metadata: core-identification-nodes, version 0.3.0, architecture all.
+- The archive contains /opt/cin-main-lobby and /opt/cin-installer.
+- Installation is performed by extracting the archive with dpkg-deb --extract and running its embedded user installer.
+- The installer writes only to the current user's home directory. It refuses root execution and does not use sudo, apt install or dpkg -i.
+- Runtime prerequisites: Python 3, PyGObject, GTK 4, OpenSSL, dpkg-deb, a running systemd user manager and systemd/cgroup support for IPAddressDeny.
+- CIN launches inside cin-main-lobby.scope; the network switch controls only this scope.
+- Persistent user data and publisher trust configuration are kept separately from replaceable application files.
 
-The `.deb` is used as a portable payload container, not registered as a system package. This is intentional: standard system-wide Debian package installation normally requires administrator authorization and is not the CIN user installation model.
+The .deb is a portable payload container, not a registered system package. It is deliberately extracted and installed per-user.
 
-## Screen behavior included in this milestone
+## Included functionality
 
-### Main Lobby
+### Main Lobby and Settings
+- Main Lobby is the initial screen.
+- Settings opens from the Lobby and Back returns to the Lobby.
+- Create reports honestly that node creation and certificate issuance are not implemented.
+- Enter and Import remain disabled.
 
-- `Welcome to the Main Lobby`
-- `Core Identification Nodes`
-- `Create` — opens an honest informational entry dialog; it does not claim node creation or certificate issuance is implemented.
-- `Enter` — visible and disabled.
-- `Import` — visible and disabled.
-- Settings icon — opens the separate Settings screen.
-- Professional copyright footer and clickable project repository link.
+### Deploy engine
+- Generates a deterministic local component manifest with SHA-256 hashes.
+- Validates application/schema metadata and official manifest fingerprint.
+- Verifies detached Ed25519 signatures against a public key provisioned independently at ~/.config/cin-main-lobby/deploy.pub.
+- Compares component additions, replacements and removals.
+- Stages HTTPS component downloads and verifies their SHA-256 hashes.
+- Requires explicit operator confirmation before applying a proposal.
+- Verifies the resulting build and restores the prior application tree if post-apply verification fails.
+- Records the deployment result under ~/.local/share/cin-main-lobby/deployment-record.json.
 
-### Settings
+The Deploy engine is included and its source tests are part of CI. Remote deployment is not live until the genuine publisher public key and a signed official manifest are provisioned and published.
 
-Display the application name, project, Phase 1 milestone, Linux ARM64 / AArch64 target, offline startup requirement, current capabilities and clickable repository URL. Display a Back icon with accessible name `Back to Main Lobby`. Back returns to the Lobby. The navigation cycle must work repeatedly without restarting.
+### CIN network switch
+- ON/OFF is enforced by systemd IPAddressDeny on cin-main-lobby.scope.
+- OFF blocks IP networking for CIN's scope only.
+- ON clears the CIN scope override.
+- Host networking, NetworkManager and other applications are not modified.
+- If the user manager or cgroup policy cannot be used, installation or the UI reports the limitation; CIN must not claim isolation that is not enforced.
 
-Both screens must support resizing and reflow. The Settings content may scroll vertically on compact windows. The interface uses native GTK widgets and system typography.
+## GitHub Actions qualification
 
-## Implementation work packages
+1. Run all source and Deploy tests.
+2. Compile-check Python source.
+3. On x86_64 and ARM64, verify user-manager policy toggling and prove that denied scope networking does not affect host networking.
+4. Run the native application smoke test inside the actual CIN systemd scope.
+5. Build and inspect the one Debian file.
+6. Verify the package contains the application, Deploy engine, network controller, embedded installer and uninstaller.
+7. Extract the embedded installer and install as an unprivileged user.
+8. Launch the installed application and test Lobby → Settings → Lobby and network OFF → ON.
+9. Uninstall and verify user data and publisher configuration remain.
+10. Publish only Core_Identification_Nodes.deb after every required gate succeeds.
 
-| ID | Work package | Deliverable | Acceptance |
-|---|---|---|---|
-| CIN-INS-01 | Native application shell | GTK 4 Python application | Launches a native window without browser runtime |
-| CIN-INS-02 | Lobby screen | Lobby UI and actions | Required content appears; Enter and Import disabled |
-| CIN-INS-03 | Settings screen | Informational Settings UI | All required information appears accurately |
-| CIN-INS-04 | Navigation | Settings and Back handlers | Repeated Lobby → Settings → Lobby navigation succeeds |
-| CIN-INS-05 | Debian payload | Architecture-independent `CIN.deb` containing application files under `/opt/cin-main-lobby` | `dpkg-deb` builds and extracts the payload |
-| CIN-INS-06 | User-space installer | Installer and uninstaller scripts | Installs only under the current user's home directory and refuses root execution |
-| CIN-INS-07 | GitHub Actions CI | Source, package and UI smoke-test workflow | Runs the user installer as an unprivileged account and launches under Xvfb |
-| CIN-INS-08 | Single downloadable artifact | `CIN-Linux-Installer.zip` containing the payload, scripts, instructions and checksums | Uploaded only after successful x86_64 and ARM64 runtime tests |
-| CIN-INS-09 | ARM64 operator qualification | Manual installation and launch test | Operator installs on target Linux ARM64 / AArch64 without root and reports results |
+CI may use administrator privileges to provision its disposable test environment. That is not part of the user's installation procedure.
 
-## GitHub Actions pipeline
+## Operator installation
 
-1. Check out the repository.
-2. Run Python source-contract tests.
-3. Provision GTK 4, Python GI bindings, Xvfb and Debian packaging tools on disposable CI runners. CI provisioning may use runner administrator permissions; this is not part of the user installer.
-4. Build `dist/CIN-Linux-Installer.zip` as the sole distributable artifact; keep `CIN.deb` inside it as the payload.
-5. Inspect package metadata and payload.
-6. Download the artifact on x86_64 and ARM64 runners.
-7. Provision CI runtime prerequisites.
-8. Run `install-user.sh` as the unprivileged CI user.
-9. Verify all installed application paths are under that user's home directory.
-10. Launch the installed executable under a virtual X display.
-11. Execute the application smoke test, traversing Lobby → Settings → Lobby.
-12. Run the user-space uninstaller and verify application files are removed.
-13. Upload the bundle as a downloadable workflow artifact on successful non-PR runs.
+Download the single Core_Identification_Nodes.deb artifact. From the directory containing the file, run as the normal desktop user:
 
-The workflow must not use `apt install ./CIN.deb` or `dpkg -i` to install CIN. The CI runner may use privileged package installation only to provision its own test dependencies.
+~~~bash
+tmp="$(mktemp -d)"
+dpkg-deb --extract ./Core_Identification_Nodes.deb "$tmp"
+bash "$tmp/opt/cin-installer/install-user.sh" "$PWD/Core_Identification_Nodes.deb"
+result=$?
+rm -rf "$tmp"
+exit "$result"
+~~~
 
-## Download and installation test
+Launch:
 
-After a successful workflow run:
-1. Open the repository's Actions tab.
-2. Open the successful `CIN Main — Build, Test and Package Linux Installer` run.
-3. Download the `CIN-deb-installer` artifact.
-4. Extract the artifact ZIP to obtain `CIN.deb`, `install-user.sh` and `uninstall-user.sh`.
-5. As the normal desktop user, run `bash install-user.sh ./CIN.deb`.
-6. Launch `~/.local/bin/cin-main` or select CIN Main Lobby from the user's application menu.
-7. Open Settings, inspect the information and use Back to return.
-8. Repeat navigation and restart the application.
-9. Test offline startup.
-10. Remove CIN with `bash uninstall-user.sh`, as the same user.
+~~~bash
+~/.local/bin/cin-main
+~~~
 
-No step in the user installation or removal procedure requires root privileges or `sudo`.
+Uninstall:
+
+~~~bash
+bash ~/.local/opt/cin-main-lobby/uninstall-user.sh
+~~~
 
 ## Definition of done
 
 The milestone is complete only when:
-- GitHub Actions produces the downloadable user installer bundle.
+- GitHub Actions publishes the single .deb artifact.
 - The installer runs as a normal user and refuses root execution.
-- All installed application files remain under the user's home directory.
-- No system package database or system directories are modified by CIN's installer.
-- The installed application opens the Lobby.
-- Settings opens as a distinct screen.
-- Back returns to the Lobby repeatedly.
-- The application starts without an Internet connection.
-- Enter and Import remain visibly unavailable.
-- The Create entry accurately reports that node/certificate workflows are not yet implemented.
-- The uninstaller removes application files without deleting future CIN user data.
-- The operator confirms the manual installation and screen test on the ARM64 target.
+- The installed app and launcher remain under the user's home directory.
+- Deploy engine and network controller are present in the package.
+- Main Lobby is the initial screen and Settings navigation works.
+- CIN's actual scope network switch turns OFF and ON successfully.
+- Another process outside CIN retains network access while CIN is OFF.
+- Uninstall removes application files but preserves user data and publisher configuration.
+- The operator confirms installation and behavior on the target Linux desktop, including ARM64 if that is the target.
 
 ## Deferred scope
 
-The three founding certificate processes, authoritative node records, external signing connectors, full Create workflow, Enter, Import and Phase 2 Package Engine remain later work. No success message or UI text may imply they already exist.
+The three founding certificate processes, authoritative node records, external signing connectors, full Create workflow, Enter, Import and Phase 2 Package Engine remain later work.
