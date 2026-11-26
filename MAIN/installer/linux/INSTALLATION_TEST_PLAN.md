@@ -1,29 +1,23 @@
-# CIN.deb — User-Space Installation and Acceptance Test
+# CIN Linux Installer — Installation and Acceptance Test
 
 ## Purpose
 
-Verify that a normal desktop user can install, launch, navigate and remove CIN without root privileges or `sudo`.
+Verify that the single downloadable installer installs, launches, navigates and removes CIN as a normal desktop user without root privileges.
 
-## 1. Record target environment
+## 1. Obtain and verify the one release artifact
 
-- Distribution and release:
-- CPU architecture (`uname -m`):
-- Package architecture (`dpkg --print-architecture`):
-- Desktop environment:
-- Display session:
-- Python 3 version:
-- GTK 4 and PyGObject availability:
-- Test date:
+Download the latest successful `CIN-Linux-Installer` artifact from the repository Actions page. It must contain one archive: `CIN-Linux-Installer.zip`.
 
-## 2. Obtain the release artifact
+Extract it, then verify:
 
-1. Open the repository Actions page.
-2. Select the latest successful **CIN Main — Build, Test and Package Debian Installer** run.
-3. Confirm source tests, package build and x86_64/ARM64 user-space runtime qualification passed.
-4. Download and extract the `CIN-deb-installer` artifact.
-5. Confirm it contains `CIN.deb`, `install-user.sh` and `uninstall-user.sh`.
+```bash
+cd CIN-Linux-Installer
+sha256sum -c SHA256SUMS
+```
 
-## 3. Install as a normal user
+The archive contains `CIN.deb` as an internal application payload, plus install and uninstall scripts. Do not download or install a separate legacy `.deb`.
+
+## 2. Install as a normal user
 
 Do not use a root shell, `sudo`, `apt install` or `dpkg -i`.
 
@@ -36,61 +30,42 @@ Expected paths:
 - `~/.local/bin/cin-main`
 - `~/.local/share/applications/cin-main.desktop`
 
-Verify:
-```bash
-test -f "$HOME/.local/opt/cin-main-lobby/cin_main.py"
-test -x "$HOME/.local/bin/cin-main"
-test -f "$HOME/.local/share/applications/cin-main.desktop"
-```
-
-## 4. Launch and inspect the Lobby
+## 3. Launch and inspect Main Lobby
 
 ```bash
 ~/.local/bin/cin-main
 ```
 
-Verify the native Lobby, required text, disabled Enter and Import controls, informational Create entry, copyright footer and repository link.
+Verify Main Lobby is the first screen. Settings must appear only after selecting its control in Main Lobby.
 
-## 5. Test Settings
+## 4. Navigation, restart and offline checks
 
-1. Open Settings.
-2. Inspect application information and capability status.
-3. Use Back to return to the Lobby.
-4. Repeat the cycle at least five times.
-5. Resize the window and test portrait/landscape layouts where supported.
+- Open Settings and use Back to return to Main Lobby.
+- Repeat at least five times.
+- Close and relaunch; confirm Main Lobby is still the first screen.
+- Disconnect the network and relaunch; local screens must remain available.
 
-## 6. Restart and offline test
-
-Close CIN, disconnect the network, launch it again and repeat Lobby → Settings → Lobby. The application screens must not require network access; only opening the repository link requires connectivity.
-
-## 7. Uninstall as the same user
+## 5. Uninstall
 
 ```bash
 bash uninstall-user.sh
 ```
 
-Verify:
-```bash
-test ! -e "$HOME/.local/opt/cin-main-lobby"
-test ! -e "$HOME/.local/bin/cin-main"
-test ! -e "$HOME/.local/share/applications/cin-main.desktop"
-```
+Verify application files and launcher are removed. User data and publisher configuration are intentionally preserved.
 
-## 8. Acceptance record
+## 6. Acceptance record
 
-| Test | Result | Notes |
-|---|---|---|
-| User-space installer runs without sudo | Pending | |
-| Application installed under home directory | Pending | |
-| No system paths modified by installer | Pending | |
-| Native Lobby launch | Pending | |
-| Settings screen opens | Pending | |
-| Back returns to Lobby | Pending | |
-| Five navigation cycles | Pending | |
-| Layout resizing/orientation | Pending | |
-| Offline startup | Pending | |
-| User-space uninstall succeeds | Pending | |
+| Test | Result |
+|---|---|
+| One downloadable ZIP only | Pending |
+| SHA-256 verification | Pending |
+| User-space install without sudo | Pending |
+| No system paths modified | Pending |
+| Main Lobby is initial screen | Pending |
+| Settings opens from Lobby | Pending |
+| Back returns to Lobby | Pending |
+| Five navigation cycles | Pending |
+| Offline startup | Pending |
+| User-space uninstall | Pending |
 
-**Overall result:** Pending operator test.
-
-A successful CI run does not replace the operator's manual test on the actual target environment.
+A successful CI run does not replace the operator's manual test on the actual target Linux desktop.
