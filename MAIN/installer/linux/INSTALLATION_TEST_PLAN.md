@@ -1,69 +1,57 @@
-# Core Identification Nodes — Official Debian Acceptance Test
+# CIN Linux AppImage — Acceptance Test Plan
 
-## Artifact
+## Artifacts
 
-The sole official downloadable package is `Core_Identification_Nodes.deb`. The Debian package metadata must identify package `core-identification-nodes`, version `0.3.0`, architecture `all`.
+- `Core_Identification_Nodes-x86_64.AppImage`
+- `Core_Identification_Nodes-aarch64.AppImage`
 
-## 1. Inspect package contents
+Each artifact must be built and tested on its matching architecture.
 
-```bash
-dpkg-deb --field Core_Identification_Nodes.deb Package Version Architecture
-dpkg-deb --contents Core_Identification_Nodes.deb
-```
+## 1. Payload inspection
 
-The payload must include:
-- `opt/cin-main-lobby/cin_main.py`
-- `opt/cin-main-lobby/settings/deployment/engine.py`
-- `opt/cin-main-lobby/settings/network_access.py`
+Verify the AppImage contains:
+- AppRun entry point
+- CIN Main Lobby executable
+- graphical first-run installer
+- GTK4/PyGObject runtime dependencies and introspection typelibs
+- Deploy engine and network controller modules
+- desktop integration metadata and icon
 
-## 2. Install as a normal user
+## 2. First-run installation
 
-Do not use root, `sudo`, `apt install` or `dpkg -i`.
+On a clean supported Linux desktop:
+- Download the matching AppImage.
+- Enable executable permission in the file manager if required.
+- Double-click it.
+- Confirm the graphical welcome installer appears.
+- Select Install for this user.
+- Confirm installation under `~/Applications`.
+- Confirm desktop entry under `~/.local/share/applications`.
+- Confirm no root, sudo, password prompt, terminal, package manager, or system directory modification occurs.
 
-```bash
-tmp="$(mktemp -d)"
-dpkg-deb --extract ./Core_Identification_Nodes.deb "$tmp"
-bash "$tmp/opt/cin-installer/install-user.sh" "$PWD/Core_Identification_Nodes.deb"
-result=$?
-rm -rf "$tmp"
-exit "$result"
-```
+## 3. Main Lobby
 
-Expected application paths:
-- `~/.local/opt/cin-main-lobby/`
-- `~/.local/bin/cin-main`
-- `~/.local/share/applications/cin-main.desktop`
-
-## 3. Launch and navigation
-
-```bash
-~/.local/bin/cin-main
-```
-
-Verify Main Lobby opens first, Settings opens from its control, and Back returns to Main Lobby.
+Open the installed desktop entry. Verify Main Lobby is the first application screen and Settings navigation works in both directions.
 
 ## 4. Deploy
 
-Generate the local manifest and verify that component hashes and build fingerprint are stable. Provision the genuine publisher Ed25519 public key independently and publish a signed official manifest before attempting remote deployment. Without those trust materials, the application must report Deploy as not configured and must not apply remote code.
+Verify the local manifest can be generated. Remote deployment must remain unavailable until the genuine publisher public key and signed official manifest are independently provisioned. Never trust a key delivered by the same downloaded manifest.
 
-## 5. Network isolation
+## 5. Network control
 
-- Confirm CIN runs in `cin-main-lobby.scope`.
-- Turn CIN network access OFF and verify that a process in the CIN scope cannot reach IP endpoints.
-- Verify another process outside the CIN scope retains connectivity.
-- Turn CIN network access ON and verify connectivity is restored for CIN.
-- Confirm the switch does not invoke NetworkManager or alter host-wide networking.
+On supported systemd environments:
+- Verify CIN's own process scope is the only scope affected.
+- Toggle OFF and verify CIN network traffic is denied.
+- Verify a separate process outside CIN retains network access.
+- Toggle ON and verify CIN access returns.
+- On unsupported systems, confirm the UI reports unavailable rather than claiming enforcement.
 
-## 6. Upgrade and uninstall
+## 6. Uninstall and data preservation
 
-Verify an application replacement preserves `~/.local/share/cin-main-lobby` and `~/.config/cin-main-lobby`. Uninstall using:
+Run `~/.local/bin/cin-uninstall`. Verify the installed AppImage and desktop launcher are removed. Verify user data and publisher trust configuration are preserved.
 
-```bash
-bash ~/.local/opt/cin-main-lobby/uninstall-user.sh
-```
+## 7. Distribution matrix
 
-Verify application files and launcher are removed while user data and publisher configuration remain.
+Test clean desktop environments on supported architectures, prioritizing Ubuntu, Debian, Fedora, and Linux Mint. Record distribution release, glibc version, architecture, GTK runtime behavior, installer result, and Main Lobby smoke-test result.
 
-## 7. Release acceptance
-
-A release requires passing source tests, x86_64 and ARM64 scope tests, Debian payload inspection, normal-user installation, installed application smoke test including OFF/ON network behavior, and uninstall/data-preservation tests.
+Do not publish until all required matrix tests pass.
