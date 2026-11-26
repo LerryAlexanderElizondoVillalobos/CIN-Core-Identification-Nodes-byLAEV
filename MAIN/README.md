@@ -1,6 +1,6 @@
 # CIN Main — First Installable Release
 
-The immediate objective is to produce a downloadable Debian package named **CIN.deb** through GitHub Actions and manually qualify it on a Linux ARM64 / AArch64 environment.
+The immediate objective is to produce a downloadable **CIN.deb** payload and a user-space installer bundle through GitHub Actions, then manually qualify it on Linux ARM64 / AArch64.
 
 ## First milestone — Install, launch and navigate
 
@@ -11,38 +11,58 @@ The first installable release contains a native GTK 4 application with two worki
 
 Create opens an informational entry point and does not claim that node creation or certificate issuance is implemented. Enter and Import remain disabled.
 
+## User-first installation model
+
+CIN is installed by the current desktop user, not by root.
+
+- No `sudo`, root shell, `apt install ./CIN.deb` or `dpkg -i` for CIN.
+- Application files: `~/.local/opt/cin-main-lobby/`
+- Launcher: `~/.local/bin/cin-main`
+- Desktop entry: `~/.local/share/applications/cin-main.desktop`
+- The installer extracts the `.deb` payload with `dpkg-deb --extract` and writes only inside the user's home directory.
+- Python 3, PyGObject and GTK 4 must already be available to the user. The installer checks them and does not attempt privileged dependency installation.
+- The running application operates as the logged-in user.
+
 ## Technology
 
 - Python 3 and GTK 4 native UI.
-- Debian `.deb` package, initially named `CIN.deb`.
-- Package architecture `all`; GTK and Python dependencies are supplied by the target Linux distribution.
+- Debian `.deb` payload named `CIN.deb`, architecture `all`.
 - Intended operator qualification: Debian-compatible Linux ARM64 / AArch64.
 - No Electron, Chromium, WebKit, remote resources or network requirement to open the application.
 
-Package installation is managed by the Debian package manager and may require administrator authorization. The running application operates as the logged-in user.
-
 ## Build and download
 
-GitHub Actions runs source tests, builds the package, installs it in CI, launches it under a virtual display and tests Lobby → Settings → Lobby navigation. A successful non-PR run uploads a downloadable artifact named **CIN-deb-installer**, containing `CIN.deb`.
+GitHub Actions runs source tests, builds the payload and user installer scripts, installs CIN into the CI user's home directory on x86_64 and ARM64 runners, launches it under a virtual display and tests Lobby → Settings → Lobby navigation. A successful non-PR run uploads **CIN-deb-installer**, containing `CIN.deb`, `install-user.sh` and `uninstall-user.sh`.
 
 See:
 - [First Installable Release Workplan](WORKPLAN_PHASE_1.md)
 - [Development Roadmap](ROADMAP.md)
-- [Linux Debian Installer](installer/linux/README.md)
+- [Linux User-Space Installer](installer/linux/README.md)
 - [Operator Installation and Acceptance Test](installer/linux/INSTALLATION_TEST_PLAN.md)
 - [Lobby and Settings](lobby/README.md)
 - [Settings Screen Specification](lobby/SETTINGS.md)
 
-## Operator test
+## Operator installation
 
-Download the `CIN-deb-installer` artifact from a successful workflow run, extract `CIN.deb`, and install it on the target:
+Extract the downloaded artifact ZIP. From that directory, run as the normal desktop user:
 
 ```bash
-sudo apt install ./CIN.deb
-cin-main
+bash install-user.sh ./CIN.deb
 ```
 
-Open Settings, inspect the information, use Back, repeat the navigation and test offline startup. ARM64 compatibility is only confirmed after this manual target test; CI success on another architecture is not sufficient.
+Launch:
+
+```bash
+~/.local/bin/cin-main
+```
+
+Remove:
+
+```bash
+bash uninstall-user.sh
+```
+
+None of these user operations requires root privileges or `sudo`. ARM64 compatibility is only confirmed after manual qualification on the actual target; CI success alone is not sufficient.
 
 ## Longer-term Phase 1
 
@@ -57,4 +77,4 @@ A separate installer and product layer for the engine of engines. It is not incl
 
 ## Current maturity
 
-The GTK4 application source and Debian packaging scaffold are present. The first CI build, package installation, automated UI smoke test and operator ARM64 installation remain to be executed and verified. Do not describe the release as tested until those checks have passed.
+The GTK4 application source and Debian user-space packaging scaffold are present. The first no-root CI installation, automated UI smoke test and operator ARM64 installation remain to be executed and verified. Do not describe the release as tested until those checks have passed.
