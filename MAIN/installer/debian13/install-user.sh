@@ -31,13 +31,14 @@ DESKTOP_TMP="$DESKTOP_HOME/.cin-desktop-$$"
 ICON_TMP="$ICON_HOME/.cin-icon-$$"
 SVG_TMP="$SCALABLE_ICON_HOME/.cin-icon-$$"
 COMMITTED=0
+APP_SWAPPED=0
 cleanup() {
   status=$?
   rm -rf "$STAGE" "$LAUNCHER_TMP" "$UNINSTALL_TMP" "$DESKTOP_TMP" "$ICON_TMP" "$SVG_TMP"
-  if [ "$COMMITTED" -eq 0 ]; then
+  if [ "$COMMITTED" -eq 0 ] && [ "$APP_SWAPPED" -eq 1 ]; then
     rm -rf "$APP_HOME"
     if [ -d "$BACKUP" ]; then mv "$BACKUP" "$APP_HOME"; fi
-  else
+  elif [ "$COMMITTED" -eq 1 ]; then
     rm -rf "$BACKUP"
   fi
   exit "$status"
@@ -49,7 +50,9 @@ mkdir -p "$STAGE"
 dpkg-deb -x "$DEB" "$STAGE"
 [ -x "$STAGE/opt/cin/AppDir/AppRun" ] || fail "Package payload is incomplete: AppRun is missing."
 [ -x "$STAGE/opt/cin/AppDir/usr/bin/cin-main" ] || fail "Package payload is incomplete: CIN Main Lobby executable is missing."
+if [ -e "$APP_HOME" ] && [ ! -d "$APP_HOME" ]; then fail "Application destination exists and is not a directory: $APP_HOME."; fi
 if [ -d "$APP_HOME" ]; then mv "$APP_HOME" "$BACKUP"; fi
+APP_SWAPPED=1
 mkdir -p "$APP_HOME"
 cp -a "$STAGE/opt/cin/AppDir" "$APP_HOME/AppDir"
 cat > "$LAUNCHER_TMP" <<EOF
