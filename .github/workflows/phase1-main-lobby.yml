@@ -1,4 +1,4 @@
-name: CIN Phase 1 — Minimal Adaptive Main Lobby
+name: CIN Phase 1 — Adaptive Main Lobby and Settings
 
 on:
   push:
@@ -19,8 +19,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  lobby-contract:
-    name: Validate minimal adaptive Lobby specification
+  screen-contract:
+    name: Validate Lobby, Settings and navigation specifications
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -30,10 +30,12 @@ jobs:
           set -euo pipefail
           test -f MAIN/README.md
           test -f MAIN/WORKPLAN_PHASE_1.md
+          test -f MAIN/ROADMAP.md
           test -f MAIN/installer/linux/README.md
           test -f MAIN/lobby/README.md
+          test -f MAIN/lobby/SETTINGS.md
 
-      - name: Validate first-screen content, resource and layout requirements
+      - name: Validate both screen contracts and navigation
         shell: python
         run: |
           from pathlib import Path
@@ -41,7 +43,8 @@ jobs:
           plan = Path("MAIN/WORKPLAN_PHASE_1.md").read_text(encoding="utf-8")
           installer = Path("MAIN/installer/linux/README.md").read_text(encoding="utf-8")
           lobby = Path("MAIN/lobby/README.md").read_text(encoding="utf-8")
-          docs = "\n".join((plan, installer, lobby))
+          settings = Path("MAIN/lobby/SETTINGS.md").read_text(encoding="utf-8")
+          docs = "\n".join((plan, installer, lobby, settings))
 
           required = (
               "Welcome to the Main Lobby",
@@ -50,33 +53,40 @@ jobs:
               "Enter",
               "Import",
               "Settings",
+              "Application Information",
+              "Current Capabilities",
+              "Linux ARM64 / AArch64",
+              "Back to Main Lobby",
               "landscape",
               "portrait",
               "flat",
               "text-only",
               "repository",
-              "© 2026 Core Identification Nodes byLAEV",
+              "© 2026 Core Identification Nodes byLAEV. All rights reserved.",
           )
-          missing = [item for item in required if item.lower() not in docs.lower()]
+          missing = [item for item in required if item.casefold() not in docs.casefold()]
           if missing:
-              raise SystemExit("Missing Lobby requirements: " + ", ".join(missing))
+              raise SystemExit("Missing screen requirements: " + ", ".join(missing))
 
-          if "only Create is active" not in installer:
-              raise SystemExit("Installer specification must keep Create as the only active action")
+          if "only active primary action" not in installer:
+              raise SystemExit("Create must be the only active primary Lobby action")
 
-          if "no fixed-aspect canvas" not in installer:
-              raise SystemExit("Installer specification must prohibit a fixed-aspect canvas")
+          if "returns to the Lobby" not in installer:
+              raise SystemExit("Settings Back navigation must return to the Lobby")
 
           if "must reflow" not in lobby:
-              raise SystemExit("Lobby specification must require responsive reflow")
+              raise SystemExit("Both screens must require responsive layout reflow")
 
-          print("PASS: minimal adaptive Lobby requirements are documented.")
-          print("NOTE: this is a specification check, not a runtime UI or memory benchmark.")
+          if "pretend toggles" not in settings:
+              raise SystemExit("Settings must explicitly exclude nonfunctional preference controls")
+
+          print("PASS: Lobby, Settings and two-way navigation requirements are documented.")
+          print("NOTE: this checks documentation contracts, not a compiled application or runtime UI.")
 
   package-build:
     name: Build Linux package when packaging scaffold exists
     runs-on: ubuntu-latest
-    needs: lobby-contract
+    needs: screen-contract
     if: ${{ hashFiles('MAIN/packaging/deb/DEBIAN/control') != '' }}
     steps:
       - uses: actions/checkout@v4
