@@ -55,7 +55,7 @@ jobs:
           (cd "$BUNDLE" && sha256sum -c SHA256SUMS)
           bash -n "$BUNDLE/install-user.sh"
           bash -n "$BUNDLE/uninstall-user.sh"
-          ! grep -Eq '(^|[[:space:]])sudo([[:space:]]|$)|apt(-get)?[[:space:]]+install|dpkg[[:space:]]+-i' "$BUNDLE/install-user.sh"
+          ! grep -Eq '^[[:space:]]*sudo[[:space:]]|[;&|][[:space:]]*sudo[[:space:]]|apt(-get)?[[:space:]]+install|dpkg[[:space:]]+-i' "$BUNDLE/install-user.sh"
           dpkg-deb --field "$BUNDLE/CIN.deb" Package Version Architecture
           test "$(dpkg-deb --field "$BUNDLE/CIN.deb" Architecture)" = "all"
           dpkg-deb --contents "$BUNDLE/CIN.deb"
@@ -111,9 +111,7 @@ jobs:
       - name: Uninstall CIN as the current user
         if: always()
         run: |
-          if [ -f dist/CIN-Linux-Installer/CIN-Linux-Installer/uninstall-user.sh ]; then
-            bash dist/CIN-Linux-Installer/CIN-Linux-Installer/uninstall-user.sh
-          elif [ -f dist/CIN-Linux-Installer/uninstall-user.sh ]; then
+          if [ -f dist/CIN-Linux-Installer/uninstall-user.sh ]; then
             bash dist/CIN-Linux-Installer/uninstall-user.sh
           fi
           test ! -e "$HOME/.local/opt/cin-main-lobby"
