@@ -58,6 +58,7 @@ jobs:
           bash -n MAIN/installer/debian13/build-deb-zip-arm64.sh
           sh -n MAIN/installer/debian13/install-user.sh
           sh -n MAIN/installer/debian13/uninstall-user.sh
+          sh -n MAIN/installer/debian13/run-user.sh
           python3 -m compileall -q MAIN/app MAIN/installer/linux/appimage_installer.py
       - name: Build CIN GTK AppDir
         env:
@@ -73,9 +74,21 @@ jobs:
           test "$(dpkg-deb -f dist/CIN.deb Version)" = 0.5.0
           dpkg-deb -c dist/CIN.deb > dist/CIN.deb.contents.txt
           grep -q './opt/cin/AppDir/AppRun' dist/CIN.deb.contents.txt
-          unzip -l dist/CIN-Debian13-Installer.zip | grep -q 'CIN-Debian13-Installer/CIN.deb'
-          unzip -l dist/CIN-Debian13-Installer.zip | grep -q 'CIN-Debian13-Installer/install-user.sh'
-          unzip -l dist/CIN-Debian13-Installer.zip | grep -q 'CIN-Debian13-Installer/uninstall-user.sh'
+          grep -q './opt/cin/AppDir/usr/bin/cin-main' dist/CIN.deb.contents.txt
+          if grep -q 'cin-appimage-installer' dist/CIN.deb.contents.txt; then echo 'Unused AppImage installer found in Debian payload'; exit 1; fi
+          mkdir -p "$RUNNER_TEMP/cin-deb-audit"
+          dpkg-deb -x dist/CIN.deb "$RUNNER_TEMP/cin-deb-audit"
+          find "$RUNNER_TEMP/cin-deb-audit/opt/cin/AppDir" -type f -print0 | while IFS= read -r -d '' file; do
+            if file -b "$file" | grep -q 'ELF'; then
+              output="$(ldd "$file" 2>&1 || true)"
+              if printf '%s\\n' "$output" | grep -q 'not found'; then printf 'Unresolved ELF dependencies in %s\\n%s\\n' "$file" "$output"; exit 1; fi
+            fi
+          done
+          unzip -l dist/CIN-Debian13-Installer.zip > dist/CIN-Debian13-Installer.contents.txt
+          grep -q 'CIN-Debian13-Installer/CIN.deb' dist/CIN-Debian13-Installer.contents.txt
+          grep -q 'CIN-Debian13-Installer/install-user.sh' dist/CIN-Debian13-Installer.contents.txt
+          grep -q 'CIN-Debian13-Installer/uninstall-user.sh' dist/CIN-Debian13-Installer.contents.txt
+          grep -q 'CIN-Debian13-Installer/run-user.sh' dist/CIN-Debian13-Installer.contents.txt
           (cd dist && sha256sum -c SHA256SUMS)
       - name: Test unprivileged install and uninstall
         run: |
@@ -89,6 +102,7 @@ jobs:
           test -x /home/cin-test/.local/bin/cin-uninstall
           test -x /home/cin-test/.local/opt/cin-main-lobby/AppDir/AppRun
           test -f /home/cin-test/.local/share/applications/cin.desktop
+          test -f /home/cin-test/.local/share/icons/hicolor/256x256/apps/cin.png
           if sh /tmp/cin-installer-test/CIN-Debian13-Installer/install-user.sh; then echo "Root install was unexpectedly accepted"; exit 1; fi
           test ! -e /opt/cin/AppDir
           test ! -e /usr/bin/cin
@@ -100,6 +114,7 @@ jobs:
           test -f /home/cin-test/.local/share/cin/preserve.test
           test -f /home/cin-test/.config/cin/preserve.test
           test -f /home/cin-test/.cache/cin/preserve.test
+          test ! -e /home/cin-test/.local/share/icons/hicolor/256x256/apps/cin.png
       - name: GUI smoke test and memory observation
         env:
           APPIMAGE_EXTRACT_AND_RUN: "1"
