@@ -86,6 +86,8 @@ jobs:
           test -f /tmp/cin-official-package/opt/cin-main-lobby/cin_main.py
           test -f /tmp/cin-official-package/opt/cin-main-lobby/settings/deployment/engine.py
           test -f /tmp/cin-official-package/opt/cin-main-lobby/settings/network_access.py
+          test -x /tmp/cin-official-package/opt/cin-installer/install-user.sh
+          test -x /tmp/cin-official-package/opt/cin-installer/uninstall-user.sh
           python3 -m compileall -q /tmp/cin-official-package/opt/cin-main-lobby
           ! find /tmp/cin-official-package -type f -name '*.pyc' | grep .
           bash -n MAIN/installer/linux/install-user.sh
@@ -128,7 +130,8 @@ jobs:
         run: |
           set -euo pipefail
           test "$(id -u)" -ne 0
-          bash MAIN/installer/linux/install-user.sh "$PWD/dist/Core_Identification_Nodes.deb"
+          dpkg-deb --extract "$PWD/dist/Core_Identification_Nodes.deb" "$RUNNER_TEMP/cin-bootstrap"
+          bash "$RUNNER_TEMP/cin-bootstrap/opt/cin-installer/install-user.sh" "$PWD/dist/Core_Identification_Nodes.deb"
           test -f "$HOME/.local/opt/cin-main-lobby/cin_main.py"
           test -f "$HOME/.local/opt/cin-main-lobby/settings/deployment/engine.py"
           test -f "$HOME/.local/opt/cin-main-lobby/settings/network_access.py"
@@ -144,8 +147,8 @@ jobs:
       - name: Uninstall application while preserving operator data
         if: always()
         run: |
-          if [ -f MAIN/installer/linux/uninstall-user.sh ]; then
-            bash MAIN/installer/linux/uninstall-user.sh
+          if [ -f "$HOME/.local/opt/cin-main-lobby/uninstall-user.sh" ]; then
+            bash "$HOME/.local/opt/cin-main-lobby/uninstall-user.sh"
           fi
           test ! -e "$HOME/.local/opt/cin-main-lobby"
           test ! -e "$HOME/.local/bin/cin-main"
