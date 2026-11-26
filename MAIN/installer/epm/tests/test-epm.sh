@@ -3,17 +3,18 @@ set -eu
 ROOT=$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd)
 fail() { echo "FAIL: $*" >&2; exit 1; }
 pass() { echo "PASS: $*"; }
-sh -n "$ROOT/epm" || fail 'launcher syntax'
-sh -n "$ROOT/core/epm-core.sh" || fail 'core syntax'
-"$ROOT/epm" --version | grep -q 'CIN EPM' || fail 'version command'
-pass 'version command'
-"$ROOT/epm" --help | grep -q -- '--report' || fail 'help command'
-pass 'help command'
-"$ROOT/epm" --system | grep -q '^architecture=' || fail 'system detection'
-pass 'system detection'
-"$ROOT/epm" --compatibility | grep -q '^lobby_compatible=' || fail 'compatibility output'
-pass 'compatibility evaluation'
-"$ROOT/epm" --report | grep -q '^release_discovery=not_configured$' || fail 'honest release state'
-pass 'report and explicit release discovery state'
-if "$ROOT/epm" --not-a-command >/dev/null 2>&1; then fail 'invalid command must fail'; fi
-pass 'invalid command exit status'
+sh -n "$ROOT/epm" || fail launcher_syntax
+sh -n "$ROOT/core/epm-core.sh" || fail core_syntax
+"$ROOT/epm" --version | grep -q '0.2.0' || fail version
+pass version
+"$ROOT/epm" --system | grep -q '^runtime_environment=' || fail runtime_detection
+"$ROOT/epm" --system | grep -q '^proc_pid1=' || fail proc_detection
+"$ROOT/epm" --system | grep -q '^systemd_user=' || fail systemd_detection
+pass environment_capability_fields
+"$ROOT/epm" --compatibility | grep -q '^lobby_compatibility=' || fail compatibility
+"$ROOT/epm" --compatibility | grep -q '^installation_readiness=not_verified$' || fail readiness_truthfulness
+pass compatibility_and_readiness
+"$ROOT/epm" --report | grep -q '^release_discovery=not_configured$' || fail release_state
+pass report
+if "$ROOT/epm" --bad >/dev/null 2>&1; then fail invalid_command; fi
+pass invalid_command
