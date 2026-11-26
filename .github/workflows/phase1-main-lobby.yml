@@ -71,7 +71,7 @@ jobs:
           if "only active primary action" not in installer:
               raise SystemExit("Create must be the only active primary Lobby action")
 
-          if "returns to the Lobby" not in installer:
+          if "return to the Lobby" not in installer:
               raise SystemExit("Settings Back navigation must return to the Lobby")
 
           if "must reflow" not in lobby:
