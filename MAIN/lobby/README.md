@@ -1,5 +1,9 @@
 # CIN Main Lobby
 
+## Screen specifications
+
+- [Dedicated Settings screen specification](SETTINGS.md)
+
 ## First-screen specification
 
 The application opens directly into a minimal Main Lobby with a single flat background color and text-only content.
