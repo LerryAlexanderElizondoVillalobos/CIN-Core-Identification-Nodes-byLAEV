@@ -1,27 +1,27 @@
 # CIN EPM — Environment Preparation Manager
 
-Two Linux editions share one functional engine:
-- **Terminal:** POSIX Shell, no GUI, no mandatory Python/Node/GTK.
-- **Desktop:** minimal Tk interface that delegates every analysis operation to the same `epm` engine.
+CIN EPM provides two Linux editions over one shared POSIX Shell engine:
+- **Terminal:** minimal, no graphical dependencies.
+- **Desktop:** minimal Tk presentation; delegates all analysis to the same engine.
 
-## Prototype 0.1.0
-This increment detects the Linux environment and evaluates the currently documented Main Lobby prerequisites. It is analysis-only: it does not install packages, download releases or modify the host.
+## Version 0.2.0 — adaptive environment detection
+Detects distribution, kernel family, architecture, Lindesk/Termux/container markers, process visibility, cgroup visibility, GUI session, Python/PyGObject/GTK, systemd system/user availability, D-Bus, OpenSSL and iproute2.
 
-The repository's current Lobby documentation specifies a Debian-compatible desktop, Python 3, PyGObject, GTK 4, OpenSSL, `dpkg-deb`, a systemd user manager and systemd/cgroup network-scope support. The documented package architectures are x86_64 and ARM64/AArch64. EPM reports these requirements without inventing minimum versions.
+Compatibility output distinguishes blocking prerequisites from environmental limitations. Missing systemd user services are not treated as proof that all Linux execution is impossible. They remain a limitation for any Lobby feature whose service contract requires them.
 
-### Terminal
+**Important:** EPM does not yet have the official Main Lobby compatibility manifest or installation contract connected. It therefore reports `installation_readiness=not_verified`. It does not select releases, install packages, download software or modify the host.
+
+## Terminal
 ```sh
-chmod +x epm
 ./epm --report
+./epm --system
+./epm --compatibility
 sh tests/test-epm.sh
 ```
-Commands: `--report`, `--system`, `--compatibility`, `--version`, `--help`.
+Terminal requires POSIX sh and standard basic utilities. It does not require Python, GTK, Tk, Node or a graphical session.
 
-### Desktop
-Requires Python 3 with Tk support and a graphical session:
+## Desktop
+Requires Python 3 with Tk and an active graphical session:
 ```sh
 ./epm-desktop
 ```
-Desktop invokes the same `epm` command. Terminal does not require Tk or Python.
-
-GitHub Actions tests both editions and publishes separate downloadable archives. Release manifests, official release discovery, version selection, signature verification, installation planning and installation are subsequent phases; this prototype makes no release-authenticity claim.
