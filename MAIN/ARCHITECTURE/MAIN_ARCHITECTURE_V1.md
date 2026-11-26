@@ -34,8 +34,8 @@ Default XDG locations (respect corresponding environment variables when implemen
 | Purpose | Default location |
 |---|---|
 | Application files | `~/.local/opt/cin-main-lobby/` |
-| User command launcher | `~/.local/bin/cin-main` |
-| Desktop entry | `~/.local/share/applications/cin-main.desktop` |
+| User command launcher | `~/.local/bin/cin` |
+| Desktop entry | `~/.local/share/applications/cin.desktop` |
 | Persistent node data | `~/.local/share/cin/` |
 | User configuration | `~/.config/cin/` |
 | Cache and temporary working data | `~/.cache/cin/` |
@@ -44,13 +44,13 @@ Application binaries, configuration, cache and node records must remain separate
 
 ### 2.2 Installation sequence
 
-1. Download the single `Core_Identification_Nodes.deb` artifact.
-2. Extract the archive with `dpkg-deb --extract` into a temporary directory.
-3. Run the embedded `/opt/cin-installer/install-user.sh` as the normal desktop user, passing the original `.deb` path.
-4. The installer checks Python 3, PyGObject, GTK 4, OpenSSL and the systemd user manager.
-5. The script extracts the application and installs it in the user's local application directory.
-6. The script creates the user's launcher and desktop entry; the launcher runs CIN inside its dedicated systemd user scope.
-7. Start CIN Main Lobby as the logged-in user.
+1. Download and extract `CIN-Debian13-Installer.zip`.
+2. Run `./install-user.sh` as the normal desktop user.
+3. The script validates Debian 13 and ARM64, then extracts `CIN.deb` with `dpkg-deb -x` into a temporary directory.
+4. The script copies the relocatable application into `~/.local/opt/cin-main-lobby/`.
+5. The script creates `~/.local/bin/cin`, `~/.local/bin/cin-uninstall` and the per-user desktop entry.
+6. Start CIN Main Lobby as the logged-in user.
+7. Remove the application with `./uninstall-user.sh` or `~/.local/bin/cin-uninstall`.
 
 Release signature verification and a detached publisher trust chain are not implemented by this first build pipeline. They remain a release-engineering requirement before treating public downloads as authenticated production releases.
 
