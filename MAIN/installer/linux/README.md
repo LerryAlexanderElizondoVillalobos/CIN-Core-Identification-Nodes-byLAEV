@@ -20,7 +20,7 @@ Run the per-user uninstaller from the desktop user's application launcher or exe
 
 ## Included application
 
-The distribution includes Main Lobby, Settings, the Deploy engine, and the CIN network controller. Remote Deploy still requires the genuine publisher public key and signed official manifest to be provisioned independently.
+The distribution includes Main Lobby, Settings, the Deploy engine, and the CIN network controller. The Deploy engine is included, but remote component updates are disabled in this AppImage build. Enabling them requires an AppImage-aware signed replacement updater as well as the genuine publisher public key and signed official manifest.
 
 ## Network switch
 
