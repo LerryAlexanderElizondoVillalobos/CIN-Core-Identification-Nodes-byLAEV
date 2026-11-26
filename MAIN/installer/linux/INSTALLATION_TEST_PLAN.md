@@ -1,71 +1,64 @@
-# CIN Linux Installer — Installation and Acceptance Test
+# Core Identification Nodes — Official Debian Acceptance Test
 
-## Purpose
+## Artifact
 
-Verify that the single downloadable installer installs, launches, navigates and removes CIN as a normal desktop user without root privileges.
+The sole official downloadable package is `Core_Identification_Nodes.deb`. The Debian package metadata must identify package `core-identification-nodes`, version `0.3.0`, architecture `all`.
 
-## 1. Obtain and verify the one release artifact
-
-Download the latest successful `CIN-Linux-Installer` artifact from the repository Actions page. It must contain one archive: `CIN-Linux-Installer.zip`.
-
-Extract it, then verify:
+## 1. Inspect package contents
 
 ```bash
-cd CIN-Linux-Installer
-sha256sum -c SHA256SUMS
+dpkg-deb --field Core_Identification_Nodes.deb Package Version Architecture
+dpkg-deb --contents Core_Identification_Nodes.deb
 ```
 
-The archive contains `CIN.deb` as an internal application payload, plus install and uninstall scripts. Do not download or install a separate legacy `.deb`.
+The payload must include:
+- `opt/cin-main-lobby/cin_main.py`
+- `opt/cin-main-lobby/settings/deployment/engine.py`
+- `opt/cin-main-lobby/settings/network_access.py`
 
 ## 2. Install as a normal user
 
-Do not use a root shell, `sudo`, `apt install` or `dpkg -i`.
+Do not use root, `sudo`, `apt install` or `dpkg -i`.
 
 ```bash
-bash install-user.sh ./CIN.deb
+bash MAIN/installer/linux/install-user.sh ./Core_Identification_Nodes.deb
 ```
 
-Expected paths:
-- `~/.local/opt/cin-main-lobby/cin_main.py`
+Expected application paths:
+- `~/.local/opt/cin-main-lobby/`
 - `~/.local/bin/cin-main`
 - `~/.local/share/applications/cin-main.desktop`
 
-## 3. Launch and inspect Main Lobby
+## 3. Launch and navigation
 
 ```bash
 ~/.local/bin/cin-main
 ```
 
-Verify Main Lobby is the first screen. Settings must appear only after selecting its control in Main Lobby.
+Verify Main Lobby opens first, Settings opens from its control, and Back returns to Main Lobby.
 
-## 4. Navigation, restart and offline checks
+## 4. Deploy
 
-- Open Settings and use Back to return to Main Lobby.
-- Repeat at least five times.
-- Close and relaunch; confirm Main Lobby is still the first screen.
-- Disconnect the network and relaunch; local screens must remain available.
+Generate the local manifest and verify that component hashes and build fingerprint are stable. Provision the genuine publisher Ed25519 public key independently and publish a signed official manifest before attempting remote deployment. Without those trust materials, the application must report Deploy as not configured and must not apply remote code.
 
-## 5. Uninstall
+## 5. Network isolation
+
+- Confirm CIN runs in `cin-main-lobby.scope`.
+- Turn CIN network access OFF and verify that a process in the CIN scope cannot reach IP endpoints.
+- Verify another process outside the CIN scope retains connectivity.
+- Turn CIN network access ON and verify connectivity is restored for CIN.
+- Confirm the switch does not invoke NetworkManager or alter host-wide networking.
+
+## 6. Upgrade and uninstall
+
+Verify an application replacement preserves `~/.local/share/cin-main-lobby` and `~/.config/cin-main-lobby`. Uninstall using:
 
 ```bash
-bash uninstall-user.sh
+bash MAIN/installer/linux/uninstall-user.sh
 ```
 
-Verify application files and launcher are removed. User data and publisher configuration are intentionally preserved.
+Verify application files and launcher are removed while user data and publisher configuration remain.
 
-## 6. Acceptance record
+## 7. Release acceptance
 
-| Test | Result |
-|---|---|
-| One downloadable ZIP only | Pending |
-| SHA-256 verification | Pending |
-| User-space install without sudo | Pending |
-| No system paths modified | Pending |
-| Main Lobby is initial screen | Pending |
-| Settings opens from Lobby | Pending |
-| Back returns to Lobby | Pending |
-| Five navigation cycles | Pending |
-| Offline startup | Pending |
-| User-space uninstall | Pending |
-
-A successful CI run does not replace the operator's manual test on the actual target Linux desktop.
+A release requires passing source tests, x86_64 and ARM64 scope tests, Debian payload inspection, normal-user installation, installed application smoke test including OFF/ON network behavior, and uninstall/data-preservation tests.
