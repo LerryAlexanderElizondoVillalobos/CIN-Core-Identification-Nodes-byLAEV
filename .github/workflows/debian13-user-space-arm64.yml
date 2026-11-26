@@ -25,6 +25,9 @@ concurrency:
 jobs:
   build-test-package:
     runs-on: ubuntu-24.04-arm
+    defaults:
+      run:
+        shell: bash
     container:
       image: debian:13-slim
     timeout-minutes: 40
