@@ -1,0 +1,8 @@
+#!/bin/sh
+set -eu
+HERE="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+if [ "${1:-}" = "--run" ]; then
+    shift
+    exec "$HERE/usr/bin/cin-main" "$@"
+fi
+exec "$HERE/usr/bin/cin-appimage-installer" "$@"
