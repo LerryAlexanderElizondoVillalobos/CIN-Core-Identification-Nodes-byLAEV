@@ -10,7 +10,7 @@ case "$ARCH" in
   *) echo "Unsupported build architecture: $ARCH" >&2; exit 2 ;;
 esac
 
-for tool in python3 linuxdeploy; do
+for tool in python3 linuxdeploy readelf rsvg-convert desktop-file-validate; do
   command -v "$tool" >/dev/null || { echo "Missing build dependency: $tool" >&2; exit 1; }
 done
 
