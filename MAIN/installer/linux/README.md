@@ -1,59 +1,77 @@
-# CIN Main Lobby — Linux Application Installer
+# CIN Main — Debian Installer
 
-## First milestone
+## Objective
 
-Build and distribute a lightweight Linux-installable desktop application whose first screen is the CIN Main Lobby and whose Settings icon opens a second, informational screen.
+Build a downloadable Debian package named `CIN.deb` that installs the first functional CIN Main Lobby application, including its informational Settings screen and return navigation.
 
-The Lobby opens directly and contains:
-- Title: **Welcome to the Main Lobby**
-- Subtitle: **Core Identification Nodes**
-- Three plain-text actions: **Create**, **Enter**, **Import**
-- A subtle **Settings** icon in one corner
-- A professional footer with copyright, byLAEV attribution and repository reference
+## Application technology
 
-Only Create is active as a primary Lobby action. Enter and Import remain visible but inactive.
+- Python 3.
+- GTK 4 native desktop interface through `python3-gi`.
+- System GTK 4 runtime; no bundled browser engine.
+- No Electron, Chromium, WebKit, remote assets or network dependency for application startup.
 
-## Settings screen
+The Python application is architecture-independent and the initial package declares `Architecture: all`. The intended manual qualification target is Debian-compatible Linux ARM64 / AArch64. GTK 4 and Python runtime dependencies are supplied by the target distribution.
 
-Settings must be a real, separately rendered screen with the following read-only information:
-- Application: **CIN Main Lobby**
-- Project: **Core Identification Nodes byLAEV**
-- Application phase: **Phase 1 — Main Lobby**
-- Milestone: **Milestone 1 — Lobby and Settings Navigation**
-- Target platform: **Linux ARM64 / AArch64**
-- Network requirement: **Not required to open the application**
-- Current availability of Create, Enter and Import, described accurately.
-- Full clickable project repository URL where supported.
+## Package contents
 
-A small Back icon (left arrow) must appear in the Settings navigation area and return to the Lobby. The user must be able to open Settings and return repeatedly without restarting. Do not expose nonfunctional settings or fabricated version/performance values.
+- CIN Main Lobby application source.
+- `cin-main` command launcher.
+- Desktop application entry.
+- Debian package metadata and declared dependencies.
+- No node records, personal data, private signing keys or publisher secrets.
 
-## Resource strategy
+## Installation model
 
-Prefer a small native UI toolkit and minimal runtime dependencies. Avoid bundling a browser engine or large application framework unless a measured technical requirement justifies it. No decorative images, videos, animations, gradients, blur or shadow effects. Both screens must render without network access. Measure package size and idle memory during qualification; do not assert unmeasured performance figures.
+The `.deb` is installed and managed by the system package manager. Installing a Debian package that writes under system directories normally requires administrator authorization. This is an installation-time package-manager operation; the running CIN application must run as the logged-in user and must not request root privileges.
 
-## Adaptive display
+The application must keep future persistent node data separate from replaceable application files. Package upgrades and removal must not silently delete user node data.
 
-Support landscape and portrait orientations, variable aspect ratios, window resizing and display scaling on both screens. The layout must reflow based on available dimensions; no fixed-aspect canvas. Prevent clipped text and inaccessible controls. Vertical scrolling may be used on very small displays. Preserve the active screen across resize and orientation changes.
+## Build pipeline
 
-## Platform strategy
+The GitHub Actions workflow:
+1. Runs source-contract tests.
+2. Installs GTK 4 and Debian packaging tools on the runner.
+3. Stages the application and launcher.
+4. Builds `dist/CIN.deb`.
+5. Inspects package metadata and contents.
+6. Validates the desktop entry.
+7. Installs the package in the CI environment.
+8. Launches the installed application under Xvfb.
+9. Runs the Lobby → Settings → Lobby smoke test.
+10. Uploads the package as the `CIN-deb-installer` artifact on successful non-PR runs.
 
-The initial package target is Linux ARM64 / AArch64, including Debian-compatible Linux userspaces used by Android environments such as LinDesk. The package format and dependency list must match the selected application technology and target distributions. Do not assume every Linux distribution is Debian-based or supports .deb.
+## Operator installation
 
-The application must not require virtualization as a product feature. Validate separately in Android-hosted Linux userspace and virtualized ARM64 Linux. Desktop display integration is a runtime requirement and must be tested in the actual environment.
+After downloading and extracting the workflow artifact:
 
-## Installer responsibilities
+```bash
+sudo apt install ./CIN.deb
+cin-main
+```
 
-1. Install application files and declared runtime dependencies.
-2. Register a launchable application entry where supported.
-3. Launch the CIN Main Lobby directly.
-4. Keep application files separate from future persistent CIN node data.
-5. Support upgrade and removal without silently deleting user-created node data.
+The application should also appear in the desktop application menu where the desktop environment supports the installed desktop entry.
 
-## Out of scope
+To remove the application package:
 
-- Genesis Environment Certificate.
-- CIN Node Birth Certificate.
-- CIN Global Personal Document and Node Marriage Certificate.
-- Enter and Import workflows.
-- Editable preferences until implemented.
-- CIN Package Engine (Phase 2).
+```bash
+sudo apt remove cin-main-lobby
+```
+
+Package removal must not remove user node data. Do not run `purge` as the normal user uninstall instruction if future persistent records may exist.
+
+## Manual qualification
+
+- Install on the intended Debian-compatible Linux ARM64 / AArch64 environment.
+- Launch the application.
+- Open Settings from the Lobby.
+- Review application information and capability status.
+- Use Back to return to the Lobby.
+- Repeat the navigation.
+- Close and relaunch the application.
+- Test application startup with network disconnected.
+- Record distribution version, desktop environment, architecture, package result and any display/runtime issue.
+
+## Current milestone limitations
+
+Create displays an informational entry point only. The founding certificate workflows and node creation are not implemented by this milestone. Enter and Import remain disabled. The CIN Package Engine belongs to Phase 2.
