@@ -78,6 +78,9 @@ jobs:
           dpkg-deb -c dist/CIN.deb > dist/CIN.deb.contents.txt
           grep -q './opt/cin/AppDir/AppRun' dist/CIN.deb.contents.txt
           grep -q './opt/cin/AppDir/usr/bin/cin-main' dist/CIN.deb.contents.txt
+          grep -q './opt/cin-installer/install-user.sh' dist/CIN.deb.contents.txt
+          grep -q './opt/cin-installer/uninstall-user.sh' dist/CIN.deb.contents.txt
+          grep -q './opt/cin-installer/run-user.sh' dist/CIN.deb.contents.txt
           if grep -q 'cin-appimage-installer' dist/CIN.deb.contents.txt; then echo 'Unused AppImage installer found in Debian payload'; exit 1; fi
           mkdir -p "$RUNNER_TEMP/cin-deb-audit"
           dpkg-deb -x dist/CIN.deb "$RUNNER_TEMP/cin-deb-audit"
@@ -98,10 +101,10 @@ jobs:
         run: |
           set -euo pipefail
           useradd --create-home --shell /bin/bash cin-test
-          mkdir -p /tmp/cin-installer-test
-          unzip -q dist/CIN-Debian13-Installer.zip -d /tmp/cin-installer-test
-          chown -R cin-test:cin-test /tmp/cin-installer-test /home/cin-test
-          runuser -u cin-test -- env HOME=/home/cin-test XDG_DATA_HOME=/home/cin-test/.local/share sh /tmp/cin-installer-test/CIN-Debian13-Installer/install-user.sh
+          mkdir -p /tmp/cin-deb-installer
+          dpkg-deb -x dist/CIN.deb /tmp/cin-deb-installer
+          chown -R cin-test:cin-test /tmp/cin-deb-installer /home/cin-test
+          runuser -u cin-test -- env HOME=/home/cin-test XDG_DATA_HOME=/home/cin-test/.local/share sh /tmp/cin-deb-installer/opt/cin-installer/install-user.sh "$PWD/dist/CIN.deb"
           test -x /home/cin-test/.local/bin/cin
           test -x /home/cin-test/.local/bin/cin-uninstall
           test -x /home/cin-test/.local/opt/cin-main-lobby/AppDir/AppRun
@@ -110,16 +113,16 @@ jobs:
           if sh /tmp/cin-installer-test/CIN-Debian13-Installer/install-user.sh; then echo "Root install was unexpectedly accepted"; exit 1; fi
           touch /home/cin-test/.local/opt/cin-main-lobby/AppDir/previous-install.test
           mkdir -p /tmp/cin-broken-installer
-          cp /tmp/cin-installer-test/CIN-Debian13-Installer/CIN.deb /tmp/cin-broken-installer/
-          cp /tmp/cin-installer-test/CIN-Debian13-Installer/install-user.sh /tmp/cin-broken-installer/
+          cp dist/CIN.deb /tmp/cin-broken-installer/
+          cp /tmp/cin-deb-installer/opt/cin-installer/install-user.sh /tmp/cin-broken-installer/
           chown -R cin-test:cin-test /tmp/cin-broken-installer
-          if runuser -u cin-test -- env HOME=/home/cin-test XDG_DATA_HOME=/home/cin-test/.local/share sh /tmp/cin-broken-installer/install-user.sh; then echo "Broken installer bundle unexpectedly succeeded"; exit 1; fi
+          if runuser -u cin-test -- env HOME=/home/cin-test XDG_DATA_HOME=/home/cin-test/.local/share sh /tmp/cin-broken-installer/install-user.sh /tmp/cin-broken-installer/CIN.deb; then echo "Broken installer bundle unexpectedly succeeded"; exit 1; fi
           test -f /home/cin-test/.local/opt/cin-main-lobby/AppDir/previous-install.test
           test ! -e /opt/cin/AppDir
           test ! -e /usr/bin/cin
           mkdir -p /home/cin-test/.local/share/cin /home/cin-test/.config/cin /home/cin-test/.cache/cin
           touch /home/cin-test/.local/share/cin/preserve.test /home/cin-test/.config/cin/preserve.test /home/cin-test/.cache/cin/preserve.test
-          runuser -u cin-test -- env HOME=/home/cin-test XDG_DATA_HOME=/home/cin-test/.local/share sh /tmp/cin-installer-test/CIN-Debian13-Installer/install-user.sh
+          runuser -u cin-test -- env HOME=/home/cin-test XDG_DATA_HOME=/home/cin-test/.local/share sh /tmp/cin-deb-installer/opt/cin-installer/install-user.sh "$PWD/dist/CIN.deb"
           test -f /home/cin-test/.local/share/cin/preserve.test
           test -f /home/cin-test/.config/cin/preserve.test
           test -f /home/cin-test/.cache/cin/preserve.test
@@ -140,13 +143,12 @@ jobs:
           useradd --create-home --shell /bin/bash cin-gui
           mkdir -p /home/cin-gui/.local/opt /home/cin-gui/.local/bin /home/cin-gui/.local/share
           chown -R cin-gui:cin-gui /home/cin-gui
-          unzip -q dist/CIN-Debian13-Installer.zip -d /tmp/cin-gui-installer
-          chown -R cin-gui:cin-gui /tmp/cin-gui-installer
-          runuser -u cin-gui -- env HOME=/home/cin-gui XDG_DATA_HOME=/home/cin-gui/.local/share sh /tmp/cin-gui-installer/CIN-Debian13-Installer/install-user.sh
+          chown -R cin-gui:cin-gui /tmp/cin-deb-installer
+          runuser -u cin-gui -- env HOME=/home/cin-gui XDG_DATA_HOME=/home/cin-gui/.local/share sh /tmp/cin-deb-installer/opt/cin-installer/install-user.sh "$PWD/dist/CIN.deb"
           dbus-run-session -- xvfb-run -a runuser -u cin-gui -- env HOME=/home/cin-gui XDG_DATA_HOME=/home/cin-gui/.local/share GDK_BACKEND=x11 /usr/bin/time -v /home/cin-gui/.local/bin/cin --smoke-test
           useradd --create-home --shell /bin/bash cin-run
           chown -R cin-run:cin-run /home/cin-run
-          dbus-run-session -- xvfb-run -a runuser -u cin-run -- env HOME=/home/cin-run XDG_CACHE_HOME=/home/cin-run/.cache GDK_BACKEND=x11 /usr/bin/time -v sh /tmp/cin-gui-installer/CIN-Debian13-Installer/run-user.sh --smoke-test
+          dbus-run-session -- xvfb-run -a runuser -u cin-run -- env HOME=/home/cin-run XDG_CACHE_HOME=/home/cin-run/.cache CIN_DEB_PATH="$PWD/dist/CIN.deb" GDK_BACKEND=x11 /usr/bin/time -v sh /tmp/cin-deb-installer/opt/cin-installer/run-user.sh --smoke-test
           test ! -e /home/cin-run/.local/opt/cin-main-lobby
           test -z "$(find /home/cin-run/.cache -maxdepth 1 -type d -name 'cin-run.*' -print -quit 2>/dev/null || true)"
       - name: Upload Debian 13 ARM64 distribution
