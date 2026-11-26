@@ -80,6 +80,7 @@ if [[ -f /usr/share/glib-2.0/schemas/gschemas.compiled ]]; then
   install -m 0644 /usr/share/glib-2.0/schemas/gschemas.compiled "$APPDIR/usr/share/glib-2.0/schemas/"
 fi
 
+mkdir -p "$BUILD/appimage-output"
 export APPIMAGE_EXTRACT_AND_RUN=1
 LIB_ARGS=()
 while IFS= read -r -d '' library; do
@@ -92,10 +93,10 @@ linuxdeploy --appdir "$APPDIR" \
   "${LIB_ARGS[@]}" \
   --desktop-file "$APPDIR/usr/share/applications/cin-main-lobby.desktop" \
   --icon-file "$APPDIR/usr/share/icons/hicolor/scalable/apps/cin-main-lobby.svg" \
-  --output appimage
+  --output appimage)
 
-# linuxdeploy emits the AppImage in the current working directory.
-mapfile -t CANDIDATES < <(find "$ROOT" -maxdepth 1 -type f -name '*.AppImage' -print)
+# linuxdeploy emits the AppImage in the dedicated build output directory.
+mapfile -t CANDIDATES < <(find "$BUILD/appimage-output" -maxdepth 1 -type f -name '*.AppImage' -print)
 if [[ "${#CANDIDATES[@]}" -ne 1 ]]; then
   printf 'Expected exactly one generated AppImage, found %s\n' "${#CANDIDATES[@]}" >&2
   printf '%s\n' "${CANDIDATES[@]}" >&2
