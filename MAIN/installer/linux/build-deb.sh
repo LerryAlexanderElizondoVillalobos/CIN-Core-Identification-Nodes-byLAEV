@@ -10,6 +10,7 @@ command -v dpkg-deb >/dev/null || {
 }
 
 PACKAGE_ROOT="MAIN/packaging/deb"
+rm -rf "$PACKAGE_ROOT/usr"
 OUTPUT_DIR="${1:-dist}"
 OUTPUT_PATH="$OUTPUT_DIR/CIN.deb"
 
