@@ -25,7 +25,7 @@ The user-facing AppImage flow does not invoke a terminal, root, sudo, apt, dpkg,
 
 ## Debian package
 
-The .deb contains the ARM64 AppImage payload under `/opt/cin` and adds a system-wide desktop launcher. Installing or removing it through apt, dpkg, GDebi, Discover, or another package manager requires administrator authorization. The running CIN application itself runs as the logged-in user.
+The .deb contains the relocatable CIN AppDir directly under `/opt/cin/AppDir` and adds a system-wide launcher. It is a native Debian payload and does not nest or mount an AppImage. Installing or removing it through apt, dpkg, GDebi, Discover, or another package manager requires administrator authorization. The running CIN application itself runs as the logged-in user.
 
 ## Runtime compatibility
 
