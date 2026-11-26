@@ -120,11 +120,26 @@ class Installer(Gtk.Application):
 
     @staticmethod
     def show_error(parent, message):
-        dialog = Gtk.AlertDialog()
-        dialog.set_message("CIN could not be started")
-        dialog.set_detail(message)
-        dialog.show(parent)
+        dialog = Gtk.Window(title="CIN could not be started")
+        dialog.set_transient_for(parent)
+        dialog.set_modal(True)
+        dialog.set_default_size(420, 180)
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
+        box.set_margin_top(18)
+        box.set_margin_bottom(18)
+        box.set_margin_start(18)
+        box.set_margin_end(18)
+        label = Gtk.Label(label=message)
+        label.set_wrap(True)
+        label.set_selectable(True)
+        box.append(label)
+        close = Gtk.Button(label="Close")
+        close.set_halign(Gtk.Align.END)
+        close.connect("clicked", lambda _button: dialog.close())
+        box.append(close)
+        dialog.set_child(box)
+        dialog.present()
 
 
 if __name__ == "__main__":
-    raise SystemExit(Installer().run(None))
+    raise SystemExit(Installer().run([]))
