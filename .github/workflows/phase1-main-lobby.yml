@@ -1,4 +1,4 @@
-name: CIN Phase 1 — Main Lobby ARM64 DEB
+name: CIN Phase 1 — Main Lobby First Milestone
 
 on:
   push:
@@ -19,85 +19,80 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  phase1-contract:
-    name: Validate Phase 1 scope and ARM64 Debian target
+  lobby-contract:
+    name: Validate first Lobby milestone
     runs-on: ubuntu-latest
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Validate required Phase 1 documentation
+      - name: Check required project documents
         shell: bash
         run: |
           set -euo pipefail
           test -f MAIN/README.md
-          test -f MAIN/ROADMAP.md
+          test -f MAIN/WORKPLAN_PHASE_1.md
           test -f MAIN/installer/linux/README.md
           test -f MAIN/lobby/README.md
-          test -f MAIN/WORKPLAN_PHASE_1.md
 
-      - name: Verify process, package and deployment contract
+      - name: Validate welcome screen and Create-only scope
         shell: python
         run: |
           from pathlib import Path
 
-          docs = {
-              "main": Path("MAIN/README.md").read_text(encoding="utf-8"),
-              "roadmap": Path("MAIN/ROADMAP.md").read_text(encoding="utf-8"),
-              "installer": Path("MAIN/installer/linux/README.md").read_text(encoding="utf-8"),
-              "lobby": Path("MAIN/lobby/README.md").read_text(encoding="utf-8"),
-              "workplan": Path("MAIN/WORKPLAN_PHASE_1.md").read_text(encoding="utf-8"),
-          }
-          combined = "\n".join(docs.values())
+          main = Path("MAIN/README.md").read_text(encoding="utf-8")
+          plan = Path("MAIN/WORKPLAN_PHASE_1.md").read_text(encoding="utf-8")
+          installer = Path("MAIN/installer/linux/README.md").read_text(encoding="utf-8")
+          lobby = Path("MAIN/lobby/README.md").read_text(encoding="utf-8")
+          all_docs = "\n".join((main, plan, installer, lobby))
+
           required = (
-              "Genesis Environment Certificate",
-              "CIN Node Birth Certificate",
-              "CIN Global Personal Document and Node Marriage",
+              "Welcome to Core Identification Nodes",
+              "Create",
+              "Enter",
+              "Import",
+              "CIN Package Engine",
+              "Phase 2",
           )
-          missing = [term for term in required if term not in combined]
+          missing = [item for item in required if item not in all_docs]
           if missing:
-              raise SystemExit("Missing founding process definitions: " + ", ".join(missing))
+              raise SystemExit("Missing first-milestone requirements: " + ", ".join(missing))
 
-          for term in ("arm64", "LinDesk", ".deb"):
-              if term.lower() not in combined.lower():
-                  raise SystemExit(f"Missing deployment target requirement: {term}")
+          if "only active and implemented action" not in main:
+              raise SystemExit("MAIN overview must state that Create is the only active action")
 
-          if "CIN Package Engine" not in docs["main"] or "Phase 2" not in docs["main"]:
-              raise SystemExit("Phase 2 boundary is not documented in MAIN/README.md")
+          if "visible but inactive" not in lobby:
+              raise SystemExit("Enter and Import must remain visible but inactive")
 
-          if "does not contain or install the CIN Package Engine" not in docs["installer"]:
-              raise SystemExit("Debian package scope must explicitly exclude the Package Engine")
+          if "must not invent node identifiers" not in lobby:
+              raise SystemExit("Create shell must not fabricate node records or identifiers")
 
-          print("PASS: Phase 1 documentation contract is consistent.")
-          print("NOTE: This job validates documentation only; it does not prove .deb build or device compatibility.")
+          print("PASS: first Lobby milestone contract is consistent.")
+          print("NOTE: This job checks project scope and documentation, not a built application.")
 
-  deb-package-build:
-    name: Build and inspect ARM64 Debian package
+  package-build:
+    name: Build Linux package when packaging scaffold exists
     runs-on: ubuntu-latest
-    needs: phase1-contract
+    needs: lobby-contract
     if: ${{ hashFiles('MAIN/packaging/deb/DEBIAN/control') != '' }}
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Install Debian packaging tools
+      - name: Install packaging tools
         run: |
           sudo apt-get update
           sudo apt-get install -y dpkg-dev
 
-      - name: Validate package architecture and build
+      - name: Build and inspect ARM64 Debian package
         shell: bash
         run: |
           set -euo pipefail
-          CONTROL="MAIN/packaging/deb/DEBIAN/control"
-          grep -Eq '^Architecture: arm64$' "$CONTROL"
+          grep -Eq '^Architecture: arm64$' MAIN/packaging/deb/DEBIAN/control
           mkdir -p dist
-          dpkg-deb --build --root-owner-group MAIN/packaging/deb "dist/cin-main-lobby_0.1.0_arm64.deb"
+          dpkg-deb --build --root-owner-group MAIN/packaging/deb dist/cin-main-lobby_0.1.0_arm64.deb
           dpkg-deb --info dist/cin-main-lobby_0.1.0_arm64.deb
           dpkg-deb --contents dist/cin-main-lobby_0.1.0_arm64.deb
 
-      - name: Upload ARM64 Debian package
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: cin-main-lobby-arm64-deb
           path: dist/*.deb
