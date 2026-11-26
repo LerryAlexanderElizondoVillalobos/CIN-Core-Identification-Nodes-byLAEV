@@ -1,4 +1,4 @@
-name: CIN Main — Build, Test and Package Debian Installer
+name: CIN Main — Build, Test and Package Linux Installer
 
 on:
   push:
@@ -18,7 +18,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: cin-main-deb-${{ github.workflow }}-${{ github.ref }}
+  group: cin-main-installer-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -31,7 +31,7 @@ jobs:
         run: python3 -m unittest discover -s MAIN/tests -v
 
   build-package:
-    name: Build user-space Debian package
+    name: Build the single Linux installer archive
     runs-on: ubuntu-24.04
     needs: source-tests
     steps:
@@ -39,25 +39,31 @@ jobs:
       - name: Install Debian packaging tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y dpkg-dev
-      - name: Build CIN.deb and user-space installer scripts
+          sudo apt-get install -y dpkg-dev zip unzip
+      - name: Build the single CIN Linux installer
         run: bash MAIN/installer/linux/build-deb.sh dist
-      - name: Validate package payload and installer scripts
+      - name: Validate installer contents and no-root contract
         run: |
           set -euo pipefail
-          dpkg-deb --field dist/CIN.deb Package Version Architecture
-          test "$(dpkg-deb --field dist/CIN.deb Architecture)" = "all"
-          bash -n dist/install-user.sh
-          bash -n dist/uninstall-user.sh
-          dpkg-deb --contents dist/CIN.deb
-      - name: Upload package candidate
+          test -s dist/CIN-Linux-Installer.zip
+          unzip -t dist/CIN-Linux-Installer.zip
+          unzip -q dist/CIN-Linux-Installer.zip -d extracted
+          BUNDLE=extracted/CIN-Linux-Installer
+          test -s "$BUNDLE/CIN.deb"
+          test -x "$BUNDLE/install-user.sh"
+          test -x "$BUNDLE/uninstall-user.sh"
+          (cd "$BUNDLE" && sha256sum -c SHA256SUMS)
+          bash -n "$BUNDLE/install-user.sh"
+          bash -n "$BUNDLE/uninstall-user.sh"
+          ! grep -Eq '(^|[[:space:]])sudo([[:space:]]|$)|apt(-get)?[[:space:]]+install|dpkg[[:space:]]+-i' "$BUNDLE/install-user.sh"
+          dpkg-deb --field "$BUNDLE/CIN.deb" Package Version Architecture
+          test "$(dpkg-deb --field "$BUNDLE/CIN.deb" Architecture)" = "all"
+          dpkg-deb --contents "$BUNDLE/CIN.deb"
+      - name: Upload single installer candidate for runtime qualification
         uses: actions/upload-artifact@v4
         with:
-          name: cin-deb-candidate
-          path: |
-            dist/CIN.deb
-            dist/install-user.sh
-            dist/uninstall-user.sh
+          name: cin-linux-installer-candidate
+          path: dist/CIN-Linux-Installer.zip
           if-no-files-found: error
           retention-days: 3
 
@@ -72,63 +78,64 @@ jobs:
           - ubuntu-24.04-arm
     runs-on: ${{ matrix.runner }}
     steps:
-      - name: Download package candidate
+      - name: Download single installer candidate
         uses: actions/download-artifact@v4
         with:
-          name: cin-deb-candidate
+          name: cin-linux-installer-candidate
           path: dist
       - name: Provision CI runtime dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y python3 python3-gi gir1.2-gtk-4.0 xvfb dbus-x11
-      - name: Inspect package architecture
+          sudo apt-get install -y dpkg-dev python3 python3-gi gir1.2-gtk-4.0 xvfb dbus-x11 unzip
+      - name: Extract and verify installer
         run: |
           set -euo pipefail
-          dpkg-deb --info dist/CIN.deb
-          test "$(dpkg-deb --field dist/CIN.deb Architecture)" = "all"
+          unzip -q dist/CIN-Linux-Installer.zip -d dist
+          cd dist/CIN-Linux-Installer
+          sha256sum -c SHA256SUMS
       - name: Install CIN for the current unprivileged user
         run: |
           set -euo pipefail
+          cd dist/CIN-Linux-Installer
           test "$(id -u)" -ne 0
-          bash dist/install-user.sh "$PWD/dist/CIN.deb"
+          bash install-user.sh "$PWD/CIN.deb"
           test -f "$HOME/.local/opt/cin-main-lobby/cin_main.py"
+          test -f "$HOME/.local/opt/cin-main-lobby/settings/network_access.py"
+          test -d "$HOME/.local/opt/cin-main-lobby/settings/deployment"
           test -x "$HOME/.local/bin/cin-main"
           test -f "$HOME/.local/share/applications/cin-main.desktop"
       - name: Launch installed application and test two-screen navigation
         env:
           GDK_BACKEND: x11
-        run: |
-          set -euo pipefail
-          xvfb-run -a dbus-run-session -- "$HOME/.local/bin/cin-main" --smoke-test
+        run: xvfb-run -a dbus-run-session -- "$HOME/.local/bin/cin-main" --smoke-test
       - name: Uninstall CIN as the current user
         if: always()
         run: |
-          if [ -f dist/uninstall-user.sh ]; then
-            bash dist/uninstall-user.sh
+          if [ -f dist/CIN-Linux-Installer/CIN-Linux-Installer/uninstall-user.sh ]; then
+            bash dist/CIN-Linux-Installer/CIN-Linux-Installer/uninstall-user.sh
+          elif [ -f dist/CIN-Linux-Installer/uninstall-user.sh ]; then
+            bash dist/CIN-Linux-Installer/uninstall-user.sh
           fi
           test ! -e "$HOME/.local/opt/cin-main-lobby"
           test ! -e "$HOME/.local/bin/cin-main"
 
   publish-artifact:
-    name: Publish downloadable CIN.deb user installer
+    name: Publish the one qualified Linux installer
     needs:
       - build-package
       - runtime-qualification
     if: success() && github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     steps:
-      - name: Download qualified user-space installer bundle
+      - name: Download qualified installer archive
         uses: actions/download-artifact@v4
         with:
-          name: cin-deb-candidate
+          name: cin-linux-installer-candidate
           path: dist
-      - name: Publish installer bundle
+      - name: Publish one downloadable package
         uses: actions/upload-artifact@v4
         with:
-          name: CIN-deb-installer
-          path: |
-            dist/CIN.deb
-            dist/install-user.sh
-            dist/uninstall-user.sh
+          name: CIN-Linux-Installer
+          path: dist/CIN-Linux-Installer.zip
           if-no-files-found: error
           retention-days: 30
