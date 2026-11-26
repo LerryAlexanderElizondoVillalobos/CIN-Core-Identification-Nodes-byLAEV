@@ -1,8 +1,8 @@
 #!/bin/sh
 set -eu
 [ "$(id -u)" -ne 0 ] || { echo "Do not run as root or with sudo." >&2; exit 1; }
-[ -n "\${HOME:-}" ] || { echo "HOME is not set." >&2; exit 1; }
-DATA_HOME="\${XDG_DATA_HOME:-$HOME/.local/share}"
+[ -n "${HOME:-}" ] || { echo "HOME is not set." >&2; exit 1; }
+DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
 APP_HOME="$HOME/.local/opt/cin-main-lobby"
 BIN_HOME="$HOME/.local/bin"
 DESKTOP_HOME="$DATA_HOME/applications"
