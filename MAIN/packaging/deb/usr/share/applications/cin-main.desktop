@@ -1,9 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=CIN Main Lobby
-Comment=Core Identification Nodes byLAEV
-Exec=cin-main
-Icon=applications-system
-Terminal=false
-Categories=Utility;
-StartupNotify=true
