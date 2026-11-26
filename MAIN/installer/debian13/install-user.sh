@@ -2,22 +2,22 @@
 set -eu
 fail() { printf 'CIN installer: %s\n' "$*" >&2; exit 1; }
 [ "$(id -u)" -ne 0 ] || fail "Do not run as root or with sudo. Run as your normal desktop user."
-[ -n "\${HOME:-}" ] || fail "HOME is not set."
+[ -n "${HOME:-}" ] || fail "HOME is not set."
 ARCH="$(dpkg --print-architecture 2>/dev/null || true)"
-[ "$ARCH" = arm64 ] || fail "This package targets Debian ARM64; detected dpkg architecture: \${ARCH:-unknown}."
+[ "$ARCH" = arm64 ] || fail "This package targets Debian ARM64; detected dpkg architecture: ${ARCH:-unknown}."
 if [ -r /etc/os-release ]; then
   . /etc/os-release
-  [ "\${ID:-}" = debian ] && [ "\${VERSION_ID:-}" = 13 ] || fail "This release targets Debian 13 (Trixie). Detected: \${PRETTY_NAME:-unknown}."
+  [ "${ID:-}" = debian ] && [ "${VERSION_ID:-}" = 13 ] || fail "This release targets Debian 13 (Trixie). Detected: ${PRETTY_NAME:-unknown}."
 else
   fail "Cannot identify the operating system through /etc/os-release."
 fi
 command -v dpkg-deb >/dev/null 2>&1 || fail "dpkg-deb is required."
 HERE="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
-DEB="\${CIN_DEB_PATH:-$HERE/CIN.deb}"
+DEB="${CIN_DEB_PATH:-$HERE/CIN.deb}"
 [ -f "$DEB" ] || fail "CIN.deb was not found beside this installer."
 [ "$(dpkg-deb -f "$DEB" Architecture)" = arm64 ] || fail "Unexpected package architecture."
 [ "$(dpkg-deb -f "$DEB" Package)" = core-identification-nodes ] || fail "Unexpected Debian package name."
-DATA_HOME="\${XDG_DATA_HOME:-$HOME/.local/share}"
+DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
 APP_HOME="$HOME/.local/opt/cin-main-lobby"
 BIN_HOME="$HOME/.local/bin"
 DESKTOP_HOME="$DATA_HOME/applications"
