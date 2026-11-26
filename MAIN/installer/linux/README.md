@@ -6,7 +6,7 @@
 
 ## Install
 
-Run as the normal desktop user:
+Run as the normal user. Do not use sudo, apt install, or dpkg -i:
 
 ```bash
 tmp="$(mktemp -d)"
@@ -17,15 +17,17 @@ rm -rf "$tmp"
 exit "$result"
 ```
 
-The installer checks Python 3, PyGObject, GTK 4, OpenSSL, `dpkg-deb`, and the systemd user manager. It refuses root execution and refuses a partial installation when the dedicated CIN network-scope service cannot be launched.
+The installer checks Python 3, PyGObject, GTK 4, OpenSSL and dpkg-deb. It refuses root execution. It does not require systemd, a systemd user manager, cgroup visibility, or an active graphical session to copy the application into the user's home directory.
 
 ## Launch
+
+From an active graphical session:
 
 ```bash
 ~/.local/bin/cin-main
 ```
 
-CIN runs inside `cin-main-lobby.scope`, the dedicated systemd user scope used by the network ON/OFF controller.
+The launcher runs the application directly in the current user's session. No system service or privileged helper is created.
 
 ## Installed paths
 
@@ -43,9 +45,9 @@ The publisher key is not embedded in the package and cannot be accepted from the
 
 ## Network ON/OFF switch
 
-The switch affects only the CIN systemd user scope through `IPAddressDeny=any`. ON clears that scope's runtime denial. It does not disable the host network, NetworkManager, browsers or other Linux applications.
+When the host provides a running systemd user manager and systemd/cgroup support for IP address filtering, the switch controls only CIN's dedicated user scope through `IPAddressDeny=any`. It does not disable the host network, NetworkManager, browsers or other Linux applications.
 
-The switch requires a running systemd user manager and systemd/cgroup support for IP address filtering. CIN does not silently fall back to an unisolated launch.
+On Lindesk installations where the systemd user manager or cgroup policy is unavailable, CIN still runs normally and the UI explicitly reports network isolation as unavailable. It does not claim that network traffic is blocked, and it does not attempt a host-wide workaround.
 
 ## Uninstall
 
