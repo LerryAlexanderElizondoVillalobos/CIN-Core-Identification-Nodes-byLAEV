@@ -27,58 +27,82 @@ jobs:
       - name: Run source contract tests
         run: python3 -m unittest discover -s MAIN/tests -v
 
-  build-test-package:
-    name: Build and test CIN Debian package
+  build-package:
+    name: Build architecture-independent Debian package
     runs-on: ubuntu-24.04
     needs: source-tests
     steps:
       - uses: actions/checkout@v4
-
-      - name: Install native GTK runtime and packaging tools
+      - name: Install Debian packaging tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y python3 python3-gi gir1.2-gtk-4.0 xvfb dbus-x11 dpkg-dev desktop-file-utils
-
-      - name: Prepare Debian package tree
-        run: |
-          set -euo pipefail
-          chmod 0755 MAIN/packaging/deb/usr/bin/cin-main
-          chmod 0755 MAIN/packaging/deb/DEBIAN/postinst
-          chmod 0755 MAIN/packaging/deb/DEBIAN/postrm
-          install -d MAIN/packaging/deb/usr/lib/cin-main-lobby
-          install -m 0644 MAIN/app/launcher/cin_main.py MAIN/packaging/deb/usr/lib/cin-main-lobby/cin_main.py
-          install -d dist
-
-      - name: Build Debian package
-        run: |
-          set -euo pipefail
-          dpkg-deb --build --root-owner-group MAIN/packaging/deb dist/CIN.deb
-          dpkg-deb --info dist/CIN.deb
-          dpkg-deb --contents dist/CIN.deb
-          dpkg-deb --field dist/CIN.deb Package Version Architecture Depends
-
+          sudo apt-get install -y dpkg-dev desktop-file-utils
+      - name: Build CIN.deb
+        run: bash MAIN/installer/linux/build-deb.sh dist
       - name: Validate desktop entry
         run: desktop-file-validate MAIN/packaging/deb/usr/share/applications/cin-main.desktop
+      - name: Upload package candidate for runtime qualification
+        uses: actions/upload-artifact@v4
+        with:
+          name: cin-deb-candidate
+          path: dist/CIN.deb
+          if-no-files-found: error
+          retention-days: 3
 
-      - name: Install package in CI environment
+  runtime-qualification:
+    name: Install and launch on ${{ matrix.runner }}
+    needs: build-package
+    strategy:
+      fail-fast: false
+      matrix:
+        runner:
+          - ubuntu-24.04
+          - ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - name: Download package candidate
+        uses: actions/download-artifact@v4
+        with:
+          name: cin-deb-candidate
+          path: dist
+      - name: Install GTK runtime and test dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3 python3-gi gir1.2-gtk-4.0 xvfb dbus-x11
+      - name: Inspect package architecture and dependencies
+        run: |
+          set -euo pipefail
+          dpkg-deb --info dist/CIN.deb
+          dpkg-deb --field dist/CIN.deb Package Version Architecture Depends
+          test "$(dpkg-deb --field dist/CIN.deb Architecture)" = "all"
+      - name: Install package
         run: |
           sudo apt-get install -y ./dist/CIN.deb
           dpkg-query -W cin-main-lobby
-
       - name: Launch installed application and test two-screen navigation
         env:
           GDK_BACKEND: x11
         run: |
           set -euo pipefail
           xvfb-run -a dbus-run-session -- /usr/bin/cin-main --smoke-test
-
-      - name: Verify package removal
+      - name: Remove package after qualification
         if: always()
-        run: |
-          sudo dpkg --purge cin-main-lobby || true
+        run: sudo dpkg --purge cin-main-lobby || true
 
-      - name: Upload installable Debian package
-        if: success() && github.event_name != 'pull_request'
+  publish-artifact:
+    name: Publish downloadable CIN.deb artifact
+    needs:
+      - build-package
+      - runtime-qualification
+    if: success() && github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Download qualified package
+        uses: actions/download-artifact@v4
+        with:
+          name: cin-deb-candidate
+          path: dist
+      - name: Publish installable package
         uses: actions/upload-artifact@v4
         with:
           name: CIN-deb-installer
