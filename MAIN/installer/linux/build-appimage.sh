@@ -53,6 +53,9 @@ chmod 0755 "$APPDIR/usr/bin/cin-main" "$APPDIR/usr/bin/cin-appimage-installer"
 install -m 0755 MAIN/installer/linux/AppRun "$APPDIR/AppRun"
 install -m 0644 MAIN/installer/linux/cin-main-lobby.desktop "$APPDIR/usr/share/applications/cin-main-lobby.desktop"
 install -m 0644 MAIN/installer/linux/cin-main-lobby.svg "$APPDIR/usr/share/icons/hicolor/scalable/apps/cin-main-lobby.svg"
+command -v rsvg-convert >/dev/null || { echo "Missing build dependency: rsvg-convert (librsvg2-bin)" >&2; exit 1; }
+mkdir -p "$APPDIR/usr/share/icons/hicolor/256x256/apps"
+rsvg-convert -w 256 -h 256 MAIN/installer/linux/cin-main-lobby.svg -o "$APPDIR/usr/share/icons/hicolor/256x256/apps/cin-main-lobby.png"
 
 # PyGObject loads typelib metadata dynamically; ELF dependency scanning alone
 # does not discover these files. Bundle the complete typelib directory.
@@ -80,6 +83,7 @@ if [[ -f /usr/share/glib-2.0/schemas/gschemas.compiled ]]; then
   install -m 0644 /usr/share/glib-2.0/schemas/gschemas.compiled "$APPDIR/usr/share/glib-2.0/schemas/"
 fi
 
+chmod -R a+rX "$APPDIR"
 mkdir -p "$BUILD/appimage-output"
 export APPIMAGE_EXTRACT_AND_RUN=1
 LIB_ARGS=()
@@ -92,7 +96,7 @@ done < <(find "$APPDIR/usr/lib" -type f -name '*.so*' -print0)
   --executable "$APPDIR/usr/lib/cin-appimage-installer/cin-appimage-installer" \
   "${LIB_ARGS[@]}" \
   --desktop-file "$APPDIR/usr/share/applications/cin-main-lobby.desktop" \
-  --icon-file "$APPDIR/usr/share/icons/hicolor/scalable/apps/cin-main-lobby.svg" \
+  --icon-file "$APPDIR/usr/share/icons/hicolor/256x256/apps/cin-main-lobby.png" \
   --output appimage)
 
 # linuxdeploy emits the AppImage in the dedicated build output directory.
