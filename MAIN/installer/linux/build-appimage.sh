@@ -87,7 +87,7 @@ while IFS= read -r -d '' library; do
   LIB_ARGS+=(--library "$library")
 done < <(find "$APPDIR/usr/lib" -type f -name '*.so*' -print0)
 
-linuxdeploy --appdir "$APPDIR" \
+(cd "$BUILD/appimage-output" && linuxdeploy --appdir "$APPDIR" \
   --executable "$APPDIR/usr/lib/cin-main/cin-main" \
   --executable "$APPDIR/usr/lib/cin-appimage-installer/cin-appimage-installer" \
   "${LIB_ARGS[@]}" \
