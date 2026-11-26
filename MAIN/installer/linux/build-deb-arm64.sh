@@ -9,19 +9,37 @@ if [[ "$ARCH" != "aarch64" && "$ARCH" != "arm64" ]]; then
   exit 2
 fi
 
-APPIMAGE="$ROOT/dist/Core_Identification_Nodes-aarch64.AppImage"
-[[ -s "$APPIMAGE" ]] || { echo "Missing ARM64 AppImage: $APPIMAGE" >&2; exit 1; }
-command -v dpkg-deb >/dev/null || { echo "Missing dpkg-deb build dependency" >&2; exit 1; }
+APPDIR="$ROOT/build/appimage/AppDir"
+[[ -x "$APPDIR/AppRun" && -x "$APPDIR/usr/bin/cin-main" ]] || {
+  echo "Missing completed AppDir. Build the ARM64 AppImage first." >&2
+  exit 1
+}
+for tool in dpkg-deb desktop-file-validate rsvg-convert; do
+  command -v "$tool" >/dev/null || { echo "Missing build dependency: $tool" >&2; exit 1; }
+done
 
 PKG="$ROOT/build/deb-arm64"
 rm -rf "$PKG"
-install -d "$PKG/DEBIAN" "$PKG/opt/cin" "$PKG/usr/share/applications" \
-  "$PKG/usr/share/icons/hicolor/scalable/apps" "$PKG/usr/share/icons/hicolor/256x256/apps" "$ROOT/dist"
+install -d "$PKG/DEBIAN" "$PKG/opt/cin/AppDir" "$PKG/usr/bin" \
+  "$PKG/usr/share/applications" "$PKG/usr/share/icons/hicolor/scalable/apps" \
+  "$PKG/usr/share/icons/hicolor/256x256/apps" "$ROOT/dist"
 
-install -m 0755 "$APPIMAGE" "$PKG/opt/cin/Core_Identification_Nodes-aarch64.AppImage"
-install -m 0644 MAIN/installer/linux/cin-main-lobby.svg "$PKG/usr/share/icons/hicolor/scalable/apps/cin-main-lobby.svg"
-desktop-file-validate MAIN/installer/linux/cin-main-lobby.desktop
-command -v rsvg-convert >/dev/null || { echo "Missing rsvg-convert" >&2; exit 1; }
+# A native Debian payload: install the same relocatable AppDir tree directly.
+# This avoids nesting an AppImage inside the .deb (and avoids a FUSE dependency).
+cp -a "$APPDIR/." "$PKG/opt/cin/AppDir/"
+test -x "$PKG/opt/cin/AppDir/AppRun"
+test -x "$PKG/opt/cin/AppDir/usr/bin/cin-main"
+
+cat > "$PKG/usr/bin/cin-main-lobby" <<'EOF'
+#!/bin/sh
+set -eu
+export APPIMAGE_EXTRACT_AND_RUN=1
+exec /opt/cin/AppDir/AppRun --run "$@"
+EOF
+chmod 0755 "$PKG/usr/bin/cin-main-lobby"
+
+install -m 0644 MAIN/installer/linux/cin-main-lobby.svg \
+  "$PKG/usr/share/icons/hicolor/scalable/apps/cin-main-lobby.svg"
 rsvg-convert -w 256 -h 256 MAIN/installer/linux/cin-main-lobby.svg \
   -o "$PKG/usr/share/icons/hicolor/256x256/apps/cin-main-lobby.png"
 
@@ -30,12 +48,13 @@ cat > "$PKG/usr/share/applications/cin-main-lobby.desktop" <<'EOF'
 Type=Application
 Name=Core Identification Nodes
 Comment=CIN Main Lobby
-Exec=/opt/cin/Core_Identification_Nodes-aarch64.AppImage --run
+Exec=/usr/bin/cin-main-lobby
 Icon=cin-main-lobby
 Terminal=false
 Categories=Utility;
 StartupNotify=true
 EOF
+desktop-file-validate "$PKG/usr/share/applications/cin-main-lobby.desktop"
 
 cat > "$PKG/DEBIAN/control" <<'EOF'
 Package: core-identification-nodes
@@ -46,16 +65,21 @@ Architecture: arm64
 Depends: libc6 (>= 2.35), libstdc++6
 Maintainer: LAEV <lerryalexelizondo@users.noreply.github.com>
 Description: Core Identification Nodes Main Lobby
- User-space runtime for the CIN Main Lobby on Linux ARM64.
+ Native relocatable CIN application payload for Linux ARM64.
 EOF
 
 cat > "$PKG/DEBIAN/postinst" <<'EOF'
 #!/bin/sh
 set -e
-chmod 0755 /opt/cin/Core_Identification_Nodes-aarch64.AppImage
+chmod 0755 /usr/bin/cin-main-lobby /opt/cin/AppDir/AppRun
 exit 0
 EOF
-chmod 0755 "$PKG/DEBIAN/postinst"
+cat > "$PKG/DEBIAN/prerm" <<'EOF'
+#!/bin/sh
+set -e
+exit 0
+EOF
+chmod 0755 "$PKG/DEBIAN/postinst" "$PKG/DEBIAN/prerm"
 
 dpkg-deb --root-owner-group --build "$PKG" "$ROOT/dist/Core_Identification_Nodes-arm64.deb"
 test "$(dpkg-deb -f "$ROOT/dist/Core_Identification_Nodes-arm64.deb" Architecture)" = "arm64"
