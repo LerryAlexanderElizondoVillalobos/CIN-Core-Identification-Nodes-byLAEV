@@ -17,7 +17,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from settings.network_access import NetworkAccessController, NetworkAccessError
+from ..network_access import NetworkAccessController, NetworkAccessError
 
 APP_ID = "cin-main-lobby"
 MANIFEST_VERSION = 1
