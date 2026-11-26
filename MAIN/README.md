@@ -2,19 +2,27 @@
 
 CIN Main is built in **two sequential phases**. The first phase delivers the installer for the Main Lobby. The second phase delivers the installer for the CIN Package Engine — the engine of engines.
 
-## Phase 1 — Main Lobby Installer
+## Phase 1 — Main Lobby Application: First Milestone
 
-Build a Debian package (.deb) targeting **arm64 / AArch64** whose sole product is the **CIN Main Lobby** and its required runtime and foundational components. The package targets Debian-compatible ARM64 Linux userspaces, including Android-hosted environments such as LinDesk, and conventional ARM64 Linux. Virtualization is optional; the same package must be qualified in both virtualized and non-virtualized profiles.
+The first deliverable is a Linux-installable application that opens the **CIN Main Lobby** and displays:
 
-After installation, the Lobby provides the three founding certificate processes:
+**Welcome to Core Identification Nodes**
 
-1. **Genesis Environment Certificate** → Genesis Environment Manifest, registered as the first logical CIN record.
-2. **CIN Node Birth Certificate** → applicable technical node identifiers and the authoritative Node Birth Record.
-3. **CIN Global Personal Document and Node Marriage Certificate** → CIN Global Personal Document identifier and the separately persisted, cryptographically accepted node-document association.
+The initial Lobby presents three actions:
 
-The Lobby coordinates these processes, stores their records locally and reconstructs their real status. The three processes are part of the Lobby delivered in Phase 1; they are not three additional installation phases.
+- **Create** — the only active and implemented action in this milestone. It opens the initial node-creation flow.
+- **Enter** — visible in the Lobby, reserved for a later milestone.
+- **Import** — visible in the Lobby, reserved for a later milestone.
 
-The later CIN Personal Registration and Credential process remains a subsequent issuance stage, not one of the three founding processes.
+The immediate implementation scope is the application installer, launchable Lobby window, welcome screen and the Create entry point. Enter and Import must not initiate incomplete workflows.
+
+The first milestone does not claim that the three founding certificates are already implemented. They will be added to the Create flow in subsequent work. The longer Phase 1 objective remains to integrate:
+
+1. **Genesis Environment Certificate** → Genesis Environment Manifest.
+2. **CIN Node Birth Certificate** → authoritative Node Birth Record and technical node identifiers.
+3. **CIN Global Personal Document and Node Marriage Certificate** → Global Personal Document identifier and separately persisted, cryptographically accepted node-document association.
+
+The CIN Package Engine remains Phase 2 and is not part of this application milestone.
 
 ## Phase 2 — CIN Package Engine Installer
 
@@ -49,4 +57,4 @@ Initial package families include dedicated certificate engines, Ledgers, Binary 
 
 ## Current maturity
 
-**Two-phase architecture defined; implementation not yet started.** Phase 1 is the immediate development target. No installer or certificate engine is claimed to be functional yet.
+**Phase 1 / Milestone 1 defined:** Linux-installable Main Lobby shell with Create as the only active action. Implementation status must be updated as executable artifacts are delivered; no certificate process is claimed functional until tested.
