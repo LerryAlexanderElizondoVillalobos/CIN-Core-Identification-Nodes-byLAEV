@@ -1,0 +1,72 @@
+name: CIN Phase 1 — Main Lobby
+
+on:
+  push:
+    paths:
+      - "MAIN/**"
+      - ".github/workflows/phase1-main-lobby.yml"
+  pull_request:
+    paths:
+      - "MAIN/**"
+      - ".github/workflows/phase1-main-lobby.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cin-phase1-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  phase1-contract:
+    name: Validate Phase 1 scope and architecture
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Validate required Phase 1 documentation
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f MAIN/README.md
+          test -f MAIN/ROADMAP.md
+          test -f MAIN/installer/linux/README.md
+          test -f MAIN/lobby/README.md
+          test -f MAIN/WORKPLAN_PHASE_1.md
+
+      - name: Verify Phase 1 process and boundary contract
+        shell: python
+        run: |
+          from pathlib import Path
+
+          docs = {
+              "main": Path("MAIN/README.md").read_text(encoding="utf-8"),
+              "roadmap": Path("MAIN/ROADMAP.md").read_text(encoding="utf-8"),
+              "installer": Path("MAIN/installer/linux/README.md").read_text(encoding="utf-8"),
+              "lobby": Path("MAIN/lobby/README.md").read_text(encoding="utf-8"),
+              "workplan": Path("MAIN/WORKPLAN_PHASE_1.md").read_text(encoding="utf-8"),
+          }
+
+          required_processes = (
+              "Genesis Environment Certificate",
+              "CIN Node Birth Certificate",
+              "CIN Global Personal Document and Node Marriage",
+          )
+          combined = "\n".join(docs.values())
+          missing = [item for item in required_processes if item not in combined]
+          if missing:
+              raise SystemExit("Missing founding process definitions: " + ", ".join(missing))
+
+          if "CIN Package Engine" not in docs["main"] or "Phase 2" not in docs["main"]:
+              raise SystemExit("Phase 2 boundary is not documented in MAIN/README.md")
+
+          if "does not install the CIN Package Engine" not in docs["installer"]:
+              raise SystemExit("Installer scope must explicitly exclude the Package Engine")
+
+          if "implementation not yet started" not in docs["main"].lower():
+              raise SystemExit("Update the maturity statement when implementation status changes")
+
+          print("PASS: Phase 1 documentation contract is consistent.")
+          print("NOTE: This job validates documentation only; it does not claim functional implementation.")
