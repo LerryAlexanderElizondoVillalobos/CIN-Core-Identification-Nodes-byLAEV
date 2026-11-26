@@ -19,6 +19,8 @@ class Installer(Gtk.Application):
         super().__init__(application_id="bylaev.cin.appimage.installer",
                          flags=Gio.ApplicationFlags.NON_UNIQUE)
         self.smoke_test = "--smoke-test" in sys.argv[1:]
+        self.smoke_install = "--smoke-install" in sys.argv[1:]
+        self.exit_status = 0
 
     def do_activate(self):
         window = Gtk.ApplicationWindow(application=self, title=APP_NAME)
@@ -53,8 +55,14 @@ class Installer(Gtk.Application):
         page.append(note)
         window.set_child(page)
         window.present()
-        if self.smoke_test:
+        if self.smoke_install:
+            GLib.idle_add(self.run_install_smoke_test, window)
+        elif self.smoke_test:
             GLib.timeout_add(500, self.finish_smoke_test)
+
+    def run_install_smoke_test(self, window):
+        self.install(window)
+        return GLib.SOURCE_REMOVE
 
     def finish_smoke_test(self):
         print("PASS: CIN graphical first-run installer window opened.")
@@ -116,11 +124,25 @@ class Installer(Gtk.Application):
                 encoding="utf-8",
             )
             uninstall.chmod(0o755)
-            self.launch(target)
+            if self.smoke_install:
+                if not (target.is_file() and os.access(target, os.X_OK)
+                        and desktop.is_file() and icon.is_file() and uninstall.is_file()):
+                    raise RuntimeError("Per-user installation did not create all expected files.")
+                subprocess.run([str(uninstall)], check=True)
+                if any(path.exists() for path in (target, desktop, icon, uninstall)):
+                    raise RuntimeError("Per-user uninstaller did not remove all installed files.")
+                print("PASS: per-user AppImage installation and uninstall work without root.")
+            else:
+                self.launch(target)
             window.close()
             self.quit()
         except Exception as exc:
-            self.show_error(window, str(exc))
+            if self.smoke_install:
+                self.exit_status = 1
+                print(f"FAIL: per-user AppImage installation test: {exc}", file=sys.stderr)
+                self.quit()
+            else:
+                self.show_error(window, str(exc))
 
     def run_app(self, window):
         try:
@@ -157,5 +179,7 @@ class Installer(Gtk.Application):
 
 
 if __name__ == "__main__":
-    arguments = [arg for arg in sys.argv[1:] if arg != "--smoke-test"]
-    raise SystemExit(Installer().run([sys.argv[0], *arguments]))
+    arguments = [arg for arg in sys.argv[1:] if arg not in ("--smoke-test", "--smoke-install")]
+    app = Installer()
+    app.run([sys.argv[0], *arguments])
+    raise SystemExit(app.exit_status)
