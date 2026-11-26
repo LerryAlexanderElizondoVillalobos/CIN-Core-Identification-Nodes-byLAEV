@@ -67,7 +67,7 @@ install -m 0755 "$INSTALLER_PAYLOAD/uninstall-user.sh" "$APP_DIR/uninstall-user.
 # handled by the Settings capability controller and may report unavailable.
 cat > "$BIN_DIR/cin-main" <<EOF
 #!/bin/sh
-exec "$PYTHON_BIN" "$APP_DIR/cin_main.py" "$@"
+exec "$PYTHON_BIN" "$APP_DIR/cin_main.py" "\$@"
 EOF
 chmod 0755 "$BIN_DIR/cin-main"
 
