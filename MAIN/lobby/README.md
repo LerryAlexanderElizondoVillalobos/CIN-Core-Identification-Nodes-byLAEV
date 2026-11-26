@@ -13,27 +13,63 @@ The application opens directly into a minimal Main Lobby with a single flat back
 - **Enter** — visible but inactive in the first milestone.
 - **Import** — visible but inactive in the first milestone.
 
-A subtle **Settings** icon is placed in one corner. It must only open settings that are actually implemented.
+A subtle **Settings** icon is placed in one corner. Activating it opens the dedicated Settings screen described below.
+
+## Settings screen
+
+Settings is a distinct application screen, not a modal placeholder or tooltip. Its first milestone is informational and read-only.
+
+### Information displayed
+
+**Application Information**
+- Application: `CIN Main Lobby`
+- Project: `Core Identification Nodes byLAEV`
+- Application phase: `Phase 1 — Main Lobby`
+- Milestone: `Milestone 1 — Lobby and Settings Navigation`
+- Target platform: `Linux ARM64 / AArch64`
+- Network requirement: `Not required to open the application`
+
+**Current Capabilities**
+- Create: available entry point; the creation workflow must report its actual implementation state.
+- Enter: not available in this milestone.
+- Import: not available in this milestone.
+
+**Project Repository**
+- Display the full repository URL:
+  `https://github.com/LerryAlexanderElizondoVillalobos/CIN-Core-Identification-Nodes-byLAEV`
+- Make the URL clickable where supported by the selected toolkit.
+
+Do not display fabricated version numbers, unmeasured performance figures, pretend toggles or nonfunctional preference controls.
+
+## Screen navigation
+
+1. The application launches into the Main Lobby.
+2. Selecting the Settings icon navigates to the Settings screen.
+3. Settings displays a small Back icon (left arrow) in its top navigation area.
+4. The Back icon returns to the Main Lobby.
+5. The navigation cycle can be repeated without restarting the application.
+6. The Back control has an accessible name or tooltip: `Back to Main Lobby`.
+7. Resizing or changing orientation must not reset the active screen.
 
 ## Visual and resource constraints
 
 - One solid background color; no image or video backgrounds.
 - Text and basic controls only.
 - No decorative illustrations, gradients, blur, heavy shadows or animation.
-- Avoid loading remote assets or requiring network access to render the Lobby.
+- Avoid loading remote assets or requiring network access to render either screen.
 - Prefer a small native UI toolkit and minimal runtime dependencies.
 - Keep the interface visually restrained and fast to render.
 
 ## Adaptive layout
 
-The Lobby must support both landscape and portrait orientations and must reflow to the available window dimensions. It must not enforce a single aspect ratio.
+The Lobby and Settings screens must support both landscape and portrait orientations and must reflow to the available window dimensions. They must not enforce a single aspect ratio.
 
-The title, subtitle, actions, Settings control and footer must remain accessible. Avoid clipping and unnecessary horizontal scrolling. On very small screens, vertical scrolling is acceptable. Window resizing and orientation changes must update the layout without restarting the application.
+The title, subtitle, actions, Settings control, Settings sections, Back control and footer must remain accessible. Avoid clipping and unnecessary horizontal scrolling. On very small screens, vertical scrolling is acceptable. Window resizing and orientation changes must update the layout without restarting the application.
 
 ## Professional footer
 
 Display:
-- `© 2026 Core Identification Nodes byLAEV`
+- `© 2026 Core Identification Nodes byLAEV. All rights reserved.`
 - Project attribution: `Core Identification Nodes`
 - Repository: `https://github.com/LerryAlexanderElizondoVillalobos/CIN-Core-Identification-Nodes-byLAEV`
 
