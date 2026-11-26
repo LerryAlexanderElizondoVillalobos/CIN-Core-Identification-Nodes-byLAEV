@@ -1,0 +1,17 @@
+# Illustrative schema example only — NOT AN OFFICIAL RELEASE
+manifest_format=cin-epm-release-v1
+product=cin-main-lobby
+release_version=0.1.0
+release_channel=development
+artifact_file=cin-main-lobby-example-arm64.deb
+artifact_url=https://example.invalid/cin-main-lobby-example-arm64.deb
+artifact_sha256=0000000000000000000000000000000000000000000000000000000000000000
+artifact_format=deb
+os_family=debian
+architecture=arm64
+runtime_profiles=debian-native,lindesk
+minimum_kernel=6.1
+libc=glibc-2.36
+required_capabilities=posix-shell,dpkg
+optional_capabilities=systemd-user,dbus-session
+dependencies=none
