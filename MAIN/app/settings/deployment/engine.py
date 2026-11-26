@@ -128,10 +128,6 @@ def compare(local: dict, remote: dict) -> dict:
 
 
 def stage_and_apply(proposal: dict, remote: dict, confirmed: bool, root: Path = APP_DIR) -> dict:
-    try:
-        NetworkAccessController().require_enabled()
-    except NetworkAccessError as exc:
-        raise DeploymentError(str(exc)) from exc
     if not confirmed:
         raise DeploymentError("Deployment requires explicit operator confirmation.")
     if proposal.get("base_build_hash") != local_manifest(root).get("build_hash"):
@@ -140,6 +136,10 @@ def stage_and_apply(proposal: dict, remote: dict, confirmed: bool, root: Path = 
     changes = proposal["additions"] + proposal["replacements"]
     removals = [_relative_component_path(path) for path in proposal["removals"]]
     change_paths = [_relative_component_path(item["path"]) for item in changes]
+    try:
+        NetworkAccessController().require_enabled()
+    except NetworkAccessError as exc:
+        raise DeploymentError(str(exc)) from exc
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     root.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="cin-deploy-", dir=str(root.parent)) as tmp:
