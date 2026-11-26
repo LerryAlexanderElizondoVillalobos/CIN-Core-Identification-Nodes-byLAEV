@@ -6,6 +6,7 @@ on:
     paths:
       - "MAIN/app/launcher/**"
       - "MAIN/app/settings/deployment/**"
+      - "MAIN/app/settings/network_connectivity.py"
       - "MAIN/tests/settings/**"
       - "MAIN/installer/linux/**"
       - "MAIN/packaging/deb/**"
