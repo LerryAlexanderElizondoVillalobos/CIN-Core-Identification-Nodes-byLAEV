@@ -57,6 +57,8 @@ command -v rsvg-convert >/dev/null || { echo "Missing build dependency: rsvg-con
 mkdir -p "$APPDIR/usr/share/icons/hicolor/256x256/apps"
 rsvg-convert -w 256 -h 256 MAIN/installer/linux/cin-main-lobby.svg -o "$APPDIR/usr/share/icons/hicolor/256x256/apps/cin-main-lobby.png"
 test -s "$APPDIR/usr/share/icons/hicolor/256x256/apps/cin-main-lobby.png"
+# AppImage type-2 tooling expects the icon at the AppDir root for .DirIcon.
+install -m 0644 "$APPDIR/usr/share/icons/hicolor/256x256/apps/cin-main-lobby.png" "$APPDIR/cin-main-lobby.png"
 
 # PyGObject loads typelib metadata dynamically; ELF dependency scanning alone
 # does not discover these files. Bundle the complete typelib directory.
