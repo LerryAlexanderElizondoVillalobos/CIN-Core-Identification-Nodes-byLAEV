@@ -16,22 +16,29 @@ done
 
 BUILD="$ROOT/build/appimage"
 APPDIR="$BUILD/AppDir"
+PYDIST="$BUILD/pyinstaller-dist"
 DIST="$ROOT/dist"
 rm -rf "$BUILD" "$DIST"
-mkdir -p "$APPDIR/usr/bin" "$APPDIR/usr/share/applications" "$APPDIR/usr/share/icons/hicolor/scalable/apps" "$DIST" "$BUILD/venv"
+mkdir -p "$APPDIR/usr/bin" "$APPDIR/usr/share/applications" \
+  "$APPDIR/usr/share/icons/hicolor/scalable/apps" "$DIST" "$BUILD/venv" "$PYDIST"
 
 python3 -m venv --system-site-packages "$BUILD/venv"
 PYTHON="$BUILD/venv/bin/python"
-"$PYTHON" -m pip install --upgrade pip pyinstaller
-"$PYTHON" -m PyInstaller --noconfirm --clean --name cin-main \
-  --paths MAIN/app --collect-all gi --collect-all cairo \
-  MAIN/app/launcher/cin_main.py
-"$PYTHON" -m PyInstaller --noconfirm --clean --name cin-appimage-installer \
-  --collect-all gi --collect-all cairo MAIN/installer/linux/appimage_installer.py
+"$PYTHON" -m pip install --disable-pip-version-check pyinstaller
+
+# onedir is intentional: the Python runtime, GI extension modules and resources
+# must remain inspectable and discoverable by linuxdeploy.
+"$PYTHON" -m PyInstaller --noconfirm --clean --distpath "$PYDIST" --workpath "$BUILD/work-main" \
+  --name cin-main --paths MAIN/app --collect-all gi --collect-all cairo \
+  --collect-submodules settings MAIN/app/launcher/cin_main.py
+"$PYTHON" -m PyInstaller --noconfirm --clean --distpath "$PYDIST" --workpath "$BUILD/work-installer" \
+  --name cin-appimage-installer --collect-all gi --collect-all cairo \
+  MAIN/installer/linux/appimage_installer.py
 
 install -d "$APPDIR/usr/lib/cin-main" "$APPDIR/usr/lib/cin-appimage-installer"
-cp -a dist/cin-main/. "$APPDIR/usr/lib/cin-main/"
-cp -a dist/cin-appimage-installer/. "$APPDIR/usr/lib/cin-appimage-installer/"
+cp -a "$PYDIST/cin-main/." "$APPDIR/usr/lib/cin-main/"
+cp -a "$PYDIST/cin-appimage-installer/." "$APPDIR/usr/lib/cin-appimage-installer/"
+
 cat > "$APPDIR/usr/bin/cin-main" <<'EOF'
 #!/bin/sh
 HERE="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
@@ -46,26 +53,24 @@ chmod 0755 "$APPDIR/usr/bin/cin-main" "$APPDIR/usr/bin/cin-appimage-installer"
 install -m 0755 MAIN/installer/linux/AppRun "$APPDIR/AppRun"
 install -m 0644 MAIN/installer/linux/cin-main-lobby.desktop "$APPDIR/usr/share/applications/cin-main-lobby.desktop"
 install -m 0644 MAIN/installer/linux/cin-main-lobby.svg "$APPDIR/usr/share/icons/hicolor/scalable/apps/cin-main-lobby.svg"
-cp -a MAIN/app/settings "$APPDIR/usr/share/cin-main-lobby-settings"
 
-# Bundle GTK introspection metadata used by PyGObject. linuxdeploy resolves ELF
-# shared-library dependencies; typelibs are runtime-loaded and copied explicitly.
+# PyGObject loads typelib metadata dynamically; ELF dependency scanning alone
+# does not discover these files. Bundle the complete typelib directory.
 GI_DIR="/usr/lib/$([ "$APPIMAGE_ARCH" = x86_64 ] && echo x86_64-linux-gnu || echo aarch64-linux-gnu)/girepository-1.0"
 if [[ ! -d "$GI_DIR" ]]; then
   echo "GTK introspection metadata not found at $GI_DIR" >&2
   exit 1
 fi
 mkdir -p "$APPDIR/usr/lib/girepository-1.0"
-for typelib in Gtk-4.0 Gdk-4.0 Gsk-4.0 Gio-2.0 GioUnix-2.0 GLib-2.0 GModule-2.0 GObject-2.0 Pango-1.0 cairo-1.0 GdkPixbuf-2.0 Graphene-1.0; do
-  file="$GI_DIR/$typelib.typelib"
-  [[ ! -f "$file" ]] || install -m 0644 "$file" "$APPDIR/usr/lib/girepository-1.0/"
-done
+find "$GI_DIR" -maxdepth 1 -type f -name '*.typelib' -exec install -m 0644 {} "$APPDIR/usr/lib/girepository-1.0/" \;
 
-# GTK4 is loaded by GObject Introspection at runtime, so include its ELF
-# libraries explicitly; linuxdeploy then follows their transitive dependencies.
+# Explicitly seed GTK's dynamically loaded libraries and modules. linuxdeploy
+# then resolves their transitive ELF dependencies into the AppDir.
 LIB_DIR="/usr/lib/$([ "$APPIMAGE_ARCH" = x86_64 ] && echo x86_64-linux-gnu || echo aarch64-linux-gnu)"
-for library in libgtk-4.so.1 libgdk-4.so.1 libgsk-4.so.1 libgraphene-1.0.so.0; do
-  [[ ! -e "$LIB_DIR/$library" ]] || install -m 0644 "$LIB_DIR/$library" "$APPDIR/usr/lib/"
+for pattern in libgtk-4.so* libgdk-4.so* libgsk-4.so* libgraphene-1.0.so*; do
+  while IFS= read -r -d '' library; do
+    install -m 0644 "$library" "$APPDIR/usr/lib/$(basename "$library")"
+  done < <(find "$LIB_DIR" -maxdepth 1 -type f -name "$pattern" -print0)
 done
 if [[ -d "$LIB_DIR/gtk-4.0" ]]; then
   cp -a "$LIB_DIR/gtk-4.0" "$APPDIR/usr/lib/"
@@ -77,15 +82,27 @@ fi
 
 export APPIMAGE_EXTRACT_AND_RUN=1
 LIB_ARGS=()
-while IFS= read -r library; do LIB_ARGS+=(--library "$library"); done < <(find "$APPDIR/usr/lib" -type f -name '*.so*')
-linuxdeploy --appdir "$APPDIR" --executable "$APPDIR/usr/lib/cin-main/cin-main" \
-  --executable "$APPDIR/usr/lib/cin-appimage-installer/cin-appimage-installer" "${LIB_ARGS[@]}" \
+while IFS= read -r -d '' library; do
+  LIB_ARGS+=(--library "$library")
+done < <(find "$APPDIR/usr/lib" -type f -name '*.so*' -print0)
+
+linuxdeploy --appdir "$APPDIR" \
+  --executable "$APPDIR/usr/lib/cin-main/cin-main" \
+  --executable "$APPDIR/usr/lib/cin-appimage-installer/cin-appimage-installer" \
+  "${LIB_ARGS[@]}" \
   --desktop-file "$APPDIR/usr/share/applications/cin-main-lobby.desktop" \
   --icon-file "$APPDIR/usr/share/icons/hicolor/scalable/apps/cin-main-lobby.svg" \
   --output appimage
-mkdir -p "$DIST"
-find "$ROOT" -maxdepth 1 -type f -name '*.AppImage' -exec mv {} "$DIST/Core_Identification_Nodes-$APPIMAGE_ARCH.AppImage" \;
+
+# linuxdeploy emits the AppImage in the current working directory.
+mapfile -t CANDIDATES < <(find "$ROOT" -maxdepth 1 -type f -name '*.AppImage' -print)
+if [[ "${#CANDIDATES[@]}" -ne 1 ]]; then
+  printf 'Expected exactly one generated AppImage, found %s\n' "${#CANDIDATES[@]}" >&2
+  printf '%s\n' "${CANDIDATES[@]}" >&2
+  exit 1
+fi
+install -m 0755 "${CANDIDATES[0]}" "$DIST/Core_Identification_Nodes-$APPIMAGE_ARCH.AppImage"
+rm -f "${CANDIDATES[0]}"
 test -s "$DIST/Core_Identification_Nodes-$APPIMAGE_ARCH.AppImage"
-chmod 0755 "$DIST/Core_Identification_Nodes-$APPIMAGE_ARCH.AppImage"
 file "$DIST/Core_Identification_Nodes-$APPIMAGE_ARCH.AppImage"
 sha256sum "$DIST/Core_Identification_Nodes-$APPIMAGE_ARCH.AppImage"
