@@ -23,14 +23,26 @@ mkdir -p "$APPDIR/usr/bin" "$APPDIR/usr/share/applications" "$APPDIR/usr/share/i
 python3 -m venv --system-site-packages "$BUILD/venv"
 PYTHON="$BUILD/venv/bin/python"
 "$PYTHON" -m pip install --upgrade pip pyinstaller
-"$PYTHON" -m PyInstaller --noconfirm --clean --onefile --name cin-main \
+"$PYTHON" -m PyInstaller --noconfirm --clean --name cin-main \
   --paths MAIN/app --collect-all gi --collect-all cairo \
   MAIN/app/launcher/cin_main.py
-"$PYTHON" -m PyInstaller --noconfirm --clean --onefile --name cin-appimage-installer \
+"$PYTHON" -m PyInstaller --noconfirm --clean --name cin-appimage-installer \
   --collect-all gi --collect-all cairo MAIN/installer/linux/appimage_installer.py
 
-install -m 0755 dist/cin-main "$APPDIR/usr/bin/cin-main"
-install -m 0755 dist/cin-appimage-installer "$APPDIR/usr/bin/cin-appimage-installer"
+install -d "$APPDIR/usr/lib/cin-main" "$APPDIR/usr/lib/cin-appimage-installer"
+cp -a dist/cin-main/. "$APPDIR/usr/lib/cin-main/"
+cp -a dist/cin-appimage-installer/. "$APPDIR/usr/lib/cin-appimage-installer/"
+cat > "$APPDIR/usr/bin/cin-main" <<'EOF'
+#!/bin/sh
+HERE="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+exec "$HERE/../lib/cin-main/cin-main" "$@"
+EOF
+cat > "$APPDIR/usr/bin/cin-appimage-installer" <<'EOF'
+#!/bin/sh
+HERE="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+exec "$HERE/../lib/cin-appimage-installer/cin-appimage-installer" "$@"
+EOF
+chmod 0755 "$APPDIR/usr/bin/cin-main" "$APPDIR/usr/bin/cin-appimage-installer"
 install -m 0755 MAIN/installer/linux/AppRun "$APPDIR/AppRun"
 install -m 0644 MAIN/installer/linux/cin-main-lobby.desktop "$APPDIR/usr/share/applications/cin-main-lobby.desktop"
 install -m 0644 MAIN/installer/linux/cin-main-lobby.svg "$APPDIR/usr/share/icons/hicolor/scalable/apps/cin-main-lobby.svg"
@@ -50,8 +62,10 @@ for typelib in Gtk-4.0 Gdk-4.0 Gio-2.0 GLib-2.0 GObject-2.0 Pango-1.0 cairo-1.0 
 done
 
 export APPIMAGE_EXTRACT_AND_RUN=1
+LIB_ARGS=()
+while IFS= read -r library; do LIB_ARGS+=(--library "$library"); done < <(find "$APPDIR/usr/lib/cin-main" "$APPDIR/usr/lib/cin-appimage-installer" -type f -name '*.so*')
 linuxdeploy --appdir "$APPDIR" --executable "$APPDIR/usr/bin/cin-main" \
-  --executable "$APPDIR/usr/bin/cin-appimage-installer" \
+  --executable "$APPDIR/usr/bin/cin-appimage-installer" "\${LIB_ARGS[@]}" \
   --desktop-file "$APPDIR/usr/share/applications/cin-main-lobby.desktop" \
   --icon-file "$APPDIR/usr/share/icons/hicolor/scalable/apps/cin-main-lobby.svg" \
   --output appimage
