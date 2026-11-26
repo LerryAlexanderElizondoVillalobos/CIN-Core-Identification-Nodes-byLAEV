@@ -77,6 +77,12 @@ jobs:
           GDK_BACKEND: x11
         run: |
           dbus-run-session -- xvfb-run -a "dist/Core_Identification_Nodes-aarch64.AppImage" --run --smoke-test
+      - name: Smoke-test graphical AppImage first-run installer
+        env:
+          APPIMAGE_EXTRACT_AND_RUN: "1"
+          GDK_BACKEND: x11
+        run: |
+          dbus-run-session -- xvfb-run -a "dist/Core_Identification_Nodes-aarch64.AppImage" --smoke-test
       - name: Build Debian ARM64 package
         run: bash MAIN/installer/linux/build-deb-arm64.sh
       - name: Validate Debian ARM64 package payload
