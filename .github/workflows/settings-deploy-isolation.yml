@@ -36,6 +36,7 @@ jobs:
 
   build-appimage:
     needs: source-tests
+    timeout-minutes: 25
     strategy:
       fail-fast: false
       matrix:
