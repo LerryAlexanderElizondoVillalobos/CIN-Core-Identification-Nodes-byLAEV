@@ -84,6 +84,7 @@ jobs:
               if printf '%s\\n' "$output" | grep -q 'not found'; then printf 'Unresolved ELF dependencies in %s\\n%s\\n' "$file" "$output"; exit 1; fi
             fi
           done
+          unzip -t dist/CIN-Debian13-Installer.zip
           unzip -l dist/CIN-Debian13-Installer.zip > dist/CIN-Debian13-Installer.contents.txt
           grep -q 'CIN-Debian13-Installer/CIN.deb' dist/CIN-Debian13-Installer.contents.txt
           grep -q 'CIN-Debian13-Installer/install-user.sh' dist/CIN-Debian13-Installer.contents.txt
@@ -140,6 +141,11 @@ jobs:
           chown -R cin-gui:cin-gui /tmp/cin-gui-installer
           runuser -u cin-gui -- env HOME=/home/cin-gui XDG_DATA_HOME=/home/cin-gui/.local/share sh /tmp/cin-gui-installer/CIN-Debian13-Installer/install-user.sh
           dbus-run-session -- xvfb-run -a runuser -u cin-gui -- env HOME=/home/cin-gui XDG_DATA_HOME=/home/cin-gui/.local/share GDK_BACKEND=x11 /usr/bin/time -v /home/cin-gui/.local/bin/cin --smoke-test
+          useradd --create-home --shell /bin/bash cin-run
+          chown -R cin-run:cin-run /home/cin-run
+          dbus-run-session -- xvfb-run -a runuser -u cin-run -- env HOME=/home/cin-run XDG_CACHE_HOME=/home/cin-run/.cache GDK_BACKEND=x11 /usr/bin/time -v sh /tmp/cin-gui-installer/CIN-Debian13-Installer/run-user.sh --smoke-test
+          test ! -e /home/cin-run/.local/opt/cin-main-lobby
+          test -z "$(find /home/cin-run/.cache -maxdepth 1 -type d -name 'cin-run.*' -print -quit 2>/dev/null || true)"
       - name: Upload Debian 13 ARM64 distribution
         uses: actions/upload-artifact@v4
         with:
