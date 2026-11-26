@@ -27,11 +27,15 @@ A formal application version/release compatibility and update-management system 
 
 ## CIN Application Network Access — implemented in this branch
 
-Network Isolation is part of the agreed CIN.deb scope for this development stage. It is **not present in the current branch implementation**: there is no installed isolation component, Settings control, integration in the Debian payload, or corresponding automated qualification test yet.
+The application has a master ON/OFF control in both Main Lobby and Settings. It controls only CIN's Internet/network access. OFF applies systemd's `IPAddressDeny=any` policy to the dedicated `cin-main-lobby.scope` cgroup; ON clears that CIN-scope override. It does not disable NetworkManager, host networking, or connectivity for browsers and other Linux applications.
 
-The architectural document `HISTORY/docs/architecture/CIN_NETWORKS_NATIVE_ADDRESSING_AND_DOMAIN_REGISTRY_v1.2.md` specifies the proposed CIN Networks Engine (addressing, resolver, domain registry and node communications). That Networks Engine is not interchangeable with an operating-system/application network-isolation mechanism. The implementation contract for Network Isolation must be defined before selecting the mechanism; do not silently substitute the Networks Engine or claim isolation is active.
+The installer launches CIN inside that dedicated systemd user scope. The control uses the user's systemd manager and cgroup network filtering; it does not require root or change host-wide network configuration. If the desktop session has no usable systemd user manager or the kernel/systemd cannot apply the policy, the UI reports the control as unavailable rather than claiming isolation is active.
 
-Consequently, the existing green CI runs qualify the current Lobby + Deploy installer only. They do not qualify the full agreed installer scope, and PR #49 must remain unmerged until Network Isolation is implemented, packaged and tested.
+The official-channel check and Deploy engine both require CIN network access to be ON. The setting is enforced at the CIN process scope, not merely by hiding buttons or disabling the UI.
+
+The previous NetworkManager-wide switch and its tests have been removed. The new automated tests cover scope status, ON/OFF policy changes, missing systemd support, and the absence of any NetworkManager command invocation.
+
+Qualification still required before merge includes running the actual ON/OFF behavior on supported Linux environments and confirming another application retains connectivity while CIN is OFF.
 
 ## Publisher trust and development channel
 
