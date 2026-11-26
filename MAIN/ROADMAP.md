@@ -2,15 +2,15 @@
 
 The project has two installation phases. The immediate and exclusive implementation target is Phase 1.
 
-## Phase 1 — Linux installer for CIN Main Lobby
+## Phase 1 — ARM64 Debian package for CIN Main Lobby
 
-**Deliverable:** one per-user Linux installer that installs and launches the CIN Main Lobby, including its required runtime and three founding certificate processes.
+**Deliverable:** one Debian package (.deb), architecture arm64 / AArch64, that installs and launches the CIN Main Lobby, including its required runtime and three founding certificate processes. The package targets Debian-compatible ARM64 userspaces on Android (including LinDesk) and conventional ARM64 Linux; virtualization is optional.
 
 ### Phase 1A — Installer foundation
-- Define the release package, manifest and publisher trust input.
-- Implement ZIP and Package Manifest verification using the adopted release profile.
-- Implement per-user extraction and versioned application directory.
-- Create the user launcher and desktop entry.
+- Define Debian package metadata, versioning, dependencies and publisher trust input.
+- Build and inspect the arm64 .deb using dpkg-deb.
+- Install into a Debian-compatible ARM64 userspace and validate package lifecycle.
+- Create the Lobby launcher and desktop entry using available user-space integration.
 - Keep application files separate from persistent node data and user configuration.
 - Launch the Main Lobby.
 
@@ -38,7 +38,7 @@ The project has two installation phases. The immediate and exclusive implementat
 - Preserve actual authority, association and issuance status.
 
 ### Phase 1 acceptance
-Phase 1 is complete when a Linux user can install and launch the Main Lobby and execute the three founding processes through their defined outputs and persisted verification states. The Package Engine is not part of this deliverable.
+Phase 1 is complete when a user can install and launch the arm64 .deb in a qualified Debian-compatible ARM64 userspace (including the Android LinDesk target) and execute the three founding processes through their defined outputs and persisted verification states. The Package Engine is not part of this deliverable.
 
 ## Phase 2 — CIN Package Engine Installer
 
