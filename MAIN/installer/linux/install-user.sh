@@ -72,7 +72,7 @@ cat > "$BIN_DIR/cin-main" <<EOF
 #!/bin/sh
 # Run CIN in its dedicated systemd user scope. IPAddressDeny is applied only
 # to this scope, leaving the host and all other applications unaffected.
-exec systemd-run --user --scope --unit=cin-main-lobby -- "$PYTHON_BIN" "$APP_DIR/cin_main.py" "$@"
+exec systemd-run --user --scope --unit=cin-main-lobby -- "$PYTHON_BIN" "$APP_DIR/cin_main.py" "\$@"
 EOF
 chmod 0755 "$BIN_DIR/cin-main"
 
