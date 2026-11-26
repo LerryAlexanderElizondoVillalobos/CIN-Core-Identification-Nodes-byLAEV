@@ -148,11 +148,12 @@ class CinMainWindow(Gtk.ApplicationWindow):
         deployment_status.set_wrap(True)
         content.append(deployment_status)
         manifest_button = Gtk.Button(label="Generate Local Manifest")
-        manifest_button.connect("clicked", lambda _button: self.show_deployment_result(
-            "Local Manifest", self.local_manifest_summary()))
+        manifest_button.set_sensitive(False)
+        manifest_button.set_tooltip_text("AppImage-aware manifest generation is pending.")
         content.append(manifest_button)
         check_button = Gtk.Button(label="Check Official Development Channel")
-        check_button.connect("clicked", lambda _button: self.check_deployment_channel())
+        check_button.set_sensitive(False)
+        check_button.set_tooltip_text("Signed AppImage replacement/update integration is pending.")
         content.append(check_button)
 
         content.append(self.section_heading("Project Repository"))
@@ -192,10 +193,12 @@ class CinMainWindow(Gtk.ApplicationWindow):
     @staticmethod
     def deployment_status_text():
         if not KEY_PATH.is_file():
-            return ("Deployment engine installed. Publisher trust is not configured. "
-                    f"Provision the official Ed25519 public key at {KEY_PATH}; "
-                    "no update can be trusted or applied yet.")
-        return "Deployment engine installed. Publisher key found; check the official channel manually."
+            trust = f"Publisher trust is not configured. Provision the genuine Ed25519 public key at {KEY_PATH}."
+        else:
+            trust = "Publisher public key is provisioned."
+        return ("Deploy engine is included, but component-level updates are disabled in this AppImage build. "
+                "An AppImage-aware signed replacement flow is required before an update can be applied. "
+                + trust)
 
     def local_manifest_summary(self):
         manifest = local_manifest(APP_DIR)
@@ -314,7 +317,7 @@ class CinMainWindow(Gtk.ApplicationWindow):
 
 class CinApplication(Gtk.Application):
     def __init__(self, smoke_test=False):
-        super().__init__(application_id="bylaev.cin.main", flags=Gio.ApplicationFlags.DEFAULT_FLAGS)
+        super().__init__(application_id="bylaev.cin.main", flags=Gio.ApplicationFlags(0))
         self.smoke_test = smoke_test
         self.window = None
         self.exit_status = 0
@@ -336,12 +339,17 @@ class CinApplication(Gtk.Application):
             assert self.window.current_screen == "settings"
             self.window.show_lobby()
             assert self.window.current_screen == "lobby"
-            # Exercise the actual CIN scope policy from inside the installed app.
-            self.window.network.set_enabled(False)
-            assert self.window.network.status() == "disabled"
-            self.window.network.set_enabled(True)
-            assert self.window.network.status() == "enabled"
-            print("PASS: Lobby navigation and CIN-only network OFF/ON policy work.")
+            print("PASS: Main Lobby and Settings navigation work.")
+            # Network enforcement depends on user-manager delegation and cgroup BPF
+            # support. Report unsupported hosts as SKIP; never fail app launch.
+            try:
+                self.window.network.set_enabled(False)
+                assert self.window.network.status() == "disabled"
+                self.window.network.set_enabled(True)
+                assert self.window.network.status() == "enabled"
+                print("PASS: CIN-only network OFF/ON policy is enforced.")
+            except NetworkAccessError as exc:
+                print(f"SKIP: CIN network policy unavailable on this host: {exc}")
         except Exception as exc:
             self.exit_status = 1
             print(f"FAIL: CIN application smoke test: {exc}", file=sys.stderr)

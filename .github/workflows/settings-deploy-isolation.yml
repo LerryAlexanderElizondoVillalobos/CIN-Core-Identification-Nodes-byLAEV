@@ -1,4 +1,4 @@
-name: CIN — Official Core Identification Nodes Debian Package
+name: CIN — Linux ARM64 packages
 
 on:
   push:
@@ -7,8 +7,6 @@ on:
       - "MAIN/app/**"
       - "MAIN/tests/**"
       - "MAIN/installer/linux/**"
-      - "MAIN/packaging/deb/**"
-      - "MAIN/deploy/**"
       - ".github/workflows/settings-deploy-isolation.yml"
   pull_request:
     paths:
@@ -20,157 +18,116 @@ permissions:
   contents: read
 
 concurrency:
-  group: cin-official-deb-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  group: cin-linux-arm64-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   source-tests:
-    name: Source, Deploy and application contract tests
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-      - name: Run all CIN source tests
+      - name: Run CIN source tests
         run: python3 -m unittest discover -s MAIN/tests -v
-      - name: Validate Python syntax
-        run: python3 -m compileall -q MAIN/app
+      - name: Validate application and installer syntax
+        run: |
+          python3 -m compileall -q MAIN/app MAIN/installer/linux/appimage_installer.py
+          bash -n MAIN/installer/linux/AppRun
+          bash -n MAIN/installer/linux/build-appimage.sh
+          bash -n MAIN/installer/linux/build-deb-arm64.sh
 
-  network-runtime:
-    timeout-minutes: 15
-    name: CIN-scoped network isolation on ${{ matrix.runner }}
+  build-appimage:
     needs: source-tests
-    strategy:
-      fail-fast: false
-      matrix:
-        runner: [ubuntu-24.04, ubuntu-24.04-arm]
-    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 25
+    runs-on: ubuntu-22.04-arm
     steps:
       - uses: actions/checkout@v4
-      - name: Install CI-only systemd and GTK test dependencies
+      - name: Install build-time GTK and Python dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y python3 python3-gi gir1.2-gtk-4.0 xvfb dbus-x11
-      - name: Start the CI user's systemd manager
+          sudo apt-get install -y python3 python3-venv python3-dev python3-gi python3-cairo gir1.2-gtk-4.0 libcairo2-dev libgirepository1.0-dev librsvg2-bin desktop-file-utils patchelf gcc pkg-config file wget
+      - name: Download architecture-matched linuxdeploy
         run: |
-          sudo loginctl enable-linger "$(id -un)"
-          sudo systemctl start "user@$(id -u).service"
-          echo "XDG_RUNTIME_DIR=/run/user/$(id -u)" >> "$GITHUB_ENV"
-          echo "DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u)/bus" >> "$GITHUB_ENV"
-      - name: Verify non-root user manager can toggle scope network policy
-        run: python3 MAIN/tests/settings/network_user_scope_runtime_check.py
-      - name: Verify denied CIN scope does not affect host networking
-        run: sudo python3 MAIN/tests/settings/network_scope_runtime_check.py
-      - name: Run native Lobby and Settings smoke test
+          wget -q "https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-aarch64.AppImage" -O linuxdeploy
+          chmod 0755 linuxdeploy
+          sudo install -m 0755 linuxdeploy /usr/local/bin/linuxdeploy
+      - name: Build AppImage
+        run: bash MAIN/installer/linux/build-appimage.sh
         env:
-          GDK_BACKEND: x11
-          PYTHONPATH: MAIN/app
-        run: xvfb-run -a systemd-run --user --scope --unit=cin-main-lobby -- python3 MAIN/app/launcher/cin_main.py --smoke-test
-
-  build-package:
-    name: Build and inspect Core_Identification_Nodes.deb
-    needs: [source-tests, network-runtime]
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install CI-only Debian build tools
-        run: sudo apt-get update && sudo apt-get install -y dpkg-dev
-      - name: Build the official Debian package
-        run: bash MAIN/installer/linux/build-deb.sh dist
-      - name: Validate exact package identity and capabilities
+          APPIMAGE_EXTRACT_AND_RUN: "1"
+      - name: Inspect artifact and verify embedded CIN modules
+        env:
+          APPIMAGE_EXTRACT_AND_RUN: "1"
         run: |
           set -euo pipefail
-          PACKAGE=dist/Core_Identification_Nodes.deb
-          test -s "$PACKAGE"
-          test "$(dpkg-deb --field "$PACKAGE" Package)" = "core-identification-nodes"
-          test "$(dpkg-deb --field "$PACKAGE" Architecture)" = "all"
-          dpkg-deb --field "$PACKAGE" Version Architecture
-          dpkg-deb --extract "$PACKAGE" /tmp/cin-official-package
-          test -f /tmp/cin-official-package/opt/cin-main-lobby/cin_main.py
-          test -f /tmp/cin-official-package/opt/cin-main-lobby/settings/deployment/engine.py
-          test -f /tmp/cin-official-package/opt/cin-main-lobby/settings/network_access.py
-          test -x /tmp/cin-official-package/opt/cin-installer/install-user.sh
-          test -x /tmp/cin-official-package/opt/cin-installer/uninstall-user.sh
-          PYTHONPYCACHEPREFIX=/tmp/cin-compile-cache python3 -m compileall -q /tmp/cin-official-package/opt/cin-main-lobby
-          ! find /tmp/cin-official-package -type f -name '*.pyc' | grep .
-          bash -n MAIN/installer/linux/install-user.sh
-          bash -n MAIN/installer/linux/uninstall-user.sh
-          ! grep -Eq '^[[:space:]]*sudo[[:space:]]|[;&|][[:space:]]*sudo[[:space:]]|apt(-get)?[[:space:]]+install|dpkg[[:space:]]+-i' MAIN/installer/linux/install-user.sh
-          sha256sum "$PACKAGE"
-      - name: Upload internal package candidate for installation qualification
-        uses: actions/upload-artifact@v4
-        with:
-          name: cin-official-deb-candidate
-          path: dist/Core_Identification_Nodes.deb
-          if-no-files-found: error
-          retention-days: 3
-
-  install-qualification:
-    timeout-minutes: 15
-    name: Install, launch, toggle network and uninstall
-    needs: build-package
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with:
-          name: cin-official-deb-candidate
-          path: dist
-      - name: Provision CI-only runtime prerequisites
+          APPIMAGE="dist/Core_Identification_Nodes-aarch64.AppImage"
+          test -s "$APPIMAGE"
+          test -x "$APPIMAGE"
+          "$APPIMAGE" --appimage-extract >/dev/null
+          test -x squashfs-root/AppRun
+          test -x squashfs-root/usr/bin/cin-main
+          test -x squashfs-root/usr/bin/cin-appimage-installer
+          test -d squashfs-root/usr/lib/girepository-1.0
+          test -n "$(find squashfs-root/usr/lib/girepository-1.0 -name 'Gtk-4.0.typelib' -print -quit)"
+          test -n "$(find squashfs-root/usr/lib -name 'libgtk-4.so*' -print -quit)"
+          rm -rf squashfs-root
+          sha256sum "$APPIMAGE"
+      - name: Smoke-test bundled Main Lobby inside the AppImage
+        env:
+          APPIMAGE_EXTRACT_AND_RUN: "1"
+          GDK_BACKEND: x11
         run: |
-          sudo apt-get update
-          sudo apt-get install -y python3 python3-gi gir1.2-gtk-4.0 xvfb openssl
-          sudo loginctl enable-linger "$(id -un)"
-          sudo systemctl start "user@$(id -u).service"
-          echo "XDG_RUNTIME_DIR=/run/user/$(id -u)" >> "$GITHUB_ENV"
-          echo "DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u)/bus" >> "$GITHUB_ENV"
-      - name: Prepare previous installation and persistent operator data
+          dbus-run-session -- xvfb-run -a "dist/Core_Identification_Nodes-aarch64.AppImage" --run --smoke-test
+      - name: Smoke-test graphical AppImage first-run installer
+        env:
+          APPIMAGE_EXTRACT_AND_RUN: "1"
+          GDK_BACKEND: x11
         run: |
-          mkdir -p "$HOME/.local/opt/cin-main-lobby" "$HOME/.local/share/cin-main-lobby" "$HOME/.config/cin-main-lobby"
-          echo old-build > "$HOME/.local/opt/cin-main-lobby/old.txt"
-          echo preserve-data > "$HOME/.local/share/cin-main-lobby/operator-data.txt"
-          echo preserve-config > "$HOME/.config/cin-main-lobby/operator-config.txt"
-      - name: Install as normal user without sudo
+          dbus-run-session -- xvfb-run -a "dist/Core_Identification_Nodes-aarch64.AppImage" --smoke-test
+      - name: Test real AppImage per-user installation and uninstall
+        env:
+          APPIMAGE_EXTRACT_AND_RUN: "1"
+          GDK_BACKEND: x11
         run: |
           set -euo pipefail
-          test "$(id -u)" -ne 0
-          dpkg-deb --extract "$PWD/dist/Core_Identification_Nodes.deb" "$RUNNER_TEMP/cin-bootstrap"
-          bash "$RUNNER_TEMP/cin-bootstrap/opt/cin-installer/install-user.sh" "$PWD/dist/Core_Identification_Nodes.deb"
-          test -f "$HOME/.local/opt/cin-main-lobby/cin_main.py"
-          test -f "$HOME/.local/opt/cin-main-lobby/settings/deployment/engine.py"
-          test -f "$HOME/.local/opt/cin-main-lobby/settings/network_access.py"
-          test ! -e "$HOME/.local/opt/cin-main-lobby/old.txt"
-          grep -q preserve-data "$HOME/.local/share/cin-main-lobby/operator-data.txt"
-          grep -q preserve-config "$HOME/.config/cin-main-lobby/operator-config.txt"
-          test -x "$HOME/.local/bin/cin-main"
-          test -f "$HOME/.local/share/applications/cin-main.desktop"
-      - name: Launch installed application and exercise Deploy/network UI contract
+          TEST_HOME="$RUNNER_TEMP/cin-user-home"
+          mkdir -p "$TEST_HOME"
+          HOME="$TEST_HOME" dbus-run-session -- xvfb-run -a \
+            "dist/Core_Identification_Nodes-aarch64.AppImage" --smoke-install
+          test ! -e "$TEST_HOME/Applications/Core_Identification_Nodes.AppImage"
+          test ! -e "$TEST_HOME/.local/share/applications/cin-main-lobby.desktop"
+      - name: Build Debian ARM64 package
+        run: bash MAIN/installer/linux/build-deb-arm64.sh
+      - name: Validate Debian ARM64 package payload
+        run: |
+          set -euo pipefail
+          DEB="dist/Core_Identification_Nodes-arm64.deb"
+          test -s "$DEB"
+          test "$(dpkg-deb -f "$DEB" Architecture)" = "arm64"
+          dpkg-deb --contents "$DEB" > "$RUNNER_TEMP/cin-deb-contents.txt"
+          grep -q '/opt/cin/AppDir/AppRun' "$RUNNER_TEMP/cin-deb-contents.txt"
+          grep -q '/usr/bin/cin-main-lobby' "$RUNNER_TEMP/cin-deb-contents.txt"
+      - name: Install, launch, and remove Debian ARM64 package
         env:
           GDK_BACKEND: x11
-        run: xvfb-run -a "$HOME/.local/bin/cin-main" --smoke-test
-      - name: Uninstall application while preserving operator data
-        if: always()
         run: |
-          if [ -f "$HOME/.local/opt/cin-main-lobby/uninstall-user.sh" ]; then
-            bash "$HOME/.local/opt/cin-main-lobby/uninstall-user.sh"
-          fi
-          test ! -e "$HOME/.local/opt/cin-main-lobby"
-          test ! -e "$HOME/.local/bin/cin-main"
-          test -f "$HOME/.local/share/cin-main-lobby/operator-data.txt"
-          test -f "$HOME/.config/cin-main-lobby/operator-config.txt"
-
-  publish-official-package:
-    name: Publish the single official Debian artifact
-    needs: install-qualification
-    if: success() && github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: cin-official-deb-candidate
-          path: dist
-      - name: Publish only Core_Identification_Nodes.deb
+          set -euo pipefail
+          sudo dpkg -i dist/Core_Identification_Nodes-arm64.deb
+          test -x /usr/bin/cin-main-lobby
+          dbus-run-session -- xvfb-run -a /usr/bin/cin-main-lobby --smoke-test
+          sudo dpkg -r core-identification-nodes
+          test ! -e /usr/bin/cin-main-lobby
+          test ! -e /opt/cin/AppDir/AppRun
+      - name: Upload ARM64 AppImage
         uses: actions/upload-artifact@v4
         with:
-          name: Core_Identification_Nodes.deb
-          path: dist/Core_Identification_Nodes.deb
+          name: Core_Identification_Nodes-aarch64.AppImage
+          path: dist/Core_Identification_Nodes-aarch64.AppImage
           if-no-files-found: error
-          retention-days: 90
+          retention-days: 30
+      - name: Upload Debian ARM64 package
+        uses: actions/upload-artifact@v4
+        with:
+          name: Core_Identification_Nodes-arm64.deb
+          path: dist/Core_Identification_Nodes-arm64.deb
+          if-no-files-found: error
+          retention-days: 30

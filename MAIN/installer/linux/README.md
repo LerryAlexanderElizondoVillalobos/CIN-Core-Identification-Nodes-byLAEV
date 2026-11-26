@@ -1,56 +1,34 @@
-# Core Identification Nodes — Linux Installer
+# Core Identification Nodes — Linux ARM64
 
-**Official package:** `Core_Identification_Nodes.deb`  
-**Version:** 0.3.0  
-**Model:** per-user installation, no root privileges.
+**Architecture:** ARM64 / AArch64 only  
+**Recommended format:** AppImage — graphical, per-user, no root or sudo  
+**Additional format:** Debian ARM64 package (.deb)
 
-## Install
+## Supported execution environments
 
-Run as the normal desktop user:
+CIN runs on compatible Linux ARM64 systems on physical hardware or inside an ARM64 virtual machine. Virtualization is not required. A virtual machine must expose ARM64 userspace and a compatible Linux kernel. x86_64 and emulated environments are outside this release target.
 
-```bash
-tmp="$(mktemp -d)"
-dpkg-deb --extract ./Core_Identification_Nodes.deb "$tmp"
-bash "$tmp/opt/cin-installer/install-user.sh" "$PWD/Core_Identification_Nodes.deb"
-result=$?
-rm -rf "$tmp"
-exit "$result"
-```
+## AppImage — user-mode installation
 
-The installer checks Python 3, PyGObject, GTK 4, OpenSSL, `dpkg-deb`, and the systemd user manager. It refuses root execution and refuses a partial installation when the dedicated CIN network-scope service cannot be launched.
+1. Download `Core_Identification_Nodes-aarch64.AppImage`.
+2. Enable execution in file Properties → Permissions if required by the desktop.
+3. Double-click the file.
+4. Select **Install for this user** or **Run without installing**.
 
-## Launch
+The installer places the AppImage in `~/Applications`, creates a launcher under `~/.local/share/applications`, and opens CIN Main Lobby. This flow does not require root, sudo, a password, or terminal use. Uninstall with `~/.local/bin/cin-uninstall`; user data is preserved.
 
-```bash
-~/.local/bin/cin-main
-```
+## Debian ARM64 package
 
-CIN runs inside `cin-main-lobby.scope`, the dedicated systemd user scope used by the network ON/OFF controller.
+Download `Core_Identification_Nodes-arm64.deb` on Debian/Ubuntu ARM64. The package installs the relocatable CIN AppDir under `/opt/cin/AppDir` and creates a system-wide application launcher. It does not depend on mounting an embedded AppImage.
 
-## Installed paths
+**Privilege distinction:** installing a conventional .deb through apt, dpkg, GDebi, Discover, or another package manager requires administrator authorization. The installed application runs as the logged-in user. If administrator authentication is unavailable or prohibited, use the AppImage.
 
-- Application: `~/.local/opt/cin-main-lobby/`
-- Launcher: `~/.local/bin/cin-main`
-- Desktop entry: `~/.local/share/applications/cin-main.desktop`
-- Deployment trust key: `~/.config/cin-main-lobby/deploy.pub`
-- Deployment result record: `~/.local/share/cin-main-lobby/deployment-record.json`
+## Included components and current limitations
 
-## Deploy engine
+The distribution includes Main Lobby, Settings, Deploy engine, and the CIN network controller. Remote component updates remain disabled until an AppImage-aware signed replacement updater, the genuine publisher public key, and a signed official manifest are provisioned and verified.
 
-The component deployment engine is included in the application. It creates a local component manifest, verifies official manifests with the independently provisioned Ed25519 key, compares additions/replacements/removals, downloads components over HTTPS, verifies SHA-256 hashes, requests explicit operator authorization, and rolls back if post-deployment verification fails.
+The network switch is application-scoped. It may report OFF only when the Linux host actually enforces CIN's process-scope policy. If systemd user-manager or cgroup support is unavailable, the control must be reported as unavailable.
 
-The publisher key is not embedded in the package and cannot be accepted from the downloaded manifest. Remote deployment remains unavailable until the real publisher key and signed official channel manifest are provisioned.
+## Release validation
 
-## Network ON/OFF switch
-
-The switch affects only the CIN systemd user scope through `IPAddressDeny=any`. ON clears that scope's runtime denial. It does not disable the host network, NetworkManager, browsers or other Linux applications.
-
-The switch requires a running systemd user manager and systemd/cgroup support for IP address filtering. CIN does not silently fall back to an unisolated launch.
-
-## Uninstall
-
-```bash
-bash ~/.local/opt/cin-main-lobby/uninstall-user.sh
-```
-
-Application files and the launcher are removed. User data and publisher configuration are intentionally preserved.
+Do not treat a build as a release until ARM64 source tests, payload inspection, GTK4/PyGObject runtime checks, AppImage graphical installation, Main Lobby navigation, .deb metadata validation, and installation tests have passed.
