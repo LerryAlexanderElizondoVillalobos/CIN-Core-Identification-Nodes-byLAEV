@@ -92,7 +92,7 @@ LIB_ARGS=()
 while IFS= read -r -d '' library; do
   # PyInstaller bundles data files next to extension modules. Only hand ELF
   # shared objects to linuxdeploy; a filename suffix alone is not proof.
-  if file -b "$library" | grep -q 'ELF'; then
+  if readelf -h "$library" >/dev/null 2>&1; then
     LIB_ARGS+=(--library "$library")
   fi
 done < <(find "$APPDIR/usr/lib" -type f -name '*.so*' -print0)
