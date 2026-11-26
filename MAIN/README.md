@@ -3,7 +3,7 @@
 **Package:** `Core_Identification_Nodes.deb`  
 **Package version:** 0.3.0  
 **Debian package name:** `core-identification-nodes`  
-**Architecture:** `all` (architecture-independent Python application)
+**Architecture:** `all` (architecture-independent Python application; includes ARM64/AArch64 Linux)
 
 ## Included capabilities
 
@@ -13,20 +13,20 @@
 - Local component manifest and SHA-256 build fingerprint.
 - Official manifest verification using a separately provisioned Ed25519 publisher public key.
 - Component comparison, HTTPS staging, explicit operator authorization and rollback on failed post-deployment verification.
-- CIN-only network ON/OFF control enforced on the dedicated `cin-main-lobby.scope` systemd user scope.
-- User-space installer and uninstaller; no system-wide installation or root privileges.
+- Per-user installation under `~/.local`, without root, sudo, apt installation, or system-wide dpkg installation.
+- Optional CIN-only network ON/OFF enforcement when a supported systemd user manager and cgroup policy are available. The application remains usable when this optional backend is absent.
 
 ## Download
 
-The only official distributable is **`Core_Identification_Nodes.deb`**, published by the GitHub Actions workflow named **CIN — Official Core Identification Nodes Debian Package**, after source tests, network runtime qualification, package inspection and installation qualification pass.
+The only official distributable is **`Core_Identification_Nodes.deb`**, published by the GitHub Actions workflow named **CIN — Official Core Identification Nodes Debian Package**, after source tests, package inspection and installation qualification pass.
 
 The previous ZIP installer workflow is retired. Do not use its historical artifacts.
 
-## Installation
+## Lindesk / Debian ARM64 installation
 
-Requirements: a Debian-compatible Linux desktop with Python 3, PyGObject, GTK 4, OpenSSL, `dpkg-deb`, `systemd --user`, and a systemd/cgroup environment that supports `IPAddressDeny`.
+Requirements: Debian-compatible ARM64/AArch64 Linux, Python 3, PyGObject, GTK 4, OpenSSL, and `dpkg-deb`. The installer does not require systemd, a systemd user manager, cgroup visibility, root privileges, or a graphical session to complete the file installation.
 
-Run as the normal desktop user, never as root. The single `.deb` contains both bootstrap scripts; extract its embedded installer into a temporary directory:
+Run as the normal user, never as root. The single `.deb` is a portable application payload; do not use `sudo dpkg -i` or `apt install`.
 
 ```bash
 tmp="$(mktemp -d)"
@@ -37,7 +37,7 @@ rm -rf "$tmp"
 exit "$result"
 ```
 
-Launch:
+Launch from a graphical Lindesk session:
 
 ```bash
 ~/.local/bin/cin-main
@@ -49,7 +49,13 @@ Uninstall:
 bash ~/.local/opt/cin-main-lobby/uninstall-user.sh
 ```
 
-The Debian archive is a portable application payload. Do not install it with `sudo dpkg -i` or `apt install`.
+## Installed paths
+
+- Application: `~/.local/opt/cin-main-lobby/`
+- Launcher: `~/.local/bin/cin-main`
+- Desktop entry: `~/.local/share/applications/cin-main.desktop`
+- Publisher key: `~/.config/cin-main-lobby/deploy.pub`
+- Persistent application data: `~/.local/share/cin-main-lobby/`
 
 ## Deployment trust setup
 
@@ -59,18 +65,18 @@ The Deploy engine is included, but it will not trust an unverified update source
 
 The signed official manifest and its signature must also be published at the configured official channel. Until both are correctly provisioned, Settings reports that publisher trust is not configured and no remote code is applied.
 
-## Network switch
+## Network switch and Lindesk compatibility
 
-The ON/OFF control applies only to CIN's dedicated systemd user scope. OFF denies IP networking for CIN; ON restores it. It does not disable NetworkManager or change connectivity for the host or other applications. If the required systemd/cgroup support is unavailable, the application reports the policy as unavailable rather than claiming it is enforced.
+The CIN-only network switch uses the dedicated `cin-main-lobby.scope` systemd user scope with `IPAddressDeny` when that facility is available. Lindesk environments without a systemd user manager or visible cgroup policy can still install and run the Main Lobby; Settings reports network isolation as unavailable, rather than claiming that traffic is blocked. This capability is not emulated by changing host networking or NetworkManager.
 
 ## Validation status
 
 The official workflow must pass:
 1. Source and Deploy tests.
-2. x86_64 and ARM64 network-scope runtime qualification.
-3. Debian payload inspection.
-4. Unprivileged installation and application launch.
-5. In-app network OFF/ON smoke test.
+2. Debian payload inspection.
+3. Unprivileged installation and application launch.
+4. Installation qualification on Debian ARM64, including Lindesk-like environments without systemd user services.
+5. Network OFF/ON smoke test on hosts that provide the supported systemd/cgroup backend; explicit unavailable-state test where it does not.
 6. Uninstallation while preserving user data and publisher configuration.
 
 A package is not considered released until the workflow publishes its single `.deb` artifact successfully.
