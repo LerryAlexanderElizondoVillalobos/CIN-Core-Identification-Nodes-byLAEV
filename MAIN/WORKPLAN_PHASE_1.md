@@ -55,6 +55,35 @@ A Linux file manager may require the user to enable executable permission once b
 - Verify graphical first-run installation, Main Lobby launch, Settings navigation, network behavior, uninstallation, and preservation of user data.
 - Do not publish an artifact merely because packaging completed; portability and runtime qualification are release gates.
 
+
+## Debian 13 ARM64 user-space delivery for LinDesk
+
+The AppImage remains the mainstream Linux desktop distribution. The LinDesk-specific delivery is a separate native Debian ARM64 payload:
+
+- Produce CIN.deb with Architecture: arm64 on a Debian 13 ARM64 runner.
+- Embed the relocatable CIN AppDir and all user-space install/uninstall/run scripts in the same .deb.
+- Install by extracting the .deb with dpkg-deb -x and executing the embedded installer as the normal user.
+- Never require sudo, root, apt install, dpkg -i, system package database registration, or system-wide writes.
+- Install under ~/.local/opt/cin-main-lobby/AppDir; create the launcher under ~/.local/bin and desktop integration under XDG user paths.
+- Preserve user data, configuration, and cache during replacement and uninstall.
+- Do not require systemd, a systemd user manager, cgroup visibility, FUSE, or an always-running service.
+- Validate package metadata, AArch64 ELF dependencies, no-root install, root refusal, rollback, upgrade, uninstall/data preservation, and GTK launch in CI.
+- Treat physical LinDesk device validation as a separate release gate. The reported environment is Debian 13, ARM64, glibc 2.43, GTK4 and PyGObject; the reported lack of a graphical session means the app can be installed headlessly but must be launched from a working graphical session.
+
+Recommended user command sequence:
+
+~~~sh
+tmp="$(mktemp -d)"
+dpkg-deb --extract ./CIN.deb "$tmp"
+sh "$tmp/opt/cin-installer/install-user.sh" "$PWD/CIN.deb"
+result=$?
+rm -rf "$tmp"
+exit "$result"
+~~~
+
+CIN-Debian13-Installer.zip remains an optional convenience bundle containing the same package and scripts.
+
+
 ## Deferred scope
 
 Founding certificate processes, node creation, Enter, Import, external signing connectors, and the CIN Package Engine remain later milestones.
