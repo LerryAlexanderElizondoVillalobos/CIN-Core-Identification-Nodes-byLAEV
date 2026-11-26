@@ -1,56 +1,33 @@
-# Core Identification Nodes — Linux Installer
+# Core Identification Nodes — Linux AppImage
 
-**Official package:** `Core_Identification_Nodes.deb`  
-**Version:** 0.3.0  
-**Model:** per-user installation, no root privileges.
+**Official Linux format:** AppImage  
+**Build targets:** x86_64 and AArch64  
+**Installation model:** graphical, per-user, no root and no sudo.
 
-## Install
+## First launch
 
-Run as the normal desktop user:
+1. Download the AppImage matching the computer's CPU architecture.
+2. In the file manager, open Properties → Permissions and enable execution if the download is not already executable. Wording varies by desktop.
+3. Double-click the AppImage.
+4. Choose **Install for this user** or **Run without installing**.
+5. The installer copies the self-contained AppImage to `~/Applications`, creates a desktop launcher in `~/.local/share/applications`, and launches CIN Main Lobby.
 
-```bash
-tmp="$(mktemp -d)"
-dpkg-deb --extract ./Core_Identification_Nodes.deb "$tmp"
-bash "$tmp/opt/cin-installer/install-user.sh" "$PWD/Core_Identification_Nodes.deb"
-result=$?
-rm -rf "$tmp"
-exit "$result"
-```
-
-The installer checks Python 3, PyGObject, GTK 4, OpenSSL, `dpkg-deb`, and the systemd user manager. It refuses root execution and refuses a partial installation when the dedicated CIN network-scope service cannot be launched.
-
-## Launch
-
-```bash
-~/.local/bin/cin-main
-```
-
-CIN runs inside `cin-main-lobby.scope`, the dedicated systemd user scope used by the network ON/OFF controller.
-
-## Installed paths
-
-- Application: `~/.local/opt/cin-main-lobby/`
-- Launcher: `~/.local/bin/cin-main`
-- Desktop entry: `~/.local/share/applications/cin-main.desktop`
-- Deployment trust key: `~/.config/cin-main-lobby/deploy.pub`
-- Deployment result record: `~/.local/share/cin-main-lobby/deployment-record.json`
-
-## Deploy engine
-
-The component deployment engine is included in the application. It creates a local component manifest, verifies official manifests with the independently provisioned Ed25519 key, compares additions/replacements/removals, downloads components over HTTPS, verifies SHA-256 hashes, requests explicit operator authorization, and rolls back if post-deployment verification fails.
-
-The publisher key is not embedded in the package and cannot be accepted from the downloaded manifest. Remote deployment remains unavailable until the real publisher key and signed official channel manifest are provisioned.
-
-## Network ON/OFF switch
-
-The switch affects only the CIN systemd user scope through `IPAddressDeny=any`. ON clears that scope's runtime denial. It does not disable the host network, NetworkManager, browsers or other Linux applications.
-
-The switch requires a running systemd user manager and systemd/cgroup support for IP address filtering. CIN does not silently fall back to an unisolated launch.
+The user-facing flow does not use a terminal, root, sudo, dpkg, apt, or administrator authentication. No system directories are modified.
 
 ## Uninstall
 
-```bash
-bash ~/.local/opt/cin-main-lobby/uninstall-user.sh
-```
+Run the per-user uninstaller from the desktop user's application launcher or execute `~/.local/bin/cin-uninstall`. It removes the installed AppImage and desktop launcher while preserving CIN user data and configuration.
 
-Application files and the launcher are removed. User data and publisher configuration are intentionally preserved.
+## Included application
+
+The distribution includes Main Lobby, Settings, the Deploy engine, and the CIN network controller. Remote Deploy still requires the genuine publisher public key and signed official manifest to be provisioned independently.
+
+## Network switch
+
+The network switch is application-scoped. It may report OFF only when the current Linux system actually enforces the CIN scope policy. Systems without the required systemd user manager/cgroup support must show the control as unavailable; CIN must not imply that host-wide network access was disabled.
+
+## Portability
+
+AppImage is intended for mainstream Linux distributions. CIN builds separate x86_64 and AArch64 artifacts. Alpine/musl, old glibc environments, unsupported architectures, and headless systems are not part of the initial release target. Each supported artifact must pass clean-environment runtime tests before publication.
+
+The first release is not considered complete merely because the AppImage file was generated. GTK4/PyGObject libraries and introspection metadata must work from the bundled payload without requiring host-installed Python, PyGObject, or GTK.
