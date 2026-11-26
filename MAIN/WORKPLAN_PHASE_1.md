@@ -1,49 +1,55 @@
-# Phase 1 Workplan — CIN Main Lobby Installer
+# Phase 1 Workplan — CIN Main Lobby Application
 
-**Scope:** deliver a Debian package (.deb) for CIN Main Lobby targeting arm64 / AArch64, including its runtime, persistent local records and the three founding certificate processes. The package is intended for Debian-compatible ARM64 userspaces on Android (including LinDesk) and conventional ARM64 Linux. Virtualization is optional, not a product requirement.
+## Immediate milestone: Installable Lobby shell
 
-**Out of scope:** CIN Package Engine implementation or installation (Phase 2), and the later CIN Personal Registration and Credential issuance process.
+**Objective:** deliver a Linux-installable application that opens the CIN Main Lobby with the welcome text and three visible actions. Only **Create** is functional.
 
-## Delivery principle
+### User-facing first screen
 
-Each milestone must produce a reviewable artifact and pass its acceptance criteria before the next milestone is treated as complete. GitHub Actions initially validates the documented architecture and repository contract. As executable modules are added, the workflow will gain unit, integration and end-to-end tests. A green documentation check is not evidence that a certificate process is implemented.
+- Heading: `Welcome to Core Identification Nodes`
+- Application label: `CIN Main Lobby`
+- Actions: `Create`, `Enter`, `Import`
+- Create: enabled; opens the initial creation flow.
+- Enter: visible but inactive / marked as forthcoming.
+- Import: visible but inactive / marked as forthcoming.
 
 ## Work breakdown
 
-| ID | Workstream | Deliverable | Acceptance criteria |
+| ID | Work item | Deliverable | Acceptance criteria |
 |---|---|---|---|
-| P1-00 | Baseline and scope | Approved Phase 1 contract | Scope is Lobby installer only; Phase 2 and later credential issuance remain deferred. |
-| P1-01 | Debian package foundation | arm64 .deb package skeleton | Valid Debian control metadata, package architecture arm64, explicit runtime dependencies, install/remove lifecycle and no assumption of systemd or rootful host access. |
-| P1-02 | Release verification | ZIP + Package Manifest v1 verification | Validates ZIP size and SHA-256, JCS manifest, detached Ed25519 signature and independently provisioned publisher trust. |
-| P1-03 | User installation | .deb installation and launcher | Installs into a Debian-compatible ARM64 userspace; separates app, config, cache and persistent node data; validates package install, launch, upgrade and removal without deleting node records by default. |
-| P1-04 | Lobby runtime | Launchable Main Lobby | Loads local records and reconstructs lifecycle state after restart. |
-| P1-05 | Local record foundation | Persistent record store | Supports commit, read-back and independent verification of records; Genesis Manifest is the first logical CIN record. |
-| P1-06 | Genesis Environment Certificate | Genesis Environment Manifest | Collects permitted environment facts with provenance labels; validates and registers the manifest. |
-| P1-07 | CIN Node Birth Certificate | Node Birth Record and technical identifiers | Imports the registered Genesis Manifest; derives identifiers using an approved versioned profile; requires separate authorization; commits, reads back and verifies the distinct birth record. |
-| P1-08 | Global Personal Document and Node Marriage Certificate | Global personal-document identifier and marriage agreement | Consumes authoritative birth record; obtains explicit external signing; verifies signature and signer; persists document record and association separately. No private signing keys are held by CIN Main. |
-| P1-09 | Lobby header and lifecycle | Rebuildable header/read model | Shows all applicable identifiers only from persisted authoritative records and clearly distinguishes candidate, authorized, registered, signed and verified states. |
-| P1-10 | Phase 1 release gate | Installable release and evidence | Clean-user install, all three processes, restart/recovery and record-verification tests pass. Phase 1 may be closed only after this gate. |
+| M1-01 | Linux application baseline | Runnable application skeleton | Starts in a supported Linux desktop session and exits cleanly. |
+| M1-02 | Lobby window | Main Lobby screen | Displays the exact welcome heading and CIN Main Lobby label. |
+| M1-03 | Lobby actions | Three visible action controls | Create is enabled; Enter and Import are visibly present but do not launch unfinished workflows. |
+| M1-04 | Create entry point | Initial Create screen / flow shell | Clicking Create opens a dedicated creation view; returning to Lobby works. No certificate claims or records are fabricated. |
+| M1-05 | Linux packaging | Installable Linux package | Package installs, creates launcher and starts the Lobby. Target package format and supported architectures are documented and tested. |
+| M1-06 | GitHub Actions | Build and smoke-test workflow | CI builds the application/package, checks package metadata and runs available automated startup/UI tests. |
+| M1-07 | First milestone release | Downloadable application artifact | Artifact is attached to a successful workflow run and tested on at least one target Linux desktop environment. |
 
-## GitHub Actions validation ladder
+## Deferred work after the first milestone
 
-1. **Current baseline:** validate required Phase 1 documentation, required process definitions and explicit Phase 2 boundary.
-2. **Package tests:** build .deb on an ARM64 runner or cross-build environment; inspect metadata with dpkg-deb; validate dependencies, file layout, install/upgrade/remove and XDG path behavior.
-3. **Record tests:** serialization, canonicalization, hashing, persistence, read-back and tamper-detection tests.
-4. **Certificate tests:** isolated fixtures for Genesis, Node Birth authorization and external signing/association verification.
-5. **End-to-end tests:** clean install → Genesis → Node Birth → Global Personal Document and Node Marriage → restart → header reconstruction.
-6. **Environment matrix:** validate the same arm64 package in a Debian-based Android userspace (LinDesk/PRoot-style) and a Debian ARM64 virtual machine. Record host/kernel, userspace and display integration limitations separately.
-7. **Release gate:** publish an artifact only after the relevant workflow checks pass; test fixtures and CI keys must never be mistaken for production authorization or publisher trust.
+The following are not part of the initial Lobby shell and must not be represented as implemented:
 
-## Definition of done — Phase 1
+- Full Genesis Environment Certificate and Manifest process.
+- CIN Node Birth Certificate and authoritative Node Birth Record.
+- CIN Global Personal Document and Node Marriage Certificate.
+- Enter existing node workflow.
+- Import node/package workflow.
+- CIN Package Engine (Phase 2).
 
-- The user can install the arm64 .deb in a supported Debian-compatible ARM64 userspace, including the qualified Android Linux environment.
-- The Lobby launches and preserves local node records across restarts.
-- The three founding processes execute and produce their distinct outputs.
-- The applicable technical identifiers and Global Personal Document identifier are visible in the header, sourced from persisted and verified records.
-- The node-document association has a verified external signature and separately persisted agreement.
-- End-to-end evidence is available from GitHub Actions.
-- No Package Engine is bundled into Phase 1.
+These are future work items. The three founding certificate processes will be integrated into the Create flow in a later milestone.
 
-## Current status
+## GitHub Actions progression
 
-**Planning/documentation baseline.** The initial GitHub Actions workflow validates the architecture contract only. Functional implementation and functional tests remain pending.
+1. Validate repository structure and application metadata.
+2. Install build dependencies and build the application.
+3. Run unit tests for the Lobby state and Create navigation.
+4. Build the Linux package for the selected target architecture.
+5. Inspect package metadata and payload.
+6. Run install/launch smoke tests in a compatible Linux CI environment.
+7. Upload the generated package only after all required jobs pass.
+
+CI smoke tests do not replace testing on LinDesk or a real desktop session. A LinDesk compatibility claim requires an actual device test.
+
+## Completion criteria
+
+The first milestone is complete when a user can install the Linux application, launch it, see the welcome screen and all three actions, activate Create to open the initial creation view, and return to the Lobby. Enter and Import remain intentionally inactive. No certificate process is claimed complete at this milestone.
