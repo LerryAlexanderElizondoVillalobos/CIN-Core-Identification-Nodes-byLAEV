@@ -1,6 +1,6 @@
 # CIN Main — Component Map V1
 
-## Layer 1 — Linux User Installer
+## Phase 1 — Main Lobby Installer
 
 `Release Source → Package Origin Verifier → Extractor → User-Level Integrator → CIN Launcher`
 
@@ -9,9 +9,9 @@
 - **User-Level Integrator:** creates the launcher and desktop entry in the current user's environment.
 - **CIN Launcher:** starts the installed runtime and hands control to Main Lobby.
 
-The installer does not create node records or issue certificates.
+This installer deploys the Main Lobby and its required runtime. The installer itself does not create node records or issue certificates; those processes execute inside the installed Lobby. The Phase 1 deliverable includes all three founding certificate processes.
 
-## Layer 2 — Main Lobby and founding records
+## Phase 1 — Main Lobby and its three founding processes
 
 `Lobby UI → Lifecycle Coordinator → Certificate Module → Core Services → Private Local Storage → Profile Assembly → Lobby UI`
 
@@ -34,7 +34,7 @@ Shared Core Services:
 
 The Lobby coordinates these services. It does not replace their validation or authority responsibilities.
 
-## Layer 3 — Package Engine
+## Phase 2 — CIN Package Engine Installer
 
 `Package Catalog → Manifest Verifier → Dependency Resolver → Installer → Engine Registry → Engine Loader → Configuration and Lifecycle Services`
 
@@ -45,7 +45,7 @@ Cross-cutting Package Engine services:
 - Package Lifecycle Ledger.
 - Update and Removal Managers.
 
-The Package Engine installs dedicated engines after the founding Lobby workflow. The Linux User Installer installs CIN Main itself; these are different responsibilities.
+The Phase 2 installer deploys the Package Engine, which then installs dedicated engines. It is a separate installer from the Phase 1 Main Lobby installer.
 
 ## Persistent data boundaries
 

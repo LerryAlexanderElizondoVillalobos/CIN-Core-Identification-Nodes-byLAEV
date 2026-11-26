@@ -1,8 +1,15 @@
-# CIN Package Engine — Engine of Engines
+# Phase 2 — CIN Package Engine Installer
 
-The Package Engine is the post-foundation subsystem that installs and manages specialized CIN packages and engines.
+The CIN Package Engine is the **engine of engines**. Its separate installer is the deliverable of Phase 2, after Phase 1 has installed the Main Lobby and the three founding certificate processes have established the node's technical identifiers and CIN Global Personal Document association.
 
-It becomes the next major development phase after the Main Lobby has completed the three founding certificate processes and persisted the required node and CIN Global Personal Document association records.
+## Separation from Phase 1
+
+- Phase 1 installer installs the CIN Main Lobby and its required runtime.
+- The Main Lobby executes the three founding certificate processes.
+- Phase 2 installer installs the CIN Package Engine.
+- The Package Engine then installs and manages specialized engines and packages.
+
+The Package Engine is not bundled into or installed by the Phase 1 Main Lobby installer.
 
 ## Core responsibilities
 
@@ -21,10 +28,10 @@ It becomes the next major development phase after the Main Lobby has completed t
 
 Certificate engines, dedicated Ledgers, binary Merkle Tree and Enterprise Merkle Tree engines, request/permission engines, external signer connectors, configurable one-time resource/UTXO-style engines, storage and evidence engines, and application-specific engines.
 
-The Package Engine is not the Linux bootstrap installer. The bootstrap installer installs CIN Main itself; the Package Engine installs the engines that CIN Main can operate.
-
 ## Engine package contract
 
 Every package must declare its stable identifiers, version, compatibility, dependencies, capabilities, permissions, entry point, configuration schema, persistent-data boundaries, publisher/signature references and lifecycle operations.
 
-This document defines the intended scope. The executable package contract and implementation remain to be specified.
+The Phase 2 installer deploys the Package Engine itself. The Package Engine's package installer then deploys the specialized engines that it manages.
+
+This document defines the intended scope. The executable installer and Package Engine implementation remain to be built.

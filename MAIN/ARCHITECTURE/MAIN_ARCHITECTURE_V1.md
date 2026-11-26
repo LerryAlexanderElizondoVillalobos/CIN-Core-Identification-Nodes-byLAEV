@@ -2,20 +2,17 @@
 
 **Project:** CIN — Core Identification Nodes byLAEV  
 **Status:** Proposed architecture baseline for the new Main  
-**Phase:** Linux User Installer → Main Lobby → CIN Package Engine  
+**Phase:** Phase 1 — Main Lobby Installer → Phase 2 — CIN Package Engine Installer  
 **Authority:** This document defines the new direction for `MAIN/`. Historical material in `HISTORY/` is reference material, not active implementation.
 
 ## 1. Product direction
 
-CIN Main is built in three consecutive layers:
+CIN Main is delivered in two consecutive installation phases:
 
-1. **Linux User Installer:** installs CIN for the current Linux user and establishes the local application environment.
-2. **CIN Main Lobby:** runs the founding certificate and manifest processes, establishes the technical node records and completes the initial CIN Global Personal Document association process.
-3. **CIN Package Engine:** the engine of engines; installs, registers, configures, updates, enables, disables and removes specialized CIN packages and engines.
+1. **Phase 1 — Main Lobby Installer:** a per-user Linux installer whose sole product is the CIN Main Lobby, including its runtime, local storage and three founding certificate processes. The three processes execute inside the installed Lobby; they are not separate installation phases.
+2. **Phase 2 — CIN Package Engine Installer:** a separate installer for the engine of engines, which installs and manages specialized CIN packages and engines. It follows the establishment of the node's technical identifiers and CIN Global Personal Document association in Phase 1.
 
-The first two layers establish a usable CIN node environment. The third layer expands what that node can operate.
-
-## 2. Linux User Installer
+## 2. Phase 1 — Linux Installer for the Main Lobby
 
 ### 2.1 Installation scope
 
@@ -54,13 +51,13 @@ The archived Package Manifest v1 is the starting specification unless a successo
 
 The existing manifest describes a ZIP distribution. A different archive format requires a versioned package-manifest specification change; it must not be silently substituted.
 
-## 3. CIN Main Lobby
+## 3. Main Lobby included in Phase 1
 
 The Lobby is the primary local user interface and lifecycle coordinator. It presents actual persisted state and invokes the dedicated certificate processes. It is not itself the authority that creates or verifies records.
 
 ### 3.1 Lobby installation and first launch
 
-The Lobby is installed as part of CIN Main by the Linux User Installer. On first launch it initializes the minimum technical storage structure, loads the installation verification receipt, detects whether a Genesis Manifest or Node Birth Record already exists, and reconstructs the current state. It must not fabricate a completed lifecycle state from missing records.
+The Lobby is the product installed by the Phase 1 Linux User Installer. On first launch it initializes the minimum technical storage structure, loads the installation verification receipt, detects whether a Genesis Manifest or Node Birth Record already exists, and reconstructs the current state. It must not fabricate a completed lifecycle state from missing records.
 
 The Lobby remains accessible in pre-birth state. Functions requiring a born node remain gated by the relevant lifecycle record and authorization result.
 
@@ -123,9 +120,9 @@ The header is a rebuildable read model assembled from persisted authoritative re
 
 Candidate, preview, registered, authorized, signed, issued and verified are distinct states. The header must display the actual state of each artifact.
 
-## 4. CIN Package Engine — the engine of engines
+## 4. Phase 2 — CIN Package Engine Installer: the engine of engines
 
-The Package Engine is introduced only after the three founding Lobby processes have produced the required node records and the CIN Global Personal Document association has been completed to its defined acceptance state.
+The separate Package Engine Installer is developed in Phase 2, after the three founding Lobby processes have produced the required node records and the CIN Global Personal Document association has reached its defined acceptance state. It is not included in the Phase 1 Lobby installer.
 
 Its purpose is to manage specialized packages and their engines as installable, versioned, discoverable and independently manageable components.
 
@@ -263,17 +260,17 @@ This is the target logical layout. Directories become active implementation only
 - Private keys and secrets are not included in packages, manifests or founding records.
 - Lobby status is reconstructed from stored records and verification outcomes after every full restart.
 
-## 7. Delivery sequence
+## 7. Two-phase delivery plan
 
 | Phase | Deliverable | Completion condition |
 |---|---|---|
-| M1 | Linux User Installer | Verified release installed and launched for a normal Linux user without root |
-| M2 | Main Lobby foundation | Lobby starts, initializes storage and reconstructs actual lifecycle state |
-| M3 | Genesis Environment Certificate | Valid Genesis Manifest is the first logical CIN record |
-| M4 | Node Birth Certificate | Authorized Node Birth Record and applicable node identifiers are committed and verified |
-| M5 | Global Personal Document and Node Marriage | Deterministic document identifier and verified explicit association are persisted |
-| M6 | Package Engine foundation | Registry, manifest verification, resolver, installer and engine contract operate |
-| M7 | First specialized engine package | One independent engine can be installed, configured, enabled, updated and removed through the Package Engine |
+| Phase 1A | Main Lobby Installer | Verified release installed and launched for a normal Linux user without root |
+| Phase 1B | Lobby foundation | Lobby starts, initializes storage and reconstructs actual lifecycle state |
+| Phase 1C | Genesis Environment Certificate | Valid Genesis Manifest is the first logical CIN record |
+| Phase 1D | Node Birth Certificate | Authorized Node Birth Record and applicable node identifiers are committed and verified |
+| Phase 1E | Global Personal Document and Node Marriage | Deterministic document identifier and verified explicit association are persisted |
+| Phase 2 | Package Engine Installer | Separate installer deploys the engine-of-engines subsystem |
+| Phase 2 validation | First specialized engine package | One independent engine is installed, configured, enabled, updated and removed through the Package Engine |
 
 ## 8. Explicit non-goals for the first Main foundation
 

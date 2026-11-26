@@ -1,8 +1,8 @@
-# Linux User Installer
+# Phase 1 — CIN Main Lobby Linux Installer
 
 ## Purpose
 
-Install CIN Main for the current Linux user without requiring root privileges for the normal installation, launch, update or removal flow.
+Install the CIN Main Lobby and its required runtime for the current Linux user without requiring root privileges for normal installation, launch, update or removal. This is the Phase 1 installer. It does not install the CIN Package Engine.
 
 ## Target locations
 
@@ -25,6 +25,8 @@ The installer root is configurable through `CIN_INSTALL_HOME`; the launcher, des
 5. Preserve node data and configuration.
 6. Launch CIN Main Lobby and record installation metadata.
 
+The installed Lobby contains the three founding certificate processes: Genesis Environment, CIN Node Birth, and CIN Global Personal Document and Node Marriage. These are Lobby functions, not separate installer packages or phases.
+
 ## Functional boundaries
 
 - Package installation is not node birth.
@@ -33,6 +35,6 @@ The installer root is configurable through `CIN_INSTALL_HOME`; the launcher, des
 - No system-wide service, global package database or mandatory sudo step is part of this installer.
 - Existing Package Manifest v1 is ZIP-specific. A new archive format requires a versioned specification.
 
-## Initial implementation order
+## Phase 1 implementation order
 
 Bootstrap and CLI → release verifier → extraction and version directory → XDG user integration → launch handoff to Main Lobby.

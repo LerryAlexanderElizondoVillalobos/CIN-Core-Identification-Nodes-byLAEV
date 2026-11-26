@@ -1,10 +1,28 @@
-# CIN Main — New Architecture
+# CIN Main — Two-Phase Installation Strategy
 
-CIN Main is being rebuilt around three successive layers:
+CIN Main is built in **two sequential phases**. The first phase delivers the installer for the Main Lobby. The second phase delivers the installer for the CIN Package Engine — the engine of engines.
 
-1. **Linux User Installer** — installs and launches CIN for the current Linux user.
-2. **CIN Main Lobby** — coordinates the three founding certificate processes and persists their records.
-3. **CIN Package Engine** — the engine of engines; installs and manages specialized CIN packages and engines.
+## Phase 1 — Main Lobby Installer
+
+Build a Linux per-user installer whose sole product is the **CIN Main Lobby** and its required runtime and foundational components.
+
+After installation, the Lobby provides the three founding certificate processes:
+
+1. **Genesis Environment Certificate** → Genesis Environment Manifest, registered as the first logical CIN record.
+2. **CIN Node Birth Certificate** → applicable technical node identifiers and the authoritative Node Birth Record.
+3. **CIN Global Personal Document and Node Marriage Certificate** → CIN Global Personal Document identifier and the separately persisted, cryptographically accepted node-document association.
+
+The Lobby coordinates these processes, stores their records locally and reconstructs their real status. The three processes are part of the Lobby delivered in Phase 1; they are not three additional installation phases.
+
+The later CIN Personal Registration and Credential process remains a subsequent issuance stage, not one of the three founding processes.
+
+## Phase 2 — CIN Package Engine Installer
+
+After Phase 1 has established the node's technical identifiers and the CIN Global Personal Document association, build the installer for the **CIN Package Engine**.
+
+This is the engine of engines: it installs, registers, configures, enables, updates, disables and removes specialized CIN engines and packages. It is a separate installer and a separate product layer from the Main Lobby installer.
+
+Initial package families include dedicated certificate engines, Ledgers, Binary Merkle Tree, Enterprise Merkle Tree, request and permission engines, external signing connectors, configurable one-time resource/UTXO-style engines, and application-specific engines.
 
 ## Architecture and navigation
 
@@ -13,30 +31,22 @@ CIN Main is being rebuilt around three successive layers:
 - [Lifecycle and Package State Model](ARCHITECTURE/MAIN_STATE_MODEL.md)
 - [Engine Package Contract V1](ARCHITECTURE/ENGINE_PACKAGE_CONTRACT_V1.md)
 - [Development Roadmap](ROADMAP.md)
-- [Linux User Installer](installer/linux/README.md)
-- [Main Lobby](lobby/README.md)
-- [CIN Package Engine](package-engine/README.md)
-
-## Founding Lobby processes
-
-1. Genesis Environment Certificate → Genesis Environment Manifest.
-2. CIN Node Birth Certificate → technical node identifiers and Node Birth Record.
-3. CIN Global Personal Document and Node Marriage Certificate → global personal-document identifier and verified node-document association.
-
-The later CIN Personal Registration and Credential certificate is a separate subsequent issuance phase.
+- [Phase 1 — Main Lobby Installer](installer/linux/README.md)
+- [Main Lobby and its three processes](lobby/README.md)
+- [Phase 2 — CIN Package Engine Installer](package-engine/README.md)
 
 ## Governing rules
 
-- The Linux installer is per-user and does not require root privileges for normal operation.
+- Phase 1 installs the Main Lobby only; it does not install the Package Engine.
+- Phase 2 installs the Package Engine; it does not replace or reinstall the Main Lobby.
+- Both installers operate in the current Linux user's space without requiring root for normal use.
 - Application files, configuration, cache and persistent node records remain separate.
-- Package installation is not node birth.
+- Installation is not node birth; node birth occurs through the Lobby's certificate process.
 - The Genesis Manifest and Node Birth Record remain distinct documents.
-- The Lobby reconstructs its status from persisted records and verification results.
 - Private signing keys remain outside CIN Main and its packages; signing uses external providers.
-- The Package Engine is a post-foundation subsystem, not part of the bootstrap installer.
 - Historical files in `HISTORY/` are references, not automatically active implementation.
 - The old CI workflows remain archived. New validation is introduced against the new implementation as it is built.
 
 ## Current maturity
 
-**Architecture defined; implementation not yet started.** The directory layout and phase boundaries are established. No installer, Lobby certificate engine or Package Engine is claimed to be functional yet.
+**Two-phase architecture defined; implementation not yet started.** Phase 1 is the immediate development target. No installer or certificate engine is claimed to be functional yet.
