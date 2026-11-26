@@ -3,7 +3,10 @@ name: CIN Main — Build, Test and Package Debian Installer
 on:
   push:
     paths:
-      - "MAIN/**"
+      - "MAIN/app/**"
+      - "MAIN/tests/**"
+      - "MAIN/installer/**"
+      - "MAIN/packaging/**"
       - ".github/workflows/phase1-main-lobby.yml"
   pull_request:
     paths:
@@ -111,7 +114,7 @@ jobs:
     needs:
       - build-package
       - runtime-qualification
-    if: success() && github.event_name != 'pull_request'
+    if: success() && github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     steps:
       - name: Download qualified user-space installer bundle
