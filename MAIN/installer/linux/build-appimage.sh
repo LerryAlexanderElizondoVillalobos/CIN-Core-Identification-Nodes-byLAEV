@@ -52,10 +52,12 @@ EOF
 chmod 0755 "$APPDIR/usr/bin/cin-main" "$APPDIR/usr/bin/cin-appimage-installer"
 install -m 0755 MAIN/installer/linux/AppRun "$APPDIR/AppRun"
 install -m 0644 MAIN/installer/linux/cin-main-lobby.desktop "$APPDIR/usr/share/applications/cin-main-lobby.desktop"
+desktop-file-validate "$APPDIR/usr/share/applications/cin-main-lobby.desktop"
 install -m 0644 MAIN/installer/linux/cin-main-lobby.svg "$APPDIR/usr/share/icons/hicolor/scalable/apps/cin-main-lobby.svg"
 command -v rsvg-convert >/dev/null || { echo "Missing build dependency: rsvg-convert (librsvg2-bin)" >&2; exit 1; }
 mkdir -p "$APPDIR/usr/share/icons/hicolor/256x256/apps"
 rsvg-convert -w 256 -h 256 MAIN/installer/linux/cin-main-lobby.svg -o "$APPDIR/usr/share/icons/hicolor/256x256/apps/cin-main-lobby.png"
+test -s "$APPDIR/usr/share/icons/hicolor/256x256/apps/cin-main-lobby.png"
 
 # PyGObject loads typelib metadata dynamically; ELF dependency scanning alone
 # does not discover these files. Bundle the complete typelib directory.
