@@ -16,7 +16,7 @@ CIN Main is delivered in two consecutive installation phases:
 
 ### 2.1 Installation scope
 
-The first downloadable milestone is one ZIP artifact named `CIN-Linux-Installer.zip`. It contains the Debian payload `CIN.deb`, `install-user.sh`, `uninstall-user.sh`, usage instructions and SHA-256 checksums. The inner `.deb` is not a separate operator download. The archive is not installed through `apt install` or `dpkg -i`; it is extracted with `dpkg-deb --extract` and integrated into the current user's home directory.
+The first downloadable milestone is one self-contained Debian archive named `Core_Identification_Nodes.deb` (Debian package `core-identification-nodes`, version `0.3.0`, architecture `all`). It contains the Main Lobby application, Settings, Deploy engine, network controller, and embedded user-space installer and uninstaller. It is extracted with `dpkg-deb --extract`; it is not registered through `apt install` or `dpkg -i`.
 
 The user installer:
 - Must run as a normal desktop user and refuse root execution.
@@ -27,7 +27,7 @@ The user installer:
 - Must place the desktop entry under `~/.local/share/applications/cin-main.desktop`.
 - Must keep future persistent CIN node data separate from replaceable application files.
 
-Python 3, PyGObject and GTK 4 are runtime prerequisites that must already be available to the user. The installer checks them and reports missing prerequisites; it does not attempt to install system dependencies or request elevated privileges.
+Python 3, PyGObject, GTK 4, OpenSSL, dpkg-deb, a running systemd user manager and systemd/cgroup support for `IPAddressDeny` are runtime prerequisites. The installer checks prerequisites and does not install system dependencies or request elevated privileges.
 
 Default XDG locations (respect corresponding environment variables when implemented):
 
@@ -44,12 +44,12 @@ Application binaries, configuration, cache and node records must remain separate
 
 ### 2.2 Installation sequence
 
-1. Download and extract the `CIN-deb-installer` workflow artifact.
-2. Confirm it contains `CIN.deb`, `install-user.sh` and `uninstall-user.sh`.
-3. Run `bash install-user.sh ./CIN.deb` as the normal desktop user.
-4. The script checks Python 3, PyGObject and GTK 4 availability.
-5. The script extracts the archive and copies the application to the user's local application directory.
-6. The script creates the user's launcher and desktop entry.
+1. Download the single `Core_Identification_Nodes.deb` artifact.
+2. Extract the archive with `dpkg-deb --extract` into a temporary directory.
+3. Run the embedded `/opt/cin-installer/install-user.sh` as the normal desktop user, passing the original `.deb` path.
+4. The installer checks Python 3, PyGObject, GTK 4, OpenSSL and the systemd user manager.
+5. The script extracts the application and installs it in the user's local application directory.
+6. The script creates the user's launcher and desktop entry; the launcher runs CIN inside its dedicated systemd user scope.
 7. Start CIN Main Lobby as the logged-in user.
 
 Release signature verification and a detached publisher trust chain are not implemented by this first build pipeline. They remain a release-engineering requirement before treating public downloads as authenticated production releases.
@@ -60,7 +60,7 @@ Package payload extraction, per-user application installation and node birth are
 
 The archived Package Manifest v1 is the starting specification unless a successor is approved. It defines UTF-8 JSON, RFC 8785 JCS canonicalization, SHA-256 for the ZIP, Ed25519 detached signatures and independently provisioned publisher trust. The public key included inside an untrusted package cannot authenticate that same package.
 
-The archived manifest describes a ZIP distribution and is not used to authenticate this initial Debian payload. The `.deb` distribution must receive its own versioned release-authentication contract before signed production publication.
+The initial Debian build is a user-space application payload. The Deploy engine's remote component channel uses an independently provisioned Ed25519 public key and a detached signature. The package itself is not publisher-authenticated by this build pipeline; signed production release authentication remains a separate release-engineering requirement.
 
 ## 3. Main Lobby included in Phase 1
 
