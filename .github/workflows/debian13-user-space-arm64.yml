@@ -71,7 +71,8 @@ jobs:
           test "$(dpkg-deb -f dist/CIN.deb Package)" = core-identification-nodes
           test "$(dpkg-deb -f dist/CIN.deb Architecture)" = arm64
           test "$(dpkg-deb -f dist/CIN.deb Version)" = 0.5.0
-          dpkg-deb -c dist/CIN.deb | grep -q './opt/cin/AppDir/AppRun'
+          dpkg-deb -c dist/CIN.deb > dist/CIN.deb.contents.txt
+          grep -q './opt/cin/AppDir/AppRun' dist/CIN.deb.contents.txt
           unzip -l dist/CIN-Debian13-Installer.zip | grep -q 'CIN-Debian13-Installer/CIN.deb'
           unzip -l dist/CIN-Debian13-Installer.zip | grep -q 'CIN-Debian13-Installer/install-user.sh'
           unzip -l dist/CIN-Debian13-Installer.zip | grep -q 'CIN-Debian13-Installer/uninstall-user.sh'
