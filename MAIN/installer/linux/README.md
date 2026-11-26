@@ -50,7 +50,7 @@ The switch requires a running systemd user manager and systemd/cgroup support fo
 ## Uninstall
 
 ```bash
-bash MAIN/installer/linux/uninstall-user.sh
+bash ~/.local/opt/cin-main-lobby/uninstall-user.sh
 ```
 
 Application files and the launcher are removed. User data and publisher configuration are intentionally preserved.
