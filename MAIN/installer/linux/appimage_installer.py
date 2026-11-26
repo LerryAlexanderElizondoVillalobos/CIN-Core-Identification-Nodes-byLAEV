@@ -23,16 +23,14 @@ class Installer(Gtk.Application):
         window.set_default_size(520, 300)
         window.set_resizable(False)
         page = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=16)
-        page.set_margin_top(28)
-        page.set_margin_bottom(28)
-        page.set_margin_start(28)
-        page.set_margin_end(28)
+        for setter in (page.set_margin_top, page.set_margin_bottom,
+                       page.set_margin_start, page.set_margin_end):
+            setter(28)
 
         title = Gtk.Label(label="Welcome to Core Identification Nodes")
         title.add_css_class("title-1")
         title.set_wrap(True)
         page.append(title)
-
         detail = Gtk.Label(label=(
             "Install the complete CIN Main Lobby for this user only. "
             "No root access, sudo, administrator password, or system-wide changes are required. "
@@ -45,11 +43,9 @@ class Installer(Gtk.Application):
         install.add_css_class("suggested-action")
         install.connect("clicked", lambda _button: self.install(window))
         page.append(install)
-
         run = Gtk.Button(label="Run without installing")
         run.connect("clicked", lambda _button: self.run_app(window))
         page.append(run)
-
         note = Gtk.Label(label="Installation location: ~/Applications")
         note.add_css_class("dim-label")
         page.append(note)
@@ -75,6 +71,15 @@ class Installer(Gtk.Application):
 
             applications = Path.home() / ".local/share/applications"
             applications.mkdir(parents=True, exist_ok=True)
+            icons = Path.home() / ".local/share/icons/hicolor/scalable/apps"
+            icons.mkdir(parents=True, exist_ok=True)
+            icon = icons / "cin-main-lobby.svg"
+            appdir = os.environ.get("APPDIR")
+            bundled_icon = (Path(appdir) / "usr/share/icons/hicolor/scalable/apps/cin-main-lobby.svg"
+                            if appdir else None)
+            if bundled_icon and bundled_icon.is_file():
+                shutil.copy2(bundled_icon, icon)
+
             desktop = applications / "cin-main-lobby.desktop"
             desktop.write_text(
                 "[Desktop Entry]\n"
@@ -82,6 +87,7 @@ class Installer(Gtk.Application):
                 "Name=Core Identification Nodes\n"
                 "Comment=CIN Main Lobby\n"
                 f'Exec="{target}" --run\n'
+                "Icon=cin-main-lobby\n"
                 "Terminal=false\n"
                 "Categories=Utility;\n"
                 "StartupNotify=true\n",
@@ -95,6 +101,7 @@ class Installer(Gtk.Application):
             uninstall.write_text(
                 "#!/bin/sh\n"
                 f'rm -f "{target}" "$HOME/.local/share/applications/cin-main-lobby.desktop"\n'
+                'rm -f "$HOME/.local/share/icons/hicolor/scalable/apps/cin-main-lobby.svg"\n'
                 'rm -f "$HOME/.local/bin/cin-uninstall"\n'
                 'echo "CIN launcher removed. User data and configuration were preserved."\n',
                 encoding="utf-8",
@@ -125,10 +132,9 @@ class Installer(Gtk.Application):
         dialog.set_modal(True)
         dialog.set_default_size(420, 180)
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
-        box.set_margin_top(18)
-        box.set_margin_bottom(18)
-        box.set_margin_start(18)
-        box.set_margin_end(18)
+        for setter in (box.set_margin_top, box.set_margin_bottom,
+                       box.set_margin_start, box.set_margin_end):
+            setter(18)
         label = Gtk.Label(label=message)
         label.set_wrap(True)
         label.set_selectable(True)
