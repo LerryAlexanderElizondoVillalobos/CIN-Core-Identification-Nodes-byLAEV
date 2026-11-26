@@ -78,7 +78,10 @@ if [ -f "$ICON_SOURCE" ]; then
   cp "$ICON_SOURCE" "$ICON_HOME/cin.png"
 else
   ICON_SOURCE="$APP_HOME/AppDir/usr/share/icons/hicolor/scalable/apps/cin-main-lobby.svg"
-  [ ! -f "$ICON_SOURCE" ] || cp "$ICON_SOURCE" "$DATA_HOME/icons/hicolor/scalable/apps/cin.svg"
+  if [ -f "$ICON_SOURCE" ]; then
+    mkdir -p "$DATA_HOME/icons/hicolor/scalable/apps"
+    cp "$ICON_SOURCE" "$DATA_HOME/icons/hicolor/scalable/apps/cin.svg"
+  fi
 fi
 
 cat > "$DESKTOP_HOME/cin.desktop" <<EOF
