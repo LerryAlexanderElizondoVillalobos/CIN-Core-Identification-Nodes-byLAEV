@@ -21,7 +21,27 @@ DIST="$ROOT/dist"
 rm -rf "$PKG" "$BUNDLE"
 mkdir -p "$PKG/DEBIAN" "$PKG/opt/cin/AppDir" "$BUNDLE" "$DIST"
 cp -a "$APPDIR/." "$PKG/opt/cin/AppDir/"
-chmod 0755 "$PKG/opt/cin/AppDir/AppRun" "$PKG/opt/cin/AppDir/usr/bin/cin-main" "$PKG/opt/cin/AppDir/usr/bin/cin-appimage-installer"
+# The Debian edition does not ship the AppImage first-run installer. Removing
+# its PyInstaller runtime keeps the native .deb smaller and avoids dead code.
+rm -rf "$PKG/opt/cin/AppDir/usr/lib/cin-appimage-installer"
+rm -f "$PKG/opt/cin/AppDir/usr/bin/cin-appimage-installer"
+cat > "$PKG/opt/cin/AppDir/AppRun" <<'APP_RUN'
+#!/bin/sh
+set -eu
+HERE="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+export LD_LIBRARY_PATH="$HERE/usr/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+export GI_TYPELIB_PATH="$HERE/usr/lib/girepository-1.0${GI_TYPELIB_PATH:+:$GI_TYPELIB_PATH}"
+export GTK_PATH="$HERE/usr/lib/gtk-4.0${GTK_PATH:+:$GTK_PATH}"
+export GSETTINGS_SCHEMA_DIR="$HERE/usr/share/glib-2.0/schemas"
+if [ "${1:-}" = "--run" ]; then shift; fi
+if command -v systemd-run >/dev/null 2>&1 && systemctl --user show-environment >/dev/null 2>&1; then
+  if systemd-run --user --scope --unit=cin-main-lobby -- "$HERE/usr/bin/cin-main" "$@"; then
+    exit 0
+  fi
+fi
+exec "$HERE/usr/bin/cin-main" "$@"
+APP_RUN
+chmod 0755 "$PKG/opt/cin/AppDir/AppRun" "$PKG/opt/cin/AppDir/usr/bin/cin-main"
 
 cat > "$PKG/DEBIAN/control" <<EOF
 Package: core-identification-nodes
@@ -46,6 +66,7 @@ cp "$DIST/CIN.deb" "$BUNDLE/CIN.deb"
 install -m 0755 MAIN/installer/debian13/install-user.sh "$BUNDLE/install-user.sh"
 install -m 0755 MAIN/installer/debian13/uninstall-user.sh "$BUNDLE/uninstall-user.sh"
 install -m 0644 MAIN/installer/debian13/README.md "$BUNDLE/README.md"
+install -m 0755 MAIN/installer/debian13/run-user.sh "$BUNDLE/run-user.sh"
 cat > "$BUNDLE/PACKAGE-MANIFEST.txt" <<EOF
 CIN Debian 13 — User Space Edition
 Package: CIN.deb
@@ -66,5 +87,6 @@ EOF
   sha256sum CIN.deb CIN-Debian13-Installer.zip > SHA256SUMS
 )
 dpkg-deb --info "$DIST/CIN.deb"
-dpkg-deb --contents "$DIST/CIN.deb" | head -n 30
+dpkg-deb --contents "$DIST/CIN.deb" > "$DIST/CIN.deb.contents.txt"
+head -n 30 "$DIST/CIN.deb.contents.txt"
 sha256sum "$DIST/CIN.deb" "$DIST/CIN-Debian13-Installer.zip"
