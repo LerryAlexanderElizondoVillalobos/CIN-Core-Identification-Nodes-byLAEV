@@ -25,6 +25,12 @@ cp -a "$APPDIR/." "$PKG/opt/cin/AppDir/"
 # its PyInstaller runtime keeps the native .deb smaller and avoids dead code.
 rm -rf "$PKG/opt/cin/AppDir/usr/lib/cin-appimage-installer"
 rm -f "$PKG/opt/cin/AppDir/usr/bin/cin-appimage-installer"
+# Embed the user-space bootstrap in the .deb so the single archive is sufficient.
+mkdir -p "$PKG/opt/cin-installer"
+install -m 0755 MAIN/installer/debian13/install-user.sh "$PKG/opt/cin-installer/install-user.sh"
+install -m 0755 MAIN/installer/debian13/uninstall-user.sh "$PKG/opt/cin-installer/uninstall-user.sh"
+install -m 0755 MAIN/installer/debian13/run-user.sh "$PKG/opt/cin-installer/run-user.sh"
+install -m 0644 MAIN/installer/debian13/README.md "$PKG/opt/cin-installer/README.md"
 cat > "$PKG/opt/cin/AppDir/AppRun" <<'APP_RUN'
 #!/bin/sh
 set -eu
