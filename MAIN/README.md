@@ -60,3 +60,16 @@ A no-root, extracted-AppDir distribution is being prepared for Debian-based ARM6
 - [LinDesk ARM64 CI workflow](../.github/workflows/linux-arm64-portable-lindesk.yml)
 
 The portable package reuses the existing GTK4 Main Lobby and Settings payload. LinDesk device compatibility and memory use still require testing on physical Android hardware.
+
+
+## Debian 13 ARM64 — User Space Edition
+
+A dedicated Debian 13 (Trixie) ARM64 distribution is being prepared as a native Debian package payload plus a ZIP installer:
+
+- `CIN.deb` — native `arm64` package containing the relocatable CIN AppDir.
+- `CIN-Debian13-Installer.zip` — includes `CIN.deb`, `install-user.sh`, `uninstall-user.sh`, and documentation.
+- Installation uses `dpkg-deb -x` and places the application under `~/.local/opt/cin-main-lobby/`.
+- No `sudo`, root, `dpkg -i`, `apt install`, system package database, daemon, or auto-start service is used.
+- The uninstaller preserves user data, configuration and cache.
+
+See [Debian 13 distribution and install instructions](installer/debian13/README.md).
