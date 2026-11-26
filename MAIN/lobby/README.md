@@ -81,7 +81,7 @@ The repository reference should be a clickable link where supported by the selec
 
 ## Create action — first increment
 
-Create opens a dedicated initial creation view and provides a return path to the Lobby. It must not invent node identifiers, certificates, authorization, signatures or completed records.
+Create opens an informational entry dialog in this first installable milestone. It explicitly states that node creation and certificate issuance are not yet implemented. Closing the dialog returns to the Lobby. It must not invent node identifiers, certificates, authorization, signatures or completed records.
 
 Subsequent increments will implement the three founding processes inside this Create flow:
 1. Genesis Environment Certificate and Genesis Environment Manifest.
