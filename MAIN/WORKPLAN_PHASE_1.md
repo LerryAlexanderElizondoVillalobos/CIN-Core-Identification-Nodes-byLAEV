@@ -2,9 +2,9 @@
 
 ## Milestone objective
 
-Deliver one downloadable file: Core_Identification_Nodes.deb, Debian package version 0.3.0, package name core-identification-nodes, architecture all. The single archive contains the CIN application, the user-space installer and uninstaller, the Deploy engine, and the application-scoped network controller.
+Deliver one downloadable file: Core_Identification_Nodes.deb, Debian package version 0.3.0, package name core-identification-nodes, architecture all. The single archive contains the CIN application, the user-space installer and uninstaller, the Deploy engine, and the optional application-scoped network controller.
 
-The normal desktop user must be able to extract and run the embedded installer without root privileges, sudo, system package registration or writes to system directories. CIN must open Main Lobby first and demonstrate Settings navigation and the network OFF/ON policy from inside its dedicated systemd user scope.
+The normal desktop user must be able to extract and run the embedded installer without root privileges, sudo, system package registration or writes to system directories. CIN must open Main Lobby first and demonstrate Settings navigation. The network OFF/ON policy is available only on hosts that expose its supported systemd/cgroup backend.
 
 This milestone does not claim that the founding certificate engines, node creation, Enter, Import or the CIN Package Engine are implemented.
 
@@ -13,12 +13,13 @@ This milestone does not claim that the founding certificate engines, node creati
 - UI: GTK 4 native desktop interface through Python GObject Introspection.
 - Application language: Python 3.
 - Official file: Core_Identification_Nodes.deb.
-- Debian package metadata: core-identification-nodes, version 0.3.0, architecture all.
+- Debian package metadata: core-identification-nodes, version 0.3.0, architecture all (architecture-independent Python payload; ARM64/AArch64 supported).
 - The archive contains /opt/cin-main-lobby and /opt/cin-installer.
 - Installation is performed by extracting the archive with dpkg-deb --extract and running its embedded user installer.
 - The installer writes only to the current user's home directory. It refuses root execution and does not use sudo, apt install or dpkg -i.
-- Runtime prerequisites: Python 3, PyGObject, GTK 4, OpenSSL, dpkg-deb, a running systemd user manager and systemd/cgroup support for IPAddressDeny.
-- CIN launches inside cin-main-lobby.scope; the network switch controls only this scope.
+- Required runtime prerequisites: Python 3, PyGObject, GTK 4, OpenSSL and dpkg-deb.
+- systemd user manager and cgroup IP filtering are optional runtime capabilities, not installation prerequisites.
+- CIN launches directly in the user's session by default. A supported systemd scope may be used by a host launcher to enable CIN-only network filtering.
 - Persistent user data and publisher trust configuration are kept separately from replaceable application files.
 
 The .deb is a portable payload container, not a registered system package. It is deliberately extracted and installed per-user.
@@ -44,24 +45,25 @@ The .deb is a portable payload container, not a registered system package. It is
 The Deploy engine is included and its source tests are part of CI. Remote deployment is not live until the genuine publisher public key and a signed official manifest are provisioned and published.
 
 ### CIN network switch
-- ON/OFF is enforced by systemd IPAddressDeny on cin-main-lobby.scope.
+- When supported, ON/OFF is enforced by systemd IPAddressDeny on cin-main-lobby.scope.
 - OFF blocks IP networking for CIN's scope only.
 - ON clears the CIN scope override.
 - Host networking, NetworkManager and other applications are not modified.
-- If the user manager or cgroup policy cannot be used, installation or the UI reports the limitation; CIN must not claim isolation that is not enforced.
+- Without the user manager or cgroup policy, the UI reports network isolation unavailable and leaves the rest of CIN usable.
 
 ## GitHub Actions qualification
 
 1. Run all source and Deploy tests.
 2. Compile-check Python source.
 3. On x86_64 and ARM64, verify user-manager policy toggling and prove that denied scope networking does not affect host networking.
-4. Run the native application smoke test inside the actual CIN systemd scope.
+4. Run the native application smoke test inside a supported CIN systemd scope.
 5. Build and inspect the one Debian file.
 6. Verify the package contains the application, Deploy engine, network controller, embedded installer and uninstaller.
-7. Extract the embedded installer and install as an unprivileged user.
-8. Launch the installed application and test Lobby → Settings → Lobby and network OFF → ON.
-9. Uninstall and verify user data and publisher configuration remain.
-10. Publish only Core_Identification_Nodes.deb after every required gate succeeds.
+7. Extract the embedded installer and install as an unprivileged user in both systemd-capable and systemd-free environments.
+8. Launch the installed application and test Lobby → Settings → Lobby.
+9. On systemd-capable environments, test network OFF → ON; on systemd-free environments, verify the control reports unavailable.
+10. Uninstall and verify user data and publisher configuration remain.
+11. Publish only Core_Identification_Nodes.deb after every required gate succeeds.
 
 CI may use administrator privileges to provision its disposable test environment. That is not part of the user's installation procedure.
 
@@ -98,8 +100,7 @@ The milestone is complete only when:
 - The installed app and launcher remain under the user's home directory.
 - Deploy engine and network controller are present in the package.
 - Main Lobby is the initial screen and Settings navigation works.
-- CIN's actual scope network switch turns OFF and ON successfully.
-- Another process outside CIN retains network access while CIN is OFF.
+- Supported hosts can enforce CIN-only network OFF/ON; unsupported hosts explicitly report that capability unavailable.
 - Uninstall removes application files but preserves user data and publisher configuration.
 - The operator confirms installation and behavior on the target Linux desktop, including ARM64 if that is the target.
 
