@@ -2,30 +2,40 @@
 
 **Project:** CIN — Core Identification Nodes byLAEV  
 **Status:** Proposed architecture baseline for the new Main  
-**Phase:** Phase 1 — Main Lobby Installer → Phase 2 — CIN Package Engine Installer  
+**Phase:** Phase 1 — Main Lobby User-Space Installer → Phase 2 — CIN Package Engine Installer  
 **Authority:** This document defines the new direction for `MAIN/`. Historical material in `HISTORY/` is reference material, not active implementation.
 
 ## 1. Product direction
 
 CIN Main is delivered in two consecutive installation phases:
 
-1. **Phase 1 — Main Lobby Installer:** a per-user Linux installer whose sole product is the CIN Main Lobby, including its runtime, local storage and three founding certificate processes. The three processes execute inside the installed Lobby; they are not separate installation phases.
+1. **Phase 1 — Main Lobby User-Space Installer:** a per-user Linux installer whose first milestone delivers the CIN Main Lobby, including its native runtime and informational Settings screen. The longer Phase 1 scope includes local storage and the three founding certificate processes. These processes execute inside the installed Lobby; they are not separate installation phases.
 2. **Phase 2 — CIN Package Engine Installer:** a separate installer for the engine of engines, which installs and manages specialized CIN packages and engines. It follows the establishment of the node's technical identifiers and CIN Global Personal Document association in Phase 1.
 
-## 2. Phase 1 — Linux Installer for the Main Lobby
+## 2. Phase 1 — User-Space Linux Installer for the Main Lobby
 
 ### 2.1 Installation scope
 
-The first downloadable milestone is a Debian `.deb` package named `CIN.deb`, installed and managed by the target system's Debian package manager. Installing or removing files under system directories normally requires administrator authorization through that package manager. This installation-time authorization is separate from application execution: the Lobby runs as the logged-in user and must not request root privileges. The package must not install system-wide daemons. Future distribution formats may provide a fully per-user installer, but they are not part of this first `.deb` milestone.
+The first downloadable milestone is a Debian `.deb` payload named `CIN.deb`, accompanied by `install-user.sh` and `uninstall-user.sh`. The archive is not installed through `apt install` or `dpkg -i`; it is extracted with `dpkg-deb --extract` and integrated into the current user's home directory.
 
-Default XDG locations (respect the corresponding environment variables when set):
+The user installer:
+- Must run as a normal desktop user and refuse root execution.
+- Must not invoke `sudo`, `apt install`, `dpkg -i` or privileged package scripts.
+- Must not write to `/usr`, system-wide `/opt`, system application directories or the system package database.
+- Must place application files under `~/.local/opt/cin-main-lobby/`.
+- Must place the launcher under `~/.local/bin/cin-main`.
+- Must place the desktop entry under `~/.local/share/applications/cin-main.desktop`.
+- Must keep future persistent CIN node data separate from replaceable application files.
+
+Python 3, PyGObject and GTK 4 are runtime prerequisites that must already be available to the user. The installer checks them and reports missing prerequisites; it does not attempt to install system dependencies or request elevated privileges.
+
+Default XDG locations (respect corresponding environment variables when implemented):
 
 | Purpose | Default location |
 |---|---|
-| Versioned application releases | `~/.local/opt/cin/releases/<version>/` |
-| Active application | `~/.local/opt/cin/current` |
-| User command launcher | `~/.local/bin/cin` |
-| Desktop entry | `~/.local/share/applications/cin.desktop` |
+| Application files | `~/.local/opt/cin-main-lobby/` |
+| User command launcher | `~/.local/bin/cin-main` |
+| Desktop entry | `~/.local/share/applications/cin-main.desktop` |
 | Persistent node data | `~/.local/share/cin/` |
 | User configuration | `~/.config/cin/` |
 | Cache and temporary working data | `~/.cache/cin/` |
@@ -34,23 +44,23 @@ Application binaries, configuration, cache and node records must remain separate
 
 ### 2.2 Installation sequence
 
-1. Obtain the `CIN.deb` release artifact from a successful GitHub Actions workflow.
-2. Inspect package metadata, architecture and declared dependencies.
-3. Install the package through the Debian package manager.
-4. Resolve Python 3, Python GI bindings and GTK 4 from the target distribution.
-5. Register the `cin-main` launcher and desktop entry.
-6. Start CIN Main Lobby as the logged-in user.
-7. Keep future persistent node data outside replaceable application files.
+1. Download and extract the `CIN-deb-installer` workflow artifact.
+2. Confirm it contains `CIN.deb`, `install-user.sh` and `uninstall-user.sh`.
+3. Run `bash install-user.sh ./CIN.deb` as the normal desktop user.
+4. The script checks Python 3, PyGObject and GTK 4 availability.
+5. The script extracts the archive and copies the application to the user's local application directory.
+6. The script creates the user's launcher and desktop entry.
+7. Start CIN Main Lobby as the logged-in user.
 
 Release signature verification and a detached publisher trust chain are not implemented by this first build pipeline. They remain a release-engineering requirement before treating public downloads as authenticated production releases.
 
-Package verification, extraction, application installation and node birth are separate events. A successfully installed application is not a born node.
+Package payload extraction, per-user application installation and node birth are separate events. A successfully installed application is not a born node.
 
 ### 2.3 Existing package-signing profile
 
 The archived Package Manifest v1 is the starting specification unless a successor is approved. It defines UTF-8 JSON, RFC 8785 JCS canonicalization, SHA-256 for the ZIP, Ed25519 detached signatures and independently provisioned publisher trust. The public key included inside an untrusted package cannot authenticate that same package.
 
-The archived manifest describes a ZIP distribution and is not used to authenticate this initial Debian package. The `.deb` distribution must receive its own versioned release-authentication contract before signed production publication.
+The archived manifest describes a ZIP distribution and is not used to authenticate this initial Debian payload. The `.deb` distribution must receive its own versioned release-authentication contract before signed production publication.
 
 ## 3. Main Lobby included in Phase 1
 
@@ -71,59 +81,28 @@ The initial Lobby workflow contains three sequential processes. Each process has
 - Performs the environment audit within the collection scope and permissions disclosed to the operator.
 - Distinguishes observed, declared, derived, external, unavailable and not-collected information.
 - Produces the Genesis Environment Manifest.
-- Validates the manifest against its versioned schema and calculates its integrity values.
-- Registers the valid Genesis Manifest as the first logical CIN record in private local storage.
-
-The Genesis Manifest describes pre-birth conditions. It is not the Node Birth Record and does not establish a born node.
+- Validates the manifest against its versioned schema.
+- Records the manifest as the first logical CIN record.
 
 #### Process 2 — CIN Node Birth Certificate
 
-- Imports the complete registered Genesis Manifest; it does not repeat the environment audit.
-- Preserves the exact source and calculates raw and canonical integrity values.
-- Validates the complete document and applies the approved, versioned identifier derivation profile.
-- Derives the applicable technical node identifiers, including CIN-NID, CIN-NSID, CIN-BID and CIN-REF; CIN-ENID and CIN-PVID are conditional where their prerequisites apply.
-- Obtains the separate Node Birth Authorization.
-- Creates the distinct Node Birth Record, referencing the Genesis Manifest.
-- Commits, reads back and independently verifies the record before the Lobby presents the node as BORN.
-
-A derived candidate identifier is not an authoritative birth record. A digest is not a signature, issuer trust or authorization.
+- Imports the complete registered Genesis Manifest.
+- Applies the approved identifier derivation profile and conformance vectors.
+- Integrates separate Node Birth Authorization.
+- Commits and independently verifies the Node Birth Record and applicable technical node identifiers.
 
 #### Process 3 — CIN Global Personal Document and Node Marriage Certificate
 
-- Consumes the authoritative Node Birth Record.
-- Derives the CIN Global Personal Document identifier under the approved deterministic profile.
-- Requests the holder's explicit cryptographic acceptance of the node-to-document association through the configured wallet/signing interface.
-- Verifies the signature and recovered signer against the stated subject address.
-- Produces the CIN Global Personal Document record and the separate node-personal-document marriage agreement.
-- Persists the outputs and their verification status.
+- Derives the deterministic document identifier from the approved input profile.
+- Requests explicit approval through an external signer.
+- Verifies the signed association.
+- Persists the personal document record and association agreement as separate artifacts.
 
-The archived development candidate uses a MetaMask-compatible EVM wallet, EIP-712 typed-data signing and signer recovery. The signed association demonstrates control of the signing address and acceptance of the agreement; it does not by itself establish civil attributes, legal recognition, issuer trust or worldwide uniqueness.
+The three processes are planned architecture. Their presence in this architecture does not claim that they are implemented in the first installer milestone.
 
-No private signing key is stored in CIN Main or in its portable release. Signing is performed through an external wallet, hardware device or separately installed signer connector.
+## 4. Phase 2 — CIN Package Engine Installer
 
-### 3.3 Later personal registration
-
-The archived architecture defines a fourth certificate, CIN Personal Registration and Credential. It consumes an authoritative Node Birth Record, an explicit person-to-node association and a separately verified Personal Issuance Authorization. It coordinates the CIN Personal Number, personal-registration record and personal credential issuance/verification.
-
-This is a subsequent personal-issuance stage, not one of the three founding processes above. A locally allocated number must be labelled with its actual allocation status and must not be described as globally unique or reserved without a verified coordinating-registry response.
-
-### 3.4 Lobby header
-
-The header is a rebuildable read model assembled from persisted authoritative records. It may display:
-
-- Node lifecycle status.
-- Genesis Manifest identifier and registration status.
-- CIN-NID, CIN-NSID, CIN-BID and CIN-REF.
-- CIN-ENID and CIN-PVID when applicable.
-- CIN Global Personal Document identifier and node-document association status.
-- Later CIN Personal Number and credential status, only when issued and approved for display.
-- Latest record references and verification states.
-
-Candidate, preview, registered, authorized, signed, issued and verified are distinct states. The header must display the actual state of each artifact.
-
-## 4. Phase 2 — CIN Package Engine Installer: the engine of engines
-
-The separate Package Engine Installer is developed in Phase 2, after the three founding Lobby processes have produced the required node records and the CIN Global Personal Document association has reached its defined acceptance state. It is not included in the Phase 1 Lobby installer.
+Phase 2 is a separate installation product, initiated only after the required node records and the CIN Global Personal Document association have reached their defined acceptance state. It is not included in the Phase 1 Lobby installer.
 
 Its purpose is to manage specialized packages and their engines as installable, versioned, discoverable and independently manageable components.
 
@@ -265,7 +244,7 @@ This is the target logical layout. Directories become active implementation only
 
 | Phase | Deliverable | Completion condition |
 |---|---|---|
-| Phase 1A | Main Lobby Installer | Verified release installed and launched for a normal Linux user without root |
+| Phase 1A | Main Lobby User-Space Installer | User-space installer runs without root and launches CIN Main |
 | Phase 1B | Lobby foundation | Lobby starts, initializes storage and reconstructs actual lifecycle state |
 | Phase 1C | Genesis Environment Certificate | Valid Genesis Manifest is the first logical CIN record |
 | Phase 1D | Node Birth Certificate | Authorized Node Birth Record and applicable node identifiers are committed and verified |
@@ -284,6 +263,6 @@ This is the target logical layout. Directories become active implementation only
 
 ## 9. Relationship with historical documents
 
-This V1 architecture deliberately supersedes the archived baseline's distribution-only-as-portable-folder constraint by selecting a Linux per-user installer. The archived Package Manifest v1 remains the starting release-authentication profile. The archived certificate lifecycle and node-document association specifications remain reference designs and must be reviewed and adopted into active V1 contracts before implementation.
+This V1 architecture selects a Linux per-user installer. The archived Package Manifest v1 remains the starting release-authentication profile. The archived certificate lifecycle and node-document association specifications remain reference designs and must be reviewed and adopted into active V1 contracts before implementation.
 
 This document is a new architecture decision proposal. It is not evidence that the installer, Lobby, certificate engines or Package Engine have already been implemented.
