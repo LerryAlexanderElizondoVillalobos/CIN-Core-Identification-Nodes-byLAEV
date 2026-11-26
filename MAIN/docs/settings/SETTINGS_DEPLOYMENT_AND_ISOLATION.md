@@ -25,7 +25,7 @@ A formal application version/release compatibility and update-management system 
 - Local deployment result record under `~/.local/share/cin-main-lobby/deployment-record.json`.
 - Initial installer migration that replaces the previous application payload while preserving user data and publisher configuration.
 
-## Network Isolation — required integration still outstanding
+## CIN Application Network Access — implemented in this branch
 
 Network Isolation is part of the agreed CIN.deb scope for this development stage. It is **not present in the current branch implementation**: there is no installed isolation component, Settings control, integration in the Debian payload, or corresponding automated qualification test yet.
 
