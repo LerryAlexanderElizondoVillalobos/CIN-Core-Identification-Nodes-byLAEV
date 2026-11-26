@@ -4,8 +4,8 @@ Section: utils
 Priority: optional
 Architecture: all
 Maintainer: Core Identification Nodes byLAEV
-Description: Core Identification Nodes Main Lobby, Deploy engine and CIN network isolation
+Description: Core Identification Nodes Main Lobby and Deploy engine
  This architecture-independent Debian archive contains the CIN Main Lobby,
- component-aware official code deployment engine and per-application network
- access control. Install with the included user-space installer as a normal
- desktop user. Do not register this payload with apt or dpkg -i.
+ component-aware official code deployment engine and optional per-application
+ network access control. Install with the included user-space installer as a
+ normal desktop user. Do not register this payload with apt or dpkg -i.
