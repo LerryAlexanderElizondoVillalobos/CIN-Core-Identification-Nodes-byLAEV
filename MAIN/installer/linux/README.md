@@ -62,6 +62,8 @@ Package removal must not remove user node data. Do not run `purge` as the normal
 
 ## Manual qualification
 
+Use the [Operator Installation and Acceptance Test](INSTALLATION_TEST_PLAN.md) to record the actual target-device result.
+
 - Install on the intended Debian-compatible Linux ARM64 / AArch64 environment.
 - Launch the application.
 - Open Settings from the Lobby.
