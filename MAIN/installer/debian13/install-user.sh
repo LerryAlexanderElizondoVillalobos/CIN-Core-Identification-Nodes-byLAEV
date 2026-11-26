@@ -13,7 +13,7 @@ else
 fi
 command -v dpkg-deb >/dev/null 2>&1 || fail "dpkg-deb is required."
 HERE="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
-DEB="${CIN_DEB_PATH:-$HERE/CIN.deb}"
+DEB="${1:-${CIN_DEB_PATH:-$HERE/CIN.deb}}"
 [ -f "$DEB" ] || fail "CIN.deb was not found beside this installer."
 [ "$(dpkg-deb -f "$DEB" Architecture)" = arm64 ] || fail "Unexpected package architecture."
 [ "$(dpkg-deb -f "$DEB" Package)" = core-identification-nodes ] || fail "Unexpected Debian package name."
