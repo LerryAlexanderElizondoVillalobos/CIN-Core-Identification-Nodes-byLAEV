@@ -43,7 +43,7 @@ finally:
     sock.close()
 """
     command = [
-        "sudo", "systemd-run", "--scope", "--wait", "--quiet",
+        "sudo", "systemd-run", "--scope", "--quiet",
         "--unit=cin-network-isolation-runtime-test",
         "--property=IPAddressDeny=any",
         sys.executable, "-c", probe, host, str(port),
