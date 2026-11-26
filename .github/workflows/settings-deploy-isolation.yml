@@ -1,0 +1,194 @@
+name: CIN Settings — Deployment and Network Isolation
+
+on:
+  push:
+    branches:
+      - main
+      - "stage/settings-deploy-network-isolation"
+    paths:
+      - "MAIN/app/launcher/**"
+      - "MAIN/app/settings/**"
+      - "MAIN/tests/settings/**"
+      - "MAIN/tests/test_settings_stage.py"
+      - "MAIN/docs/settings/**"
+      - "MAIN/installer/linux/**"
+      - "MAIN/packaging/deb/**"
+      - ".github/workflows/settings-deploy-isolation.yml"
+  pull_request:
+    paths:
+      - "MAIN/app/launcher/**"
+      - "MAIN/app/settings/**"
+      - "MAIN/tests/settings/**"
+      - "MAIN/tests/test_settings_stage.py"
+      - "MAIN/docs/settings/**"
+      - "MAIN/installer/linux/**"
+      - "MAIN/packaging/deb/**"
+      - ".github/workflows/settings-deploy-isolation.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cin-settings-stage-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  implementation-gate:
+    name: Confirm Settings stage implementation exists
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require Settings services and acceptance suites
+        shell: bash
+        run: |
+          set -euo pipefail
+          required=(
+            MAIN/app/settings/deployment
+            MAIN/app/settings/network
+            MAIN/tests/settings/test_settings_contract.py
+            MAIN/tests/settings/test_deployment_manifest.py
+            MAIN/tests/settings/test_deployment_comparison.py
+            MAIN/tests/settings/test_deployment_apply.py
+            MAIN/tests/settings/test_network_policy.py
+            MAIN/tests/settings/test_network_enforcement.py
+            MAIN/tests/settings/test_settings_integration.py
+          )
+          missing=0
+          for path in "${required[@]}"; do
+            if [[ ! -e "$path" ]]; then
+              echo "::error::Settings stage implementation missing: $path"
+              missing=1
+            fi
+          done
+          if [[ "$missing" -ne 0 ]]; then
+            echo "Settings stage is not implemented yet. CIN.deb will not be built."
+            exit 1
+          fi
+
+  source-and-service-tests:
+    name: Source, deployment and network tests
+    runs-on: ubuntu-24.04
+    needs: implementation-gate
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run existing application contract tests
+        run: python3 -m unittest MAIN.tests.test_application_contract -v
+      - name: Run Settings acceptance suites
+        run: |
+          python3 -m unittest discover -s MAIN/tests/settings -p "test_*.py" -v
+
+  runtime-qualification:
+    name: GTK Settings integration on ${{ matrix.runner }}
+    needs: source-and-service-tests
+    strategy:
+      fail-fast: false
+      matrix:
+        runner:
+          - ubuntu-24.04
+          - ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install CI-only GTK and display dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3 python3-gi gir1.2-gtk-4.0 xvfb dbus-x11
+      - name: Run installed Settings integration smoke test
+        env:
+          GDK_BACKEND: x11
+        run: |
+          set -euo pipefail
+          xvfb-run -a dbus-run-session -- python3 MAIN/app/launcher/cin_main.py --settings-stage-smoke-test
+
+  build-deb:
+    name: Build CIN.deb after all Settings tests pass
+    runs-on: ubuntu-24.04
+    needs:
+      - source-and-service-tests
+      - runtime-qualification
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Debian packaging tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y dpkg-dev
+      - name: Build CIN.deb and user-space installer scripts
+        run: bash MAIN/installer/linux/build-deb.sh dist
+      - name: Inspect Debian package
+        run: |
+          set -euo pipefail
+          test -s dist/CIN.deb
+          test "$(dpkg-deb --field dist/CIN.deb Architecture)" = "all"
+          dpkg-deb --field dist/CIN.deb Package Version Architecture
+          dpkg-deb --contents dist/CIN.deb
+          bash -n dist/install-user.sh
+          bash -n dist/uninstall-user.sh
+      - name: Upload package candidate
+        uses: actions/upload-artifact@v4
+        with:
+          name: cin-settings-stage-candidate
+          path: |
+            dist/CIN.deb
+            dist/install-user.sh
+            dist/uninstall-user.sh
+          if-no-files-found: error
+          retention-days: 3
+
+  install-test:
+    name: Test candidate using the unprivileged CI user
+    needs: build-deb
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download package candidate
+        uses: actions/download-artifact@v4
+        with:
+          name: cin-settings-stage-candidate
+          path: dist
+      - name: Provision CI runtime dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3 python3-gi gir1.2-gtk-4.0 xvfb dbus-x11
+      - name: Install CIN as current user
+        run: |
+          set -euo pipefail
+          test "$(id -u)" -ne 0
+          bash dist/install-user.sh "$PWD/dist/CIN.deb"
+          test -f "$HOME/.local/opt/cin-main-lobby/cin_main.py"
+          test -x "$HOME/.local/bin/cin-main"
+      - name: Launch installed application and verify Settings stage
+        env:
+          GDK_BACKEND: x11
+        run: |
+          xvfb-run -a dbus-run-session -- "$HOME/.local/bin/cin-main" --settings-stage-smoke-test
+      - name: Uninstall as current user
+        if: always()
+        run: |
+          if [[ -f dist/uninstall-user.sh ]]; then
+            bash dist/uninstall-user.sh
+          fi
+          test ! -e "$HOME/.local/opt/cin-main-lobby"
+          test ! -e "$HOME/.local/bin/cin-main"
+
+  publish:
+    name: Publish qualified CIN-deb-installer
+    needs: install-test
+    if: success() && github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Download tested package
+        uses: actions/download-artifact@v4
+        with:
+          name: cin-settings-stage-candidate
+          path: dist
+      - name: Publish final installer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: CIN-deb-installer
+          path: |
+            dist/CIN.deb
+            dist/install-user.sh
+            dist/uninstall-user.sh
+          if-no-files-found: error
+          retention-days: 30
