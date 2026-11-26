@@ -91,8 +91,9 @@ jobs:
           DEB="dist/Core_Identification_Nodes-arm64.deb"
           test -s "$DEB"
           test "$(dpkg-deb -f "$DEB" Architecture)" = "arm64"
-          dpkg-deb --contents "$DEB" | grep -q '/opt/cin/AppDir/AppRun'
-          dpkg-deb --contents "$DEB" | grep -q '/usr/bin/cin-main-lobby'
+          dpkg-deb --contents "$DEB" > "$RUNNER_TEMP/cin-deb-contents.txt"
+          grep -q '/opt/cin/AppDir/AppRun' "$RUNNER_TEMP/cin-deb-contents.txt"
+          grep -q '/usr/bin/cin-main-lobby' "$RUNNER_TEMP/cin-deb-contents.txt"
       - name: Upload ARM64 AppImage
         uses: actions/upload-artifact@v4
         with:
