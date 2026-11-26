@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import Mock
 
-from settings.network_access import NetworkAccessController, NetworkAccessError
+from MAIN.app.settings.network_access import NetworkAccessController, NetworkAccessError
 
 
 class NetworkAccessControllerTests(unittest.TestCase):
