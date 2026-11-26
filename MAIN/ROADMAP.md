@@ -1,10 +1,10 @@
 # CIN Main — Delivery Roadmap
 
-The immediate goal is a downloadable and manually installable Debian package for the first functional two-screen CIN Main Lobby.
+The immediate goal is a downloadable Debian application payload and a user-space installer for the first functional two-screen CIN Main Lobby. The application is installed and managed by the normal desktop user, without root privileges.
 
-## Milestone 1 — First installable release: `CIN.deb`
+## Milestone 1 — First user-installable release: `CIN.deb`
 
-**Deliverable:** a GitHub Actions-built Debian package containing the native GTK 4 CIN Main Lobby application.
+**Deliverable:** a GitHub Actions-built `CIN.deb` payload plus user installer and uninstaller scripts.
 
 ### M1.1 — Native application
 - Implement the Lobby in Python with GTK 4.
@@ -14,40 +14,42 @@ The immediate goal is a downloadable and manually installable Debian package for
 - Keep Enter and Import disabled.
 - Use native widgets, system typography and no embedded browser engine.
 
-### M1.2 — Debian packaging
-- Define package metadata and runtime dependencies.
-- Include the application launcher and desktop entry.
-- Build `CIN.deb` with `dpkg-deb`.
-- Keep future node data separate from replaceable application files.
-- Document installation and removal behavior.
+### M1.2 — User-space Debian payload
+- Build the architecture-independent `CIN.deb` with `dpkg-deb`.
+- Keep application payload under `/opt/cin-main-lobby` inside the archive.
+- Extract the archive without registering it as a system package.
+- Install application files under `~/.local/opt/cin-main-lobby`.
+- Create the launcher under `~/.local/bin` and desktop entry under `~/.local/share/applications`.
+- Do not write to system directories or modify the system package database.
+- Require Python 3, PyGObject and GTK 4 to be already available; check these prerequisites without attempting privileged installation.
 
 ### M1.3 — Continuous integration
 - Run source-contract tests.
-- Build the Debian package on GitHub-hosted Linux.
-- Inspect package metadata and contents.
-- Install the package in the CI runner.
+- Build the Debian payload and user install/uninstall scripts.
+- On x86_64 and ARM64 runners, provision CI test dependencies, then install CIN as the unprivileged runner user.
 - Launch it under Xvfb and execute the two-screen navigation smoke test.
-- Upload `CIN.deb` as a workflow artifact only after all required checks pass.
+- Uninstall as the same user and verify removal.
+- Upload the complete installer bundle only after all required checks pass.
 
 ### M1.4 — Operator installation and qualification
 - Download the successful workflow artifact.
-- Install the package on a Debian-compatible Linux ARM64 / AArch64 target.
-- Launch the Lobby from desktop integration or terminal.
+- Run `bash install-user.sh ./CIN.deb` as a normal user.
+- Launch the Lobby from the user's application menu or `~/.local/bin/cin-main`.
 - Open Settings and return with Back.
 - Repeat navigation, restart and test offline startup.
+- Remove with `bash uninstall-user.sh`.
 - Record actual compatibility, display behavior and resource measurements.
 
-**Milestone 1 acceptance:** a successful downloadable package plus a successful manual installation and screen-navigation test on the operator's target environment. CI x86_64 success alone does not qualify ARM64 compatibility.
+**Milestone 1 acceptance:** a successful downloadable bundle plus successful no-root manual installation and screen-navigation test on the operator's target environment. CI x86_64 success alone does not qualify ARM64 compatibility.
 
 ## Technology baseline
 
 - Python 3 application code.
 - GTK 4 native interface via Python GObject Introspection.
-- Debian `.deb` package, initially `CIN.deb`.
-- Package architecture `all` because the Python application is architecture-independent; native GTK/Python dependencies are resolved by the target distribution.
+- Debian `.deb` payload, initially `CIN.deb`.
+- Package architecture `all`; native GTK/Python prerequisites are supplied by the target distribution and must already be available to the user.
 - No Electron, Chromium, WebKit, remote resources or network requirement for application startup.
-
-The package manager may require administrator authorization to install system-managed files. The running Lobby operates as the logged-in user and must not require root privileges.
+- The CIN installer and uninstaller execute as the logged-in user and do not require root.
 
 ## Milestone 2 — Main Lobby foundation
 
@@ -79,4 +81,4 @@ A separate installer for the engine of engines, following the founding node and 
 
 ## Release discipline
 
-A workflow contract check is not an application runtime test. An x86_64 CI test is not ARM64 device qualification. A generated Debian package is not considered delivered until the operator can download and install it and verify the planned behavior.
+A workflow contract check is not an application runtime test. An x86_64 CI test is not ARM64 device qualification. A generated Debian payload is not considered delivered until the operator can download it, install it as a normal user and verify the planned behavior.
