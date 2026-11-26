@@ -36,7 +36,7 @@ Do not run the installer with sudo. It intentionally refuses root execution.
 
 ## Run without installing
 
-After extracting the ZIP, run `./run-user.sh` if present in the bundle, or install with the user installer. The installed launcher is `~/.local/bin/cin`.
+After extracting the ZIP, run `./run-user.sh` to extract the package into a temporary cache directory, launch CIN, and remove that temporary extraction when CIN exits. This does not create a persistent installation. The installed launcher is `~/.local/bin/cin`.
 
 ## Uninstall
 
