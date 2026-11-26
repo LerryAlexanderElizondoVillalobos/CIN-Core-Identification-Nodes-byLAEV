@@ -16,18 +16,18 @@ CIN Main is delivered in two consecutive installation phases:
 
 ### 2.1 Installation scope
 
-The first downloadable milestone is one self-contained Debian archive named `Core_Identification_Nodes.deb` (Debian package `core-identification-nodes`, version `0.3.0`, architecture `all`). It contains the Main Lobby application, Settings, Deploy engine, network controller, and embedded user-space installer and uninstaller. It is extracted with `dpkg-deb --extract`; it is not registered through `apt install` or `dpkg -i`.
+The Debian 13 ARM64 distribution consists of `CIN.deb` (Debian package `core-identification-nodes`, architecture `arm64`) and `CIN-Debian13-Installer.zip`. The ZIP contains the .deb plus `install-user.sh` and `uninstall-user.sh`. The .deb contains the relocatable CIN AppDir and is extracted with `dpkg-deb -x`; it is not registered through `apt install` or `dpkg -i`. The ARM64 package architecture reflects the native executable payload and must not be marked `all`.
 
 The user installer:
 - Must run as a normal desktop user and refuse root execution.
 - Must not invoke `sudo`, `apt install`, `dpkg -i` or privileged package scripts.
 - Must not write to `/usr`, system-wide `/opt`, system application directories or the system package database.
 - Must place application files under `~/.local/opt/cin-main-lobby/`.
-- Must place the launcher under `~/.local/bin/cin-main`.
-- Must place the desktop entry under `~/.local/share/applications/cin-main.desktop`.
+- Must place the launcher under `~/.local/bin/cin`.
+- Must place the desktop entry under `~/.local/share/applications/cin.desktop`.
 - Must keep future persistent CIN node data separate from replaceable application files.
 
-Python 3, PyGObject, GTK 4, OpenSSL, dpkg-deb, a running systemd user manager and systemd/cgroup support for `IPAddressDeny` are runtime prerequisites. The installer checks prerequisites and does not install system dependencies or request elevated privileges.
+The packaged AppDir carries the application runtime and GTK/PyGObject components required by CIN. `dpkg-deb` is required only by the user-space extraction script. A systemd user manager is optional for the dedicated application scope and network-policy integration; CIN must remain launchable without it and accurately report when host-enforced network isolation is unavailable. The installer does not install system dependencies or request elevated privileges.
 
 Default XDG locations (respect corresponding environment variables when implemented):
 
