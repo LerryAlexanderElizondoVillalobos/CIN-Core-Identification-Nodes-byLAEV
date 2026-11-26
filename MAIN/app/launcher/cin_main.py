@@ -148,11 +148,12 @@ class CinMainWindow(Gtk.ApplicationWindow):
         deployment_status.set_wrap(True)
         content.append(deployment_status)
         manifest_button = Gtk.Button(label="Generate Local Manifest")
-        manifest_button.connect("clicked", lambda _button: self.show_deployment_result(
-            "Local Manifest", self.local_manifest_summary()))
+        manifest_button.set_sensitive(False)
+        manifest_button.set_tooltip_text("AppImage-aware manifest generation is pending.")
         content.append(manifest_button)
         check_button = Gtk.Button(label="Check Official Development Channel")
-        check_button.connect("clicked", lambda _button: self.check_deployment_channel())
+        check_button.set_sensitive(False)
+        check_button.set_tooltip_text("Signed AppImage replacement/update integration is pending.")
         content.append(check_button)
 
         content.append(self.section_heading("Project Repository"))
@@ -192,10 +193,12 @@ class CinMainWindow(Gtk.ApplicationWindow):
     @staticmethod
     def deployment_status_text():
         if not KEY_PATH.is_file():
-            return ("Deployment engine installed. Publisher trust is not configured. "
-                    f"Provision the official Ed25519 public key at {KEY_PATH}; "
-                    "no update can be trusted or applied yet.")
-        return "Deployment engine installed. Publisher key found; check the official channel manually."
+            trust = f"Publisher trust is not configured. Provision the genuine Ed25519 public key at {KEY_PATH}."
+        else:
+            trust = "Publisher public key is provisioned."
+        return ("Deploy engine is included, but component-level updates are disabled in this AppImage build. "
+                "An AppImage-aware signed replacement flow is required before an update can be applied. "
+                + trust)
 
     def local_manifest_summary(self):
         manifest = local_manifest(APP_DIR)
