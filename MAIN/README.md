@@ -9,6 +9,9 @@ CIN Main is being rebuilt around three successive layers:
 ## Architecture and navigation
 
 - [Main Architecture V1](ARCHITECTURE/MAIN_ARCHITECTURE_V1.md)
+- [Component Map](ARCHITECTURE/MAIN_COMPONENT_MAP.md)
+- [Lifecycle and Package State Model](ARCHITECTURE/MAIN_STATE_MODEL.md)
+- [Engine Package Contract V1](ARCHITECTURE/ENGINE_PACKAGE_CONTRACT_V1.md)
 - [Development Roadmap](ROADMAP.md)
 - [Linux User Installer](installer/linux/README.md)
 - [Main Lobby](lobby/README.md)
