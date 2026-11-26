@@ -1,2 +1,2 @@
 #!/bin/sh
-exec /usr/lib/cin-main-lobby/cin_main.py "$@"
+exec /usr/bin/python3 /usr/lib/cin-main-lobby/cin_main.py "$@"
