@@ -109,7 +109,7 @@ class CinMainWindow(Gtk.ApplicationWindow):
             ("Project", "Core Identification Nodes byLAEV"),
             ("Application phase", "Phase 1 — Main Lobby"),
             ("Milestone", "Milestone 1 — Lobby and Settings Navigation"),
-            ("Target platform", "Linux x86_64 / ARM64 / AArch64"),
+            ("Target platform", "Linux ARM64 / AArch64"),
             ("Network requirement", "Not required to open the application"),
         ):
             row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
