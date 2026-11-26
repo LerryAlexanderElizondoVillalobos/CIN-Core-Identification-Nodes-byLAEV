@@ -1,51 +1,38 @@
-# Phase 1 — CIN Main Lobby ARM64 Debian Package
+# CIN Main Lobby — Linux Application Installer
 
-## Purpose
+## First milestone
 
-Deliver CIN Main Lobby as a Debian package (.deb) targeting **arm64 / AArch64**. The primary deployment target includes Debian-compatible Linux userspaces running locally on Android, including LinDesk, as well as conventional ARM64 Debian/Ubuntu systems.
+Build and distribute a Linux-installable desktop application whose first screen is the CIN Main Lobby.
 
-Virtualization is optional. The package is installed inside the Linux userspace provided by the host environment; it is not an Android APK and does not install a Linux distribution or virtual machine.
+Visible interface:
 
-## Deployment model
+- **Welcome to Core Identification Nodes**
+- **Create** — active; opens the initial creation flow.
+- **Enter** — visible, inactive until its milestone.
+- **Import** — visible, inactive until its milestone.
 
-The same ARM64 Debian package is tested in two execution profiles:
+The installer must install the application and provide a launcher in the target Linux desktop environment. This milestone is about getting the Lobby application installed and opened; it does not yet create a fully registered CIN node.
 
-1. **Android-hosted Linux userspace, without a VM:** Debian userspace provided by an Android Linux environment such as LinDesk. This may use PRoot or another userspace isolation layer and shares the Android device's Linux kernel.
-2. **Virtualized ARM64 Linux:** Debian/Ubuntu ARM64 running inside a virtual machine.
+## Platform strategy
 
-The package architecture remains arm64 in both cases. Compatibility is determined by the guest userspace, available libraries, kernel interfaces and display integration—not by the package architecture alone.
+The initial package target is Linux ARM64 / AArch64, including Debian-compatible Linux userspaces used by Android environments such as LinDesk. The package format and dependency list must match the selected application technology and target distributions. Do not assume that every Linux distribution is Debian-based or supports .deb.
 
-## Package contract
+The application should not require virtualization as a product feature. Validate separately in Android-hosted Linux userspace and virtualized ARM64 Linux. Desktop display integration is a runtime requirement and must be tested in the actual environment.
 
-- Debian package architecture: arm64.
-- Artifact: cin-main-lobby_<version>_arm64.deb.
-- Package metadata declares actual runtime dependencies; no blanket dependency on systemd, a VM, root access or a particular desktop environment.
-- Installation and application data remain inside the target Linux userspace.
-- Persistent CIN node records, configuration and cache use separate XDG locations.
-- Package removal must not silently delete persistent node records.
-- The package contains the Main Lobby and its three founding certificate processes.
-- It does not contain or install the CIN Package Engine (Phase 2).
+## Installer responsibilities
 
-## LinDesk / Android qualification
+1. Install the application files and runtime dependencies.
+2. Register a launchable application entry where the desktop environment supports it.
+3. Start the CIN Main Lobby.
+4. Keep application files separate from future persistent CIN node data.
+5. Support upgrade and removal without silently deleting user-created node data.
 
-LinDesk is described by its publisher as a local Debian-based Linux environment on Android and supports importing .deb packages. CIN will qualify the package by installing and launching it in that environment. Android device model, Android version, LinDesk version, userspace architecture and display mode must be recorded with test evidence.
+## Out of scope for this milestone
 
-A successful package build or metadata inspection does not prove runtime compatibility. The CI pipeline can validate package structure and install behavior in an ARM64 Debian runner; a real LinDesk device test remains a separate qualification step.
+- Genesis Environment Certificate.
+- CIN Node Birth Certificate.
+- CIN Global Personal Document and Node Marriage Certificate.
+- Enter and Import workflows.
+- CIN Package Engine (Phase 2).
 
-## Installer / package flow
-
-1. Build the application payload for ARM64.
-2. Assemble Debian control metadata and declared dependencies.
-3. Build .deb with dpkg-deb.
-4. Inspect package metadata and contents.
-5. Install into a clean ARM64 Debian-compatible userspace.
-6. Launch the Lobby and verify XDG paths and persistent data behavior.
-7. Run the three certificate processes and restart/recovery tests as they become implemented.
-
-## Functional boundaries
-
-- Installing the package is not node birth.
-- The package does not issue certificates or personal documents merely by being installed.
-- CIN Main does not hold private signing keys.
-- Virtualization is supported as one test profile, not a prerequisite.
-- LinDesk-specific compatibility must be established by actual device testing; ARM64 package metadata alone is insufficient.
+The three founding certificate processes are planned for later integration into the Create flow.
