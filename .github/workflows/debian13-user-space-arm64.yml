@@ -108,9 +108,14 @@ jobs:
           test ! -e /usr/bin/cin
           mkdir -p /home/cin-test/.local/share/cin /home/cin-test/.config/cin /home/cin-test/.cache/cin
           touch /home/cin-test/.local/share/cin/preserve.test /home/cin-test/.config/cin/preserve.test /home/cin-test/.cache/cin/preserve.test
-          runuser -u cin-test -- env HOME=/home/cin-test XDG_DATA_HOME=/home/cin-test/.local/share sh /tmp/cin-installer-test/CIN-Debian13-Installer/uninstall-user.sh
+          runuser -u cin-test -- env HOME=/home/cin-test XDG_DATA_HOME=/home/cin-test/.local/share sh /tmp/cin-installer-test/CIN-Debian13-Installer/install-user.sh
+          test -f /home/cin-test/.local/share/cin/preserve.test
+          test -f /home/cin-test/.config/cin/preserve.test
+          test -f /home/cin-test/.cache/cin/preserve.test
+          runuser -u cin-test -- env HOME=/home/cin-test XDG_DATA_HOME=/home/cin-test/.local/share /home/cin-test/.local/bin/cin-uninstall
           test ! -e /home/cin-test/.local/opt/cin-main-lobby
           test ! -e /home/cin-test/.local/bin/cin
+          test ! -e /home/cin-test/.local/share/applications/cin.desktop
           test -f /home/cin-test/.local/share/cin/preserve.test
           test -f /home/cin-test/.config/cin/preserve.test
           test -f /home/cin-test/.cache/cin/preserve.test
