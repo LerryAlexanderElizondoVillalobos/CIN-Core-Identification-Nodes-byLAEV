@@ -16,7 +16,7 @@ CIN Main is delivered in two consecutive installation phases:
 
 ### 2.1 Installation scope
 
-The first downloadable milestone is a Debian `.deb` payload named `CIN.deb`, accompanied by `install-user.sh` and `uninstall-user.sh`. The archive is not installed through `apt install` or `dpkg -i`; it is extracted with `dpkg-deb --extract` and integrated into the current user's home directory.
+The first downloadable milestone is one ZIP artifact named `CIN-Linux-Installer.zip`. It contains the Debian payload `CIN.deb`, `install-user.sh`, `uninstall-user.sh`, usage instructions and SHA-256 checksums. The inner `.deb` is not a separate operator download. The archive is not installed through `apt install` or `dpkg -i`; it is extracted with `dpkg-deb --extract` and integrated into the current user's home directory.
 
 The user installer:
 - Must run as a normal desktop user and refuse root execution.
