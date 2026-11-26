@@ -29,6 +29,7 @@ See:
 - [First Installable Release Workplan](WORKPLAN_PHASE_1.md)
 - [Development Roadmap](ROADMAP.md)
 - [Linux Debian Installer](installer/linux/README.md)
+- [Operator Installation and Acceptance Test](installer/linux/INSTALLATION_TEST_PLAN.md)
 - [Lobby and Settings](lobby/README.md)
 - [Settings Screen Specification](lobby/SETTINGS.md)
 
