@@ -20,6 +20,7 @@ install -d "$PKG/DEBIAN" "$PKG/opt/cin" "$PKG/usr/share/applications" \
 
 install -m 0755 "$APPIMAGE" "$PKG/opt/cin/Core_Identification_Nodes-aarch64.AppImage"
 install -m 0644 MAIN/installer/linux/cin-main-lobby.svg "$PKG/usr/share/icons/hicolor/scalable/apps/cin-main-lobby.svg"
+desktop-file-validate MAIN/installer/linux/cin-main-lobby.desktop
 command -v rsvg-convert >/dev/null || { echo "Missing rsvg-convert" >&2; exit 1; }
 rsvg-convert -w 256 -h 256 MAIN/installer/linux/cin-main-lobby.svg \
   -o "$PKG/usr/share/icons/hicolor/256x256/apps/cin-main-lobby.png"
@@ -56,6 +57,7 @@ EOF
 chmod 0755 "$PKG/DEBIAN/postinst"
 
 dpkg-deb --root-owner-group --build "$PKG" "$ROOT/dist/Core_Identification_Nodes-arm64.deb"
+test "$(dpkg-deb -f "$ROOT/dist/Core_Identification_Nodes-arm64.deb" Architecture)" = "arm64"
 dpkg-deb --info "$ROOT/dist/Core_Identification_Nodes-arm64.deb"
 dpkg-deb --contents "$ROOT/dist/Core_Identification_Nodes-arm64.deb"
 sha256sum "$ROOT/dist/Core_Identification_Nodes-arm64.deb"
