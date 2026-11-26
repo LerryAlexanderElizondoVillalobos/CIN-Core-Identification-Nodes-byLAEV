@@ -317,7 +317,7 @@ class CinMainWindow(Gtk.ApplicationWindow):
 
 class CinApplication(Gtk.Application):
     def __init__(self, smoke_test=False):
-        super().__init__(application_id="bylaev.cin.main", flags=Gio.ApplicationFlags.DEFAULT_FLAGS)
+        super().__init__(application_id="bylaev.cin.main", flags=Gio.ApplicationFlags(0))
         self.smoke_test = smoke_test
         self.window = None
         self.exit_status = 0
