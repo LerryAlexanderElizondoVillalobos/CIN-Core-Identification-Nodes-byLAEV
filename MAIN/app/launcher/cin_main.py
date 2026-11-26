@@ -317,6 +317,7 @@ class CinApplication(Gtk.Application):
         super().__init__(application_id="bylaev.cin.main", flags=Gio.ApplicationFlags.DEFAULT_FLAGS)
         self.smoke_test = smoke_test
         self.window = None
+        self.exit_status = 0
 
     def do_activate(self):
         if self.window is None:
@@ -326,21 +327,26 @@ class CinApplication(Gtk.Application):
             GLib.idle_add(self.run_navigation_smoke_test)
 
     def run_navigation_smoke_test(self):
-        self.window.show_settings()
-        assert self.window.current_screen == "settings"
-        self.window.show_lobby()
-        assert self.window.current_screen == "lobby"
-        self.window.show_settings()
-        assert self.window.current_screen == "settings"
-        self.window.show_lobby()
-        assert self.window.current_screen == "lobby"
-        # Exercise the actual CIN scope policy from inside the installed app.
-        self.window.network.set_enabled(False)
-        assert self.window.network.status() == "disabled"
-        self.window.network.set_enabled(True)
-        assert self.window.network.status() == "enabled"
-        print("PASS: Lobby navigation and CIN-only network OFF/ON policy work.")
-        self.quit()
+        try:
+            self.window.show_settings()
+            assert self.window.current_screen == "settings"
+            self.window.show_lobby()
+            assert self.window.current_screen == "lobby"
+            self.window.show_settings()
+            assert self.window.current_screen == "settings"
+            self.window.show_lobby()
+            assert self.window.current_screen == "lobby"
+            # Exercise the actual CIN scope policy from inside the installed app.
+            self.window.network.set_enabled(False)
+            assert self.window.network.status() == "disabled"
+            self.window.network.set_enabled(True)
+            assert self.window.network.status() == "enabled"
+            print("PASS: Lobby navigation and CIN-only network OFF/ON policy work.")
+        except Exception as exc:
+            self.exit_status = 1
+            print(f"FAIL: CIN application smoke test: {exc}", file=sys.stderr)
+        finally:
+            self.quit()
         return GLib.SOURCE_REMOVE
 
 
@@ -349,7 +355,8 @@ def main():
     parser.add_argument("--smoke-test", action="store_true")
     args, remaining = parser.parse_known_args()
     app = CinApplication(smoke_test=args.smoke_test)
-    return app.run([sys.argv[0], *remaining])
+    app.run([sys.argv[0], *remaining])
+    return app.exit_status
 
 
 if __name__ == "__main__":
