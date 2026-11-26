@@ -61,6 +61,20 @@ for typelib in Gtk-4.0 Gdk-4.0 Gsk-4.0 Gio-2.0 GioUnix-2.0 GLib-2.0 GModule-2.0 
   [[ ! -f "$file" ]] || install -m 0644 "$file" "$APPDIR/usr/lib/girepository-1.0/"
 done
 
+# GTK4 is loaded by GObject Introspection at runtime, so include its ELF
+# libraries explicitly; linuxdeploy then follows their transitive dependencies.
+LIB_DIR="/usr/lib/$([ "$APPIMAGE_ARCH" = x86_64 ] && echo x86_64-linux-gnu || echo aarch64-linux-gnu)"
+for library in libgtk-4.so.1 libgdk-4.so.1 libgsk-4.so.1 libgraphene-1.0.so.0; do
+  [[ ! -e "$LIB_DIR/$library" ]] || install -m 0644 "$LIB_DIR/$library" "$APPDIR/usr/lib/"
+done
+if [[ -d "$LIB_DIR/gtk-4.0" ]]; then
+  cp -a "$LIB_DIR/gtk-4.0" "$APPDIR/usr/lib/"
+fi
+if [[ -f /usr/share/glib-2.0/schemas/gschemas.compiled ]]; then
+  mkdir -p "$APPDIR/usr/share/glib-2.0/schemas"
+  install -m 0644 /usr/share/glib-2.0/schemas/gschemas.compiled "$APPDIR/usr/share/glib-2.0/schemas/"
+fi
+
 export APPIMAGE_EXTRACT_AND_RUN=1
 LIB_ARGS=()
 while IFS= read -r library; do LIB_ARGS+=(--library "$library"); done < <(find "$APPDIR/usr/lib/cin-main" "$APPDIR/usr/lib/cin-appimage-installer" -type f -name '*.so*')
