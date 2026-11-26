@@ -1,18 +1,18 @@
-# CIN Main — Single Linux Installer
+# Core Identification Nodes — Linux Installer
 
-The only distributable download is **CIN-Linux-Installer.zip**. It contains the Debian payload, the user-space installer, the uninstaller, usage instructions and SHA-256 checksums. The inner `CIN.deb` is a payload container; it is not a separate operator download.
+**Official package:** `Core_Identification_Nodes.deb`  
+**Version:** 0.3.0  
+**Model:** per-user installation, no root privileges.
 
 ## Install
 
-Extract the ZIP and run as the normal desktop user:
+Run as the normal desktop user:
 
 ```bash
-cd CIN-Linux-Installer
-sha256sum -c SHA256SUMS
-bash install-user.sh ./CIN.deb
+bash MAIN/installer/linux/install-user.sh ./Core_Identification_Nodes.deb
 ```
 
-The installer extracts the payload and installs it under `~/.local/opt/cin-main-lobby`; it does not use `sudo`, `apt install`, `dpkg -i` or system package scripts. Python 3, PyGObject, GTK 4, OpenSSL and dpkg-deb must already be available.
+The installer checks Python 3, PyGObject, GTK 4, OpenSSL, `dpkg-deb`, and the systemd user manager. It refuses root execution and refuses a partial installation when the dedicated CIN network-scope service cannot be launched.
 
 ## Launch
 
@@ -20,16 +20,32 @@ The installer extracts the payload and installs it under `~/.local/opt/cin-main-
 ~/.local/bin/cin-main
 ```
 
-The initial screen is Main Lobby. Settings is opened only from the Settings control in the Lobby.
+CIN runs inside `cin-main-lobby.scope`, the dedicated systemd user scope used by the network ON/OFF controller.
 
-## Bootstrap migration
+## Installed paths
 
-This package replaces the previous application payload and refreshes the launcher. Operator data and configuration in `~/.local/share/cin-main-lobby` and `~/.config/cin-main-lobby` are preserved.
+- Application: `~/.local/opt/cin-main-lobby/`
+- Launcher: `~/.local/bin/cin-main`
+- Desktop entry: `~/.local/share/applications/cin-main.desktop`
+- Deployment trust key: `~/.config/cin-main-lobby/deploy.pub`
+- Deployment result record: `~/.local/share/cin-main-lobby/deployment-record.json`
+
+## Deploy engine
+
+The component deployment engine is included in the application. It creates a local component manifest, verifies official manifests with the independently provisioned Ed25519 key, compares additions/replacements/removals, downloads components over HTTPS, verifies SHA-256 hashes, requests explicit operator authorization, and rolls back if post-deployment verification fails.
+
+The publisher key is not embedded in the package and cannot be accepted from the downloaded manifest. Remote deployment remains unavailable until the real publisher key and signed official channel manifest are provisioned.
+
+## Network ON/OFF switch
+
+The switch affects only the CIN systemd user scope through `IPAddressDeny=any`. ON clears that scope's runtime denial. It does not disable the host network, NetworkManager, browsers or other Linux applications.
+
+The switch requires a running systemd user manager and systemd/cgroup support for IP address filtering. CIN does not silently fall back to an unisolated launch.
 
 ## Uninstall
 
 ```bash
-bash uninstall-user.sh
+bash MAIN/installer/linux/uninstall-user.sh
 ```
 
-Application files and launcher are removed. Operator data and publisher configuration remain in place.
+Application files and the launcher are removed. User data and publisher configuration are intentionally preserved.
