@@ -93,7 +93,7 @@ jobs:
           ! find /tmp/cin-official-package -type f -name '*.pyc' | grep .
           bash -n MAIN/installer/linux/install-user.sh
           bash -n MAIN/installer/linux/uninstall-user.sh
-          ! grep -Eq '^[[:space:]]*sudo[[:space:]]|[;&|][[:space:]]*sudo[[:space:]]|apt(-get)?[[:space:]]+install|dpkg[[:space:]]+-i' MAIN/installer/linux/install-user.sh
+          ! grep -Eq '^[[:space:]]*sudo[[:space:]]|[;&|][[:space:]]*sudo[[:space:]]|apt(-get)?[[:space:]]+install|dpkg[[:space:]]+-i|systemctl|systemd-run' MAIN/installer/linux/install-user.sh
           sha256sum "$PACKAGE"
       - name: Upload internal package candidate for installation qualification
         uses: actions/upload-artifact@v4
@@ -145,7 +145,7 @@ jobs:
       - name: Launch installed application and exercise Deploy/network UI contract
         env:
           GDK_BACKEND: x11
-        run: xvfb-run -a "$HOME/.local/bin/cin-main" --smoke-test
+        run: xvfb-run -a systemd-run --user --scope --unit=cin-main-lobby -- "$HOME/.local/bin/cin-main" --smoke-test
       - name: Uninstall application while preserving operator data
         if: always()
         run: |
