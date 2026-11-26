@@ -19,7 +19,7 @@ The installer places the AppImage in `~/Applications`, creates a launcher under 
 
 ## Debian ARM64 package
 
-Download `Core_Identification_Nodes-arm64.deb` on Debian/Ubuntu ARM64. The package installs the AppImage payload under `/opt/cin` and creates a system-wide application launcher.
+Download `Core_Identification_Nodes-arm64.deb` on Debian/Ubuntu ARM64. The package installs the relocatable CIN AppDir under `/opt/cin/AppDir` and creates a system-wide application launcher. It does not depend on mounting an embedded AppImage.
 
 **Privilege distinction:** installing a conventional .deb through apt, dpkg, GDebi, Discover, or another package manager requires administrator authorization. The installed application runs as the logged-in user. If administrator authentication is unavailable or prohibited, use the AppImage.
 
