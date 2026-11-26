@@ -1,7 +1,8 @@
 #!/bin/sh
 set -eu
 HERE="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
-if [ "${1:-}" = "--run" ]; then
+export GI_TYPELIB_PATH="$HERE/usr/lib/girepository-1.0\${GI_TYPELIB_PATH:+:$GI_TYPELIB_PATH}"
+if [ "\${1:-}" = "--run" ]; then
     shift
     exec "$HERE/usr/bin/cin-main" "$@"
 fi
