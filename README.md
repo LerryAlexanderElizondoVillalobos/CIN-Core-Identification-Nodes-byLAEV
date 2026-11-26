@@ -7,6 +7,8 @@ The previous repository contents are preserved in [HISTORY](HISTORY/ARCHIVE_INDE
 - [New Main workspace](MAIN/README.md)
 - [Historical archive index](HISTORY/ARCHIVE_INDEX.md)
 - [Complete inventory of 176 archived files](HISTORY/INVENTORY.md)
+- [CIN Linux ARM64 Portable — LinDesk compatibility profile](MAIN/installer/linux-portable/README.md)
+- [Portable installation acceptance plan](MAIN/installer/linux-portable/INSTALLATION_TEST_PLAN.md)
 - [Source commit](https://github.com/LerryAlexanderElizondoVillalobos/CIN-Core-Identification-Nodes-byLAEV/commit/cf5b2761ba324fe97d1d1068e976ae0874949b41)
 
-New automated workflows will be introduced only after the new Main architecture and acceptance scope are defined.
+The LinDesk-targeted distribution is developed on its own feature branch and remains subject to CI and real-device acceptance testing before release.
