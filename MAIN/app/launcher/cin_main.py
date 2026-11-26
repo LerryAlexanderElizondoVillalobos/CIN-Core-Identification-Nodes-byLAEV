@@ -334,7 +334,12 @@ class CinApplication(Gtk.Application):
         assert self.window.current_screen == "settings"
         self.window.show_lobby()
         assert self.window.current_screen == "lobby"
-        print("PASS: Lobby → Settings → Lobby navigation works.")
+        # Exercise the actual CIN scope policy from inside the installed app.
+        self.window.network.set_enabled(False)
+        assert self.window.network.status() == "disabled"
+        self.window.network.set_enabled(True)
+        assert self.window.network.status() == "enabled"
+        print("PASS: Lobby navigation and CIN-only network OFF/ON policy work.")
         self.quit()
         return GLib.SOURCE_REMOVE
 
