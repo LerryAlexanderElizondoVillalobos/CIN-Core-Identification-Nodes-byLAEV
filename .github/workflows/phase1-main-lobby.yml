@@ -28,7 +28,7 @@ jobs:
         run: python3 -m unittest discover -s MAIN/tests -v
 
   build-package:
-    name: Build architecture-independent Debian package
+    name: Build user-space Debian package
     runs-on: ubuntu-24.04
     needs: source-tests
     steps:
@@ -36,21 +36,30 @@ jobs:
       - name: Install Debian packaging tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y dpkg-dev desktop-file-utils
-      - name: Build CIN.deb
+          sudo apt-get install -y dpkg-dev
+      - name: Build CIN.deb and user-space installer scripts
         run: bash MAIN/installer/linux/build-deb.sh dist
-      - name: Validate desktop entry
-        run: desktop-file-validate MAIN/packaging/deb/usr/share/applications/cin-main.desktop
-      - name: Upload package candidate for runtime qualification
+      - name: Validate package payload and installer scripts
+        run: |
+          set -euo pipefail
+          dpkg-deb --field dist/CIN.deb Package Version Architecture
+          test "$(dpkg-deb --field dist/CIN.deb Architecture)" = "all"
+          bash -n dist/install-user.sh
+          bash -n dist/uninstall-user.sh
+          dpkg-deb --contents dist/CIN.deb
+      - name: Upload package candidate
         uses: actions/upload-artifact@v4
         with:
           name: cin-deb-candidate
-          path: dist/CIN.deb
+          path: |
+            dist/CIN.deb
+            dist/install-user.sh
+            dist/uninstall-user.sh
           if-no-files-found: error
           retention-days: 3
 
   runtime-qualification:
-    name: Install and launch on ${{ matrix.runner }}
+    name: User-space install and launch on ${{ matrix.runner }}
     needs: build-package
     strategy:
       fail-fast: false
@@ -65,47 +74,58 @@ jobs:
         with:
           name: cin-deb-candidate
           path: dist
-      - name: Install GTK runtime and test dependencies
+      - name: Provision CI runtime dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y python3 python3-gi gir1.2-gtk-4.0 xvfb dbus-x11
-      - name: Inspect package architecture and dependencies
+      - name: Inspect package architecture
         run: |
           set -euo pipefail
           dpkg-deb --info dist/CIN.deb
-          dpkg-deb --field dist/CIN.deb Package Version Architecture Depends
           test "$(dpkg-deb --field dist/CIN.deb Architecture)" = "all"
-      - name: Install package
+      - name: Install CIN for the current unprivileged user
         run: |
-          sudo apt-get install -y ./dist/CIN.deb
-          dpkg-query -W cin-main-lobby
+          set -euo pipefail
+          test "$(id -u)" -ne 0
+          bash dist/install-user.sh "$PWD/dist/CIN.deb"
+          test -f "$HOME/.local/opt/cin-main-lobby/cin_main.py"
+          test -x "$HOME/.local/bin/cin-main"
+          test -f "$HOME/.local/share/applications/cin-main.desktop"
       - name: Launch installed application and test two-screen navigation
         env:
           GDK_BACKEND: x11
         run: |
           set -euo pipefail
-          xvfb-run -a dbus-run-session -- /usr/bin/cin-main --smoke-test
-      - name: Remove package after qualification
+          xvfb-run -a dbus-run-session -- "$HOME/.local/bin/cin-main" --smoke-test
+      - name: Uninstall CIN as the current user
         if: always()
-        run: sudo dpkg --purge cin-main-lobby || true
+        run: |
+          if [ -f dist/uninstall-user.sh ]; then
+            bash dist/uninstall-user.sh
+          fi
+          test ! -e "$HOME/.local/opt/cin-main-lobby"
+          test ! -e "$HOME/.local/bin/cin-main"
 
   publish-artifact:
-    name: Publish downloadable CIN.deb artifact
+    name: Publish downloadable CIN.deb user installer
     needs:
       - build-package
       - runtime-qualification
     if: success() && github.event_name != 'pull_request'
     runs-on: ubuntu-24.04
     steps:
-      - name: Download qualified package
+      - name: Download qualified user-space installer bundle
         uses: actions/download-artifact@v4
         with:
           name: cin-deb-candidate
           path: dist
-      - name: Publish installable package
+      - name: Publish installer bundle
         uses: actions/upload-artifact@v4
         with:
           name: CIN-deb-installer
-          path: dist/CIN.deb
+          path: |
+            dist/CIN.deb
+            dist/install-user.sh
+            dist/uninstall-user.sh
           if-no-files-found: error
           retention-days: 30
