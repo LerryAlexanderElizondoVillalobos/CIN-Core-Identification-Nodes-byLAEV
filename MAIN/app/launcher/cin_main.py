@@ -157,13 +157,27 @@ class CinMainWindow(Gtk.ApplicationWindow):
         self.set_child(self.build_settings())
 
     def show_create_information(self):
-        dialog = Gtk.AlertDialog()
-        dialog.set_message("Create")
-        dialog.set_detail(
-            "The initial creation entry point is reserved for the founding CIN processes. "
-            "Node creation and certificate issuance are not implemented in this milestone."
+        dialog = Gtk.Window(title="Create")
+        dialog.set_transient_for(self)
+        dialog.set_modal(True)
+        dialog.set_default_size(380, 180)
+        content = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
+        content.set_margin_top(20)
+        content.set_margin_bottom(20)
+        content.set_margin_start(20)
+        content.set_margin_end(20)
+        message = Gtk.Label(
+            label="The initial creation entry point is reserved for the founding CIN processes. "
+                  "Node creation and certificate issuance are not implemented in this milestone."
         )
-        dialog.show(self)
+        message.set_wrap(True)
+        content.append(message)
+        close = Gtk.Button(label="Close")
+        close.connect("clicked", lambda _button: dialog.close())
+        close.set_halign(Gtk.Align.END)
+        content.append(close)
+        dialog.set_child(content)
+        dialog.present()
 
 
 class CinApplication(Gtk.Application):
