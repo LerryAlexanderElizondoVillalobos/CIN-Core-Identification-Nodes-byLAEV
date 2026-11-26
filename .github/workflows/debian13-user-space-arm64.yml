@@ -16,7 +16,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: cin-debian13-user-space-${{ github.workflow }}-${{ github.ref }}
@@ -151,6 +151,47 @@ jobs:
           dbus-run-session -- xvfb-run -a runuser -u cin-run -- env HOME=/home/cin-run XDG_CACHE_HOME=/home/cin-run/.cache CIN_DEB_PATH="$PWD/dist/CIN.deb" GDK_BACKEND=x11 /usr/bin/time -v sh /tmp/cin-deb-installer/opt/cin-installer/run-user.sh --smoke-test
           test ! -e /home/cin-run/.local/opt/cin-main-lobby
           test -z "$(find /home/cin-run/.cache -maxdepth 1 -type d -name 'cin-run.*' -print -quit 2>/dev/null || true)"
+      - name: Publish public downloads in repository branch
+        if: github.event_name != 'pull_request'
+        env:
+          DOWNLOAD_BRANCH: downloads/debian13-arm64
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/cin-public-downloads"
+          cp -a dist/. "$RUNNER_TEMP/cin-public-downloads/"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout --orphan "$DOWNLOAD_BRANCH"
+          git rm -rf . >/dev/null 2>&1 || true
+          find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          cp "$RUNNER_TEMP/cin-public-downloads/README.md" ./README.md 2>/dev/null || true
+          cp -a "$RUNNER_TEMP/cin-public-downloads/." .
+          cat > README.md <<'CIN_DOWNLOADS_README'
+# CIN — Debian 13 ARM64 downloads
+
+Public, stable download files for Debian 13 (Trixie) ARM64 / AArch64.
+
+- [CIN.deb](CIN.deb) — native ARM64 package payload with embedded per-user installer.
+- [CIN-Debian13-Installer.zip](CIN-Debian13-Installer.zip) — convenience bundle.
+- [SHA256SUMS](SHA256SUMS) — checksums.
+- Package content listings are included for inspection.
+
+Install as the regular user; do not use sudo, apt install, or dpkg -i:
+
+```sh
+tmp="$(mktemp -d)"
+dpkg-deb --extract ./CIN.deb "$tmp"
+sh "$tmp/opt/cin-installer/install-user.sh" "$PWD/CIN.deb"
+result=$?
+rm -rf "$tmp"
+exit "$result"
+```
+
+Files are published from the validated Debian 13 ARM64 workflow.
+CIN_DOWNLOADS_README
+          git add CIN.deb CIN-Debian13-Installer.zip SHA256SUMS CIN.deb.contents.txt CIN-Debian13-Installer.contents.txt README.md
+          git commit -m "Publish validated CIN ARM64 downloads"
+          git push --force origin "HEAD:$DOWNLOAD_BRANCH"
       - name: Upload Debian 13 ARM64 distribution
         uses: actions/upload-artifact@v4
         with:
