@@ -13,7 +13,7 @@ OUTPUT_DIR="${1:-dist}"
 OUTPUT_PATH="$OUTPUT_DIR/Core_Identification_Nodes.deb"
 
 # Recreate the payload from the current source tree; never reuse an old build.
-rm -rf "$PACKAGE_ROOT/opt" "$OUTPUT_DIR"
+rm -rf "$PACKAGE_ROOT/opt" "$PACKAGE_ROOT/usr" "$OUTPUT_DIR"
 install -d "$PACKAGE_ROOT/opt/cin-main-lobby" "$OUTPUT_DIR"
 install -m 0644 MAIN/app/launcher/cin_main.py "$PACKAGE_ROOT/opt/cin-main-lobby/cin_main.py"
 cp -a MAIN/app/settings "$PACKAGE_ROOT/opt/cin-main-lobby/"
