@@ -1,0 +1,2 @@
+#!/bin/sh
+exec /usr/lib/cin-main-lobby/cin_main.py "$@"
