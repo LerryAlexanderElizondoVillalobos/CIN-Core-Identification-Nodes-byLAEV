@@ -29,11 +29,11 @@ A formal application version/release compatibility and update-management system 
 
 The application has a master ON/OFF control in both Main Lobby and Settings. It controls only CIN's Internet/network access. OFF applies systemd's `IPAddressDeny=any` policy to the dedicated `cin-main-lobby.scope` cgroup; ON clears that CIN-scope override. It does not disable NetworkManager, host networking, or connectivity for browsers and other Linux applications.
 
-The installer launches CIN inside that dedicated systemd user scope. The control uses the user's systemd manager and cgroup network filtering; it does not require root or change host-wide network configuration. If the desktop session has no usable systemd user manager or the kernel/systemd cannot apply the policy, the UI reports the control as unavailable rather than claiming isolation is active.
+The installer launches CIN inside that dedicated systemd user scope. The control uses the user's systemd manager and cgroup network filtering; it does not change host-wide network configuration. Its availability depends on the systemd user manager, kernel cgroup support and the permissions available to that manager. If the desktop session cannot apply the policy, the UI reports the control as unavailable rather than claiming isolation is active.
 
 The official-channel check and Deploy engine both require CIN network access to be ON. The setting is enforced at the CIN process scope, not merely by hiding buttons or disabling the UI.
 
-The previous NetworkManager-wide switch and its tests have been removed. The new automated tests cover scope status, ON/OFF policy changes, missing systemd support, and the absence of any NetworkManager command invocation.
+The previous NetworkManager-wide switch and its tests have been removed. The automated tests cover scope status, ON/OFF policy commands, missing systemd support, and the absence of any NetworkManager command invocation. A Linux runtime qualification test also verifies that a process in a denied systemd scope cannot reach a TCP listener while a process outside that scope can still reach it.
 
 Qualification still required before merge includes running the actual ON/OFF behavior on supported Linux environments and confirming another application retains connectivity while CIN is OFF.
 
