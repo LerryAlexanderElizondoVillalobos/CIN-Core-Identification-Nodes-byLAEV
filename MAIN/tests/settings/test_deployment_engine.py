@@ -1,7 +1,10 @@
 import hashlib
 import tempfile
 import unittest
+import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "app"))
 
 from settings.deployment.engine import DeploymentError, compare, fingerprint, local_manifest, stage_and_apply
 
