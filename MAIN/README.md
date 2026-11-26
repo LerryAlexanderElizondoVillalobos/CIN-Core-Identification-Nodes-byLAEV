@@ -1,76 +1,52 @@
-# Core Identification Nodes — Official Linux Package
+# Core Identification Nodes — Linux AppImage
 
-**Package:** `Core_Identification_Nodes.deb`  
-**Package version:** 0.3.0  
-**Debian package name:** `core-identification-nodes`  
-**Architecture:** `all` (architecture-independent Python application)
+**Official Linux format:** AppImage  
+**Build targets:** x86_64 and AArch64  
+**Installation:** graphical, per-user, no root and no sudo.
 
 ## Included capabilities
 
 - CIN Main Lobby, opening as the initial screen.
 - Settings with Lobby navigation.
-- Component-aware Deploy engine.
-- Local component manifest and SHA-256 build fingerprint.
-- Official manifest verification using a separately provisioned Ed25519 publisher public key.
-- Component comparison, HTTPS staging, explicit operator authorization and rollback on failed post-deployment verification.
-- CIN-only network ON/OFF control enforced on the dedicated `cin-main-lobby.scope` systemd user scope.
-- User-space installer and uninstaller; no system-wide installation or root privileges.
+- Component-aware Deploy engine, with remote deployment gated on publisher trust and AppImage update integration.
+- CIN-only network ON/OFF controller, enforced only where the user's systemd scope and cgroup policy are supported.
+- Graphical first-run installer and portable run option.
+- Per-user installation under `~/Applications` with desktop integration under `~/.local/share/applications`.
 
-## Download
+## Official artifacts
 
-The only official distributable is **`Core_Identification_Nodes.deb`**, published by the GitHub Actions workflow named **CIN — Official Core Identification Nodes Debian Package**, after source tests, network runtime qualification, package inspection and installation qualification pass.
+- `Core_Identification_Nodes-x86_64.AppImage`
+- `Core_Identification_Nodes-aarch64.AppImage`
 
-The previous ZIP installer workflow is retired. Do not use its historical artifacts.
+The GitHub Actions workflow builds one artifact for each supported architecture. AppImage targets mainstream glibc-based Linux desktop distributions, not every Linux environment (for example, Alpine/musl and unsupported architectures are outside the initial target).
 
 ## Installation
 
-Requirements: a Debian-compatible Linux desktop with Python 3, PyGObject, GTK 4, OpenSSL, `dpkg-deb`, `systemd --user`, and a systemd/cgroup environment that supports `IPAddressDeny`.
+1. Download the artifact matching the computer's architecture.
+2. If required by the desktop environment, open Properties → Permissions and enable execution.
+3. Double-click the AppImage.
+4. Choose **Install for this user** or **Run without installing**.
 
-Run as the normal desktop user, never as root. The single `.deb` contains both bootstrap scripts; extract its embedded installer into a temporary directory:
+The graphical installer copies the AppImage to `~/Applications`, creates the desktop entry, and starts CIN Main Lobby. The user-facing process does not invoke a terminal, root, sudo, apt, dpkg, or administrator authentication. It does not modify system directories.
 
-```bash
-tmp="$(mktemp -d)"
-dpkg-deb --extract ./Core_Identification_Nodes.deb "$tmp"
-bash "$tmp/opt/cin-installer/install-user.sh" "$PWD/Core_Identification_Nodes.deb"
-result=$?
-rm -rf "$tmp"
-exit "$result"
-```
+Uninstall with `~/.local/bin/cin-uninstall`. User data and configuration are preserved.
 
-Launch:
+## Deploy
 
-```bash
-~/.local/bin/cin-main
-```
-
-Uninstall:
-
-```bash
-bash ~/.local/opt/cin-main-lobby/uninstall-user.sh
-```
-
-The Debian archive is a portable application payload. Do not install it with `sudo dpkg -i` or `apt install`.
-
-## Deployment trust setup
-
-The Deploy engine is included, but it will not trust an unverified update source. The publisher's Ed25519 public key must be provisioned independently at:
-
-`~/.config/cin-main-lobby/deploy.pub`
-
-The signed official manifest and its signature must also be published at the configured official channel. Until both are correctly provisioned, Settings reports that publisher trust is not configured and no remote code is applied.
+The Deploy engine is included in the application. Remote deployment must remain disabled until the AppImage-aware replacement flow, the genuine publisher Ed25519 public key, and the signed official manifest are provisioned and verified. The engine must not apply component changes to an immutable mounted AppImage.
 
 ## Network switch
 
-The ON/OFF control applies only to CIN's dedicated systemd user scope. OFF denies IP networking for CIN; ON restores it. It does not disable NetworkManager or change connectivity for the host or other applications. If the required systemd/cgroup support is unavailable, the application reports the policy as unavailable rather than claiming it is enforced.
+The ON/OFF control is limited to CIN's own systemd user scope. OFF must be confirmed by the actual system policy. Other applications and host networking remain unaffected. If the required user manager or cgroup support is unavailable, CIN reports the control as unavailable rather than claiming isolation.
 
-## Validation status
+## Release validation
 
-The official workflow must pass:
-1. Source and Deploy tests.
-2. x86_64 and ARM64 network-scope runtime qualification.
-3. Debian payload inspection.
-4. Unprivileged installation and application launch.
-5. In-app network OFF/ON smoke test.
-6. Uninstallation while preserving user data and publisher configuration.
+An artifact is not an official release merely because packaging completed. The AppImage must pass:
+1. Source tests and syntax checks.
+2. x86_64 and AArch64 build and payload inspection.
+3. Clean-environment GTK4/PyGObject runtime validation without host-installed Python or GTK.
+4. Graphical first-run installation and Main Lobby launch.
+5. Settings navigation and supported network-scope OFF/ON tests.
+6. Uninstallation and user-data preservation.
 
-A package is not considered released until the workflow publishes its single `.deb` artifact successfully.
+See [Linux AppImage migration](installer/linux/APPIMAGE_MIGRATION.md) and the [acceptance test plan](installer/linux/INSTALLATION_TEST_PLAN.md).
