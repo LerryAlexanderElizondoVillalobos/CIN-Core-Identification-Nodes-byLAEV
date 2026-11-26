@@ -24,7 +24,7 @@ cat > "$BIN_HOME/cin" <<EOF
 set -eu
 APP="$APP_HOME/AppDir"
 export APPIMAGE_EXTRACT_AND_RUN=1
-exec "$APP/AppRun" --run "\$@"
+exec "\$APP/AppRun" --run "\$@"
 EOF
 chmod 0755 "$BIN_HOME/cin"
 cat > "$BIN_HOME/cin-uninstall" <<EOF
