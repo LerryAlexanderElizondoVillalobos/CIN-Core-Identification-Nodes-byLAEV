@@ -49,6 +49,8 @@ trap cleanup EXIT
 
 dpkg-deb --extract "$PACKAGE" "$TEMP_DIR"
 PAYLOAD="$TEMP_DIR/opt/cin-main-lobby"
+INSTALLER_PAYLOAD="$TEMP_DIR/opt/cin-installer"
+test -x "$INSTALLER_PAYLOAD/uninstall-user.sh" || { echo "CIN uninstaller is missing from package." >&2; exit 1; }
 test -f "$PAYLOAD/cin_main.py" || { echo "Unexpected CIN Debian payload." >&2; exit 1; }
 test -f "$PAYLOAD/settings/deployment/engine.py" || { echo "CIN Deploy engine is missing from package." >&2; exit 1; }
 test -f "$PAYLOAD/settings/network_access.py" || { echo "CIN network controller is missing from package." >&2; exit 1; }
@@ -64,6 +66,7 @@ if ! mv "$PAYLOAD" "$APP_DIR"; then
   exit 1
 fi
 rm -rf "$BACKUP_DIR"
+install -m 0755 "$INSTALLER_PAYLOAD/uninstall-user.sh" "$APP_DIR/uninstall-user.sh"
 
 cat > "$BIN_DIR/cin-main" <<EOF
 #!/bin/sh
