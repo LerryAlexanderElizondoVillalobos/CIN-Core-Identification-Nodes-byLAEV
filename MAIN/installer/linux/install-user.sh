@@ -47,6 +47,13 @@ fi
 rm -rf "$BACKUP_DIR"
 cat > "$BIN_DIR/cin-main" <<EOF
 #!/bin/sh
+# Run CIN in its own systemd user scope so its network policy cannot affect
+# the host or other applications.
+if command -v systemd-run >/dev/null 2>&1 && systemctl --user show-environment >/dev/null 2>&1; then
+  exec systemd-run --user --scope --unit=cin-main-lobby -- "$PYTHON_BIN" "$APP_DIR/cin_main.py" "\$@"
+fi
+# Development/minimal desktops without a user systemd manager can still launch
+# CIN, but the in-app network switch will report that enforcement is unavailable.
 exec "$PYTHON_BIN" "$APP_DIR/cin_main.py" "\$@"
 EOF
 chmod 0755 "$BIN_DIR/cin-main"
