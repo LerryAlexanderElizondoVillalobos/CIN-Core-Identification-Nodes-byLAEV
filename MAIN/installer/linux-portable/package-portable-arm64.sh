@@ -25,6 +25,7 @@ No AppImage mount, FUSE, VM, or system-wide package installation is required.
 EOF
 tar -C "$ROOT/build" -czf "$OUT/CIN-Linux-ARM64-Portable.tar.gz" "CIN-Linux-ARM64-Portable"
 (cd "$OUT" && sha256sum CIN-Linux-ARM64-Portable.tar.gz > CIN-Linux-ARM64-Portable.tar.gz.sha256)
-tar -tzf "$OUT/CIN-Linux-ARM64-Portable.tar.gz" | grep -q '^CIN-Linux-ARM64-Portable/AppDir/AppRun$'
+tar -tzf "$OUT/CIN-Linux-ARM64-Portable.tar.gz" > "$OUT/CIN-Linux-ARM64-Portable.contents.txt"
+grep -q '^CIN-Linux-ARM64-Portable/AppDir/AppRun$'
 test -s "$OUT/CIN-Linux-ARM64-Portable.tar.gz"
 sha256sum "$OUT/CIN-Linux-ARM64-Portable.tar.gz"
