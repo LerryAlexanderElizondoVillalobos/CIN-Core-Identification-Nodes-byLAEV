@@ -11,12 +11,14 @@
 - Version is the declared release version.
 - Architecture is `arm64`.
 - AppDir includes executable `AppRun` and `usr/bin/cin-main`.
-- ZIP includes the .deb, installer, uninstaller, no-install runner and README.
+- The .deb includes `/opt/cin-installer/install-user.sh`, `/opt/cin-installer/uninstall-user.sh`, and `/opt/cin-installer/run-user.sh`.
+- ZIP convenience bundle includes the .deb, installer, uninstaller, no-install runner and README.
 - ZIP passes `unzip -t` without archive errors.
 - SHA-256 manifest validates.
 
 ## User-space installation
 Run as a non-root test user on Debian 13 ARM64:
+- Extract `CIN.deb` with `dpkg-deb -x` into a temporary directory and run its embedded `/opt/cin-installer/install-user.sh`, passing the original .deb path.
 - Installer succeeds without sudo or root.
 - Installer rejects root execution.
 - Failed upgrade restores the previous application directory.
