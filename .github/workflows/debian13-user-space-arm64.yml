@@ -104,6 +104,13 @@ jobs:
           test -f /home/cin-test/.local/share/applications/cin.desktop
           test -f /home/cin-test/.local/share/icons/hicolor/256x256/apps/cin.png
           if sh /tmp/cin-installer-test/CIN-Debian13-Installer/install-user.sh; then echo "Root install was unexpectedly accepted"; exit 1; fi
+          touch /home/cin-test/.local/opt/cin-main-lobby/AppDir/previous-install.test
+          mkdir -p /tmp/cin-broken-installer
+          cp /tmp/cin-installer-test/CIN-Debian13-Installer/CIN.deb /tmp/cin-broken-installer/
+          cp /tmp/cin-installer-test/CIN-Debian13-Installer/install-user.sh /tmp/cin-broken-installer/
+          chown -R cin-test:cin-test /tmp/cin-broken-installer
+          if runuser -u cin-test -- env HOME=/home/cin-test XDG_DATA_HOME=/home/cin-test/.local/share sh /tmp/cin-broken-installer/install-user.sh; then echo "Broken installer bundle unexpectedly succeeded"; exit 1; fi
+          test -f /home/cin-test/.local/opt/cin-main-lobby/AppDir/previous-install.test
           test ! -e /opt/cin/AppDir
           test ! -e /usr/bin/cin
           mkdir -p /home/cin-test/.local/share/cin /home/cin-test/.config/cin /home/cin-test/.cache/cin
