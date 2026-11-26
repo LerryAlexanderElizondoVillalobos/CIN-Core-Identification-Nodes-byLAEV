@@ -1,6 +1,6 @@
 # Phase 1 Workplan — CIN Main Lobby Installer
 
-**Scope:** deliver one Linux per-user installer for CIN Main Lobby, including its runtime, persistent local records and the three founding certificate processes.
+**Scope:** deliver a Debian package (.deb) for CIN Main Lobby targeting arm64 / AArch64, including its runtime, persistent local records and the three founding certificate processes. The package is intended for Debian-compatible ARM64 userspaces on Android (including LinDesk) and conventional ARM64 Linux. Virtualization is optional, not a product requirement.
 
 **Out of scope:** CIN Package Engine implementation or installation (Phase 2), and the later CIN Personal Registration and Credential issuance process.
 
@@ -13,9 +13,9 @@ Each milestone must produce a reviewable artifact and pass its acceptance criter
 | ID | Workstream | Deliverable | Acceptance criteria |
 |---|---|---|---|
 | P1-00 | Baseline and scope | Approved Phase 1 contract | Scope is Lobby installer only; Phase 2 and later credential issuance remain deferred. |
-| P1-01 | Installer bootstrap | Linux user-space installer entry point | Installs without root for normal use; detects supported Linux environment; reports actionable installation errors. |
+| P1-01 | Debian package foundation | arm64 .deb package skeleton | Valid Debian control metadata, package architecture arm64, explicit runtime dependencies, install/remove lifecycle and no assumption of systemd or rootful host access. |
 | P1-02 | Release verification | ZIP + Package Manifest v1 verification | Validates ZIP size and SHA-256, JCS manifest, detached Ed25519 signature and independently provisioned publisher trust. |
-| P1-03 | User installation | Versioned release layout and launcher | Uses XDG paths; separates app, config, cache and persistent node data; supports launch and removal without deleting node records by default. |
+| P1-03 | User installation | .deb installation and launcher | Installs into a Debian-compatible ARM64 userspace; separates app, config, cache and persistent node data; validates package install, launch, upgrade and removal without deleting node records by default. |
 | P1-04 | Lobby runtime | Launchable Main Lobby | Loads local records and reconstructs lifecycle state after restart. |
 | P1-05 | Local record foundation | Persistent record store | Supports commit, read-back and independent verification of records; Genesis Manifest is the first logical CIN record. |
 | P1-06 | Genesis Environment Certificate | Genesis Environment Manifest | Collects permitted environment facts with provenance labels; validates and registers the manifest. |
@@ -27,15 +27,16 @@ Each milestone must produce a reviewable artifact and pass its acceptance criter
 ## GitHub Actions validation ladder
 
 1. **Current baseline:** validate required Phase 1 documentation, required process definitions and explicit Phase 2 boundary.
-2. **Installer tests:** shell lint, bootstrap unit tests, supported Linux matrix, XDG path tests and install/launch/uninstall tests.
+2. **Package tests:** build .deb on an ARM64 runner or cross-build environment; inspect metadata with dpkg-deb; validate dependencies, file layout, install/upgrade/remove and XDG path behavior.
 3. **Record tests:** serialization, canonicalization, hashing, persistence, read-back and tamper-detection tests.
 4. **Certificate tests:** isolated fixtures for Genesis, Node Birth authorization and external signing/association verification.
 5. **End-to-end tests:** clean install → Genesis → Node Birth → Global Personal Document and Node Marriage → restart → header reconstruction.
-6. **Release gate:** publish an artifact only after the relevant workflow checks pass; test fixtures and CI keys must never be mistaken for production authorization or publisher trust.
+6. **Environment matrix:** validate the same arm64 package in a Debian-based Android userspace (LinDesk/PRoot-style) and a Debian ARM64 virtual machine. Record host/kernel, userspace and display integration limitations separately.
+7. **Release gate:** publish an artifact only after the relevant workflow checks pass; test fixtures and CI keys must never be mistaken for production authorization or publisher trust.
 
 ## Definition of done — Phase 1
 
-- The Linux user can download and install CIN Main Lobby in user space.
+- The user can install the arm64 .deb in a supported Debian-compatible ARM64 userspace, including the qualified Android Linux environment.
 - The Lobby launches and preserves local node records across restarts.
 - The three founding processes execute and produce their distinct outputs.
 - The applicable technical identifiers and Global Personal Document identifier are visible in the header, sourced from persisted and verified records.
