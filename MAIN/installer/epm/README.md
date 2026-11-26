@@ -25,3 +25,6 @@ Requires Python 3 with Tk and an active graphical session:
 ```sh
 ./epm-desktop
 ```
+
+## Release discovery and authenticity (next implementation phase)
+The signed release-manifest contract is documented in [RELEASE-MANIFEST-SPEC.md](RELEASE-MANIFEST-SPEC.md), with an explicitly unsigned schema example in [RELEASE-MANIFEST.example](RELEASE-MANIFEST.example). The signing key and fingerprint are not yet published/pinned, and no official Main Lobby release manifest is configured. EPM therefore cannot currently authenticate an official release, select a verified Main Lobby version, or install it. See [RELEASE-AND-INSTALLATION-PLAN.md](RELEASE-AND-INSTALLATION-PLAN.md).
