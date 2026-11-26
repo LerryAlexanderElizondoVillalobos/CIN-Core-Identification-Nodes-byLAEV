@@ -17,6 +17,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from settings.network_access import NetworkAccessController, NetworkAccessError
+
 APP_ID = "cin-main-lobby"
 MANIFEST_VERSION = 1
 DEFAULT_CHANNEL = "https://raw.githubusercontent.com/LerryAlexanderElizondoVillalobos/CIN-Core-Identification-Nodes-byLAEV/main/MAIN/deploy/official-manifest.json"
@@ -82,6 +84,10 @@ def verify_official_manifest(manifest: dict, signature: bytes, public_key: Path 
 
 
 def fetch_official(channel_url: str = DEFAULT_CHANNEL) -> tuple[dict, bytes]:
+    try:
+        NetworkAccessController().require_enabled()
+    except NetworkAccessError as exc:
+        raise DeploymentError(str(exc)) from exc
     request = urllib.request.Request(channel_url, headers={"User-Agent": "CIN-Main-Lobby-Deploy/1"})
     with urllib.request.urlopen(request, timeout=20) as response:
         manifest = json.loads(response.read().decode("utf-8"))
@@ -109,6 +115,10 @@ def compare(local: dict, remote: dict) -> dict:
 
 
 def stage_and_apply(proposal: dict, remote: dict, confirmed: bool, root: Path = APP_DIR) -> dict:
+    try:
+        NetworkAccessController().require_enabled()
+    except NetworkAccessError as exc:
+        raise DeploymentError(str(exc)) from exc
     if not confirmed:
         raise DeploymentError("Deployment requires explicit operator confirmation.")
     if proposal.get("base_build_hash") != local_manifest(root).get("build_hash"):
