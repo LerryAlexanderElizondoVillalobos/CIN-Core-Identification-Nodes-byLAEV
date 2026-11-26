@@ -101,7 +101,7 @@ class Installer(Gtk.Application):
             uninstall.write_text(
                 "#!/bin/sh\n"
                 f'rm -f "{target}" "$HOME/.local/share/applications/cin-main-lobby.desktop"\n'
-                'rm -f "$HOME/.local/share/icons/hicolor/scalable/apps/cin-main-lobby.svg"\n'
+                'rm -f "$HOME/.local/share/icons/hicolor/256x256/apps/cin-main-lobby.png"\n'
                 'rm -f "$HOME/.local/bin/cin-uninstall"\n'
                 'echo "CIN launcher removed. User data and configuration were preserved."\n',
                 encoding="utf-8",
