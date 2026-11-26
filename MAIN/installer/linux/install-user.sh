@@ -27,11 +27,11 @@ APP_DIR="$HOME/.local/opt/cin-main-lobby"
 BIN_DIR="$HOME/.local/bin"
 APPS_DIR="$HOME/.local/share/applications"
 PARENT_DIR="$(dirname "$APP_DIR")"
+mkdir -p "$PARENT_DIR"
 TEMP_DIR="$(mktemp -d "$PARENT_DIR/.cin-install.XXXXXX")"
 BACKUP_DIR="$PARENT_DIR/.cin-previous"
 cleanup() { rm -rf "$TEMP_DIR"; }
 trap cleanup EXIT
-mkdir -p "$PARENT_DIR"
 dpkg-deb --extract "$PACKAGE" "$TEMP_DIR"
 test -f "$TEMP_DIR/opt/cin-main-lobby/cin_main.py" || { echo "Unexpected CIN.deb payload." >&2; exit 1; }
 test -d "$TEMP_DIR/opt/cin-main-lobby/settings/deployment" || { echo "Deployment engine missing from CIN.deb." >&2; exit 1; }
