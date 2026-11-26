@@ -26,10 +26,15 @@ The previous ZIP installer workflow is retired. Do not use its historical artifa
 
 Requirements: a Debian-compatible Linux desktop with Python 3, PyGObject, GTK 4, OpenSSL, `dpkg-deb`, `systemd --user`, and a systemd/cgroup environment that supports `IPAddressDeny`.
 
-Run as the normal desktop user, never as root:
+Run as the normal desktop user, never as root. The single `.deb` contains both bootstrap scripts; extract its embedded installer into a temporary directory:
 
 ```bash
-bash MAIN/installer/linux/install-user.sh ./Core_Identification_Nodes.deb
+tmp="$(mktemp -d)"
+dpkg-deb --extract ./Core_Identification_Nodes.deb "$tmp"
+bash "$tmp/opt/cin-installer/install-user.sh" "$PWD/Core_Identification_Nodes.deb"
+result=$?
+rm -rf "$tmp"
+exit "$result"
 ```
 
 Launch:
