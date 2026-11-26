@@ -60,6 +60,8 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y python3 python3-gi gir1.2-gtk-4.0 xvfb dbus-x11
+      - name: Verify CIN-scoped network denial leaves host networking available
+        run: sudo python3 MAIN/tests/settings/network_scope_runtime_check.py
       - name: Run Lobby and Settings navigation smoke test
         env:
           GDK_BACKEND: x11
