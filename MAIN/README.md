@@ -49,3 +49,14 @@ A generated file is not an official release until it passes:
 8. Supported network-scope OFF/ON tests and uninstall validation.
 
 See [Linux AppImage migration](installer/linux/APPIMAGE_MIGRATION.md) and the [installation acceptance test plan](installer/linux/INSTALLATION_TEST_PLAN.md).
+
+
+## Linux ARM64 Portable — LinDesk
+
+A no-root, extracted-AppDir distribution is being prepared for Debian-based ARM64 Linux environments hosted on Android, including LinDesk. It does not require FUSE, a virtual machine, sudo, or system-wide package installation.
+
+- [Portable distribution documentation](installer/linux-portable/README.md)
+- [Installation acceptance test plan](installer/linux-portable/INSTALLATION_TEST_PLAN.md)
+- [LinDesk ARM64 CI workflow](../.github/workflows/linux-arm64-portable-lindesk.yml)
+
+The portable package reuses the existing GTK4 Main Lobby and Settings payload. LinDesk device compatibility and memory use still require testing on physical Android hardware.
