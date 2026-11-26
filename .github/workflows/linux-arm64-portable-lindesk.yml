@@ -16,7 +16,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: cin-lindesk-arm64-${{ github.workflow }}-${{ github.ref }}
@@ -101,6 +101,37 @@ jobs:
         run: |
           sudo apt-get install -y xvfb dbus-x11
           dbus-run-session -- xvfb-run -a "$RUNNER_TEMP/cin-portable-inspect/CIN-Linux-ARM64-Portable/run-cin.sh" --smoke-test
+      - name: Publish public downloads in repository branch
+        if: github.event_name != 'pull_request'
+        env:
+          DOWNLOAD_BRANCH: downloads/lindesk-arm64-portable
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/cin-public-downloads"
+          cp -a dist/. "$RUNNER_TEMP/cin-public-downloads/"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout --orphan "$DOWNLOAD_BRANCH"
+          git rm -rf . >/dev/null 2>&1 || true
+          find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          cp "$RUNNER_TEMP/cin-public-downloads/README.md" ./README.md 2>/dev/null || true
+          cp -a "$RUNNER_TEMP/cin-public-downloads/." .
+          cat > README.md <<'CIN_DOWNLOADS_README'
+# CIN — Linux ARM64 portable download
+
+Public portable distribution for Linux ARM64 / AArch64, including compatible Debian-based LinDesk environments.
+
+- [CIN-Linux-ARM64-Portable.tar.gz](CIN-Linux-ARM64-Portable.tar.gz)
+- [SHA-256 checksum](CIN-Linux-ARM64-Portable.tar.gz.sha256)
+- [Archive contents](CIN-Linux-ARM64-Portable.contents.txt)
+
+Extract the archive and follow its included README and install.sh. The installation is per-user and does not require root or sudo.
+
+Files are published from the validated ARM64 portable workflow.
+CIN_DOWNLOADS_README
+          git add CIN-Linux-ARM64-Portable.tar.gz CIN-Linux-ARM64-Portable.tar.gz.sha256 CIN-Linux-ARM64-Portable.contents.txt README.md
+          git commit -m "Publish validated CIN ARM64 downloads"
+          git push --force origin "HEAD:$DOWNLOAD_BRANCH"
       - name: Upload CIN Linux ARM64 Portable archive
         uses: actions/upload-artifact@v4
         with:
