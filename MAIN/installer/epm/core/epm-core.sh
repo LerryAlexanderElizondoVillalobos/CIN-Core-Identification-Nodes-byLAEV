@@ -1,7 +1,6 @@
 #!/bin/sh
 # CIN EPM shared functional engine. POSIX sh; no graphical/runtime dependency.
 EPM_VERSION="0.1.0"
-EPM_ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 
 has() { command -v "$1" >/dev/null 2>&1; }
 read_os_value() {
