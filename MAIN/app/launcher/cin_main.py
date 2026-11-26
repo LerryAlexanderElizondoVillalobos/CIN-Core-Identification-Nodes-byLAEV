@@ -6,6 +6,7 @@ import json
 import sys
 import gi
 from pathlib import Path
+from settings.network_connectivity import NetworkConnectivity, NetworkConnectivityError
 
 from settings.deployment.engine import APP_DIR, KEY_PATH, compare, fetch_official, local_manifest, stage_and_apply
 
@@ -23,6 +24,7 @@ class CinMainWindow(Gtk.ApplicationWindow):
         self.set_size_request(280, 360)
         self.set_resizable(True)
         self.current_screen = "lobby"
+        self.network = NetworkConnectivity()
         self.set_child(self.build_lobby())
 
     def make_page(self):
@@ -63,6 +65,7 @@ class CinMainWindow(Gtk.ApplicationWindow):
         subtitle = Gtk.Label(label="Core Identification Nodes")
         subtitle.add_css_class("title-3")
         page.append(subtitle)
+        self.add_network_control(page, compact=True)
 
         actions = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
         actions.set_halign(Gtk.Align.CENTER)
@@ -132,6 +135,13 @@ class CinMainWindow(Gtk.ApplicationWindow):
             label.set_wrap(True)
             content.append(label)
 
+        content.append(self.section_heading("Network Connectivity"))
+        explanation = Gtk.Label(label="Master switch for this computer's NetworkManager-managed connectivity. OFF disables managed network connections and Internet access. ON restores normal connectivity. CIN Main Lobby can still open while offline.")
+        explanation.set_xalign(0)
+        explanation.set_wrap(True)
+        content.append(explanation)
+        self.add_network_control(content)
+
         content.append(self.section_heading("Code Deployment"))
         deployment_status = Gtk.Label(label=self.deployment_status_text())
         deployment_status.set_xalign(0)
@@ -155,6 +165,28 @@ class CinMainWindow(Gtk.ApplicationWindow):
         page.append(self.make_footer())
         return page
 
+
+    def add_network_control(self, parent, compact=False):
+        state = self.network.status()
+        enabled = state == "enabled"
+        button = Gtk.Button(label="Turn network off" if enabled else "Turn network on")
+        button.add_css_class("destructive-action" if enabled else "suggested-action")
+        button.connect("clicked", lambda _button: self.toggle_network())
+        parent.append(button)
+        status = Gtk.Label(label="Network: ON" if enabled else "Network: OFF")
+        status.set_xalign(0.5 if compact else 0)
+        status.add_css_class("dim-label")
+        parent.append(status)
+
+    def toggle_network(self):
+        try:
+            if self.network.status() == "enabled":
+                self.network.disable()
+            else:
+                self.network.enable()
+            self.show_lobby() if self.current_screen == "lobby" else self.show_settings()
+        except NetworkConnectivityError as exc:
+            self.show_deployment_result("Network control", str(exc))
 
     @staticmethod
     def deployment_status_text():
