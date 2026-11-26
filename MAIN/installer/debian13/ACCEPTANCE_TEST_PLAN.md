@@ -11,13 +11,16 @@
 - Version is the declared release version.
 - Architecture is `arm64`.
 - AppDir includes executable `AppRun` and `usr/bin/cin-main`.
-- ZIP includes the .deb, installer, uninstaller and README.
+- ZIP includes the .deb, installer, uninstaller, no-install runner and README.
+- ZIP passes `unzip -t` without archive errors.
 - SHA-256 manifest validates.
 
 ## User-space installation
 Run as a non-root test user on Debian 13 ARM64:
 - Installer succeeds without sudo or root.
 - Installer rejects root execution.
+- Failed upgrade restores the previous application directory.
+- Re-running the installer updates application files without deleting user data.
 - App files are installed under `~/.local/opt/cin-main-lobby/AppDir`.
 - Launcher is created at `~/.local/bin/cin`.
 - Uninstaller is created at `~/.local/bin/cin-uninstall`.
@@ -27,6 +30,7 @@ Run as a non-root test user on Debian 13 ARM64:
 
 ## Runtime and memory
 - Launch CIN through the per-user command.
+- Run CIN through `run-user.sh` without creating a persistent installation.
 - Verify Main Lobby opens and Settings navigation works.
 - Verify process exits after the application is closed.
 - Confirm no CIN daemon, auto-start service or background update process remains.
