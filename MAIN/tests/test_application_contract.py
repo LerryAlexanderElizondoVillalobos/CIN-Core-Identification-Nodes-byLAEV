@@ -16,7 +16,7 @@ class ApplicationContractTests(unittest.TestCase):
     def test_settings_information_and_navigation(self):
         for value in ("Application Information", "Current Capabilities",
                       "Project Repository", "Back to Main Lobby",
-                      "Linux x86_64 / ARM64 / AArch64", "Not required to open the application",
+                      "Linux ARM64 / AArch64", "Not required to open the application",
                       "show_settings", "show_lobby"):
             with self.subTest(value=value):
                 self.assertIn(value, TEXT)
