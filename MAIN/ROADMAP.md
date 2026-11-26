@@ -1,13 +1,13 @@
 # CIN Main — Delivery Roadmap
 
-The current Phase 1 distribution is a single, self-contained Debian archive named Core_Identification_Nodes.deb. It carries the CIN Main Lobby, Settings, component-aware Deploy engine, CIN-scoped network controller, and embedded user-space installer/uninstaller.
+The current Phase 1 distribution is a single, self-contained Debian archive named Core_Identification_Nodes.deb. It carries the CIN Main Lobby, Settings, component-aware Deploy engine, optional CIN-scoped network controller, and embedded user-space installer/uninstaller.
 
 ## Milestone 1 — Official user-space Debian package
 
 Package file: Core_Identification_Nodes.deb  
 Debian package: core-identification-nodes  
 Version: 0.3.0  
-Architecture: all
+Architecture: all (architecture-independent; ARM64/AArch64 supported)
 
 ### M1.1 — Main Lobby and Settings
 - Launch directly into Main Lobby.
@@ -26,25 +26,27 @@ Architecture: all
 
 The engine is installed in the package. Remote deployment is not active until the genuine publisher key and signed official manifest are provisioned.
 
-### M1.3 — Application-scoped network switch
-- Launch CIN inside cin-main-lobby.scope through the systemd user manager.
+### M1.3 — Optional application-scoped network switch
+- When supported, launch CIN inside cin-main-lobby.scope through the systemd user manager.
 - Apply IPAddressDeny=any to CIN only when the operator switches network access OFF.
 - Clear the CIN scope override when switched ON.
 - Do not modify host networking, NetworkManager or other applications.
-- Qualify the policy on x86_64 and ARM64 and verify that other host processes retain connectivity.
+- On systems without a systemd user manager or cgroup policy, keep CIN operational and report this optional control as unavailable. Never claim isolation that is not enforced.
 
 ### M1.4 — Single Debian installer
 - Build exactly Core_Identification_Nodes.deb.
 - Embed the user-space installer and uninstaller inside the package.
 - Extract and install as the normal user, without root, sudo, apt install or dpkg -i.
+- Do not require systemd, a user service manager, cgroup visibility, or an active GUI session to install files.
 - Place the application in ~/.local/opt/cin-main-lobby, launcher in ~/.local/bin, and desktop entry in ~/.local/share/applications.
 - Preserve user data and publisher configuration during replacement and uninstall.
 
 ### M1.5 — Continuous integration and release
 - Run source, Deploy and application contract tests.
-- Run network scope runtime tests on x86_64 and ARM64.
+- Run network scope runtime tests on x86_64 and ARM64 where supported.
 - Build and inspect the Debian payload.
-- Install, launch, exercise navigation and network OFF/ON, then uninstall as an unprivileged user.
+- Install, launch, exercise navigation and optional network OFF/ON, then uninstall as an unprivileged user.
+- Include an install qualification with no systemd user manager.
 - Publish only the single .deb artifact after all qualification gates pass.
 
 ## Operator installation
@@ -60,11 +62,11 @@ rm -rf "$tmp"
 exit "$result"
 ~~~
 
-Launch with ~/.local/bin/cin-main. Uninstall with bash ~/.local/opt/cin-main-lobby/uninstall-user.sh.
+Launch from a graphical session with ~/.local/bin/cin-main. Uninstall with bash ~/.local/opt/cin-main-lobby/uninstall-user.sh.
 
 ## Runtime prerequisites
 
-Python 3, PyGObject, GTK 4, OpenSSL, dpkg-deb, a running systemd user manager and systemd/cgroup support for IPAddressDeny must be available. The CIN installer does not install system dependencies or request administrator privileges.
+Python 3, PyGObject, GTK 4, OpenSSL and dpkg-deb must be available to the user. systemd user-manager and cgroup IP filtering are optional capabilities used only by the network switch. A graphical session is required to display the GTK application, but not to install its files.
 
 ## Milestone 2 — Main Lobby foundation
 
