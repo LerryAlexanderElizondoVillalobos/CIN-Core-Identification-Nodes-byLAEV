@@ -28,15 +28,20 @@ def main():
 
     # The host process can reach the listener before and after the scoped test.
     host_probe()
-    probe = (
-        "import socket,sys; "
-        "s=socket.socket(); s.settimeout(2); "
-        "try_connect=True; "
-        "try: s.connect((sys.argv[1],int(sys.argv[2]))) "
-        "except OSError: try_connect=False; "
-        "s.close(); "
-        "sys.exit(1 if try_connect else 0)"
-    )
+    probe = """
+import socket
+import sys
+sock = socket.socket()
+sock.settimeout(2)
+try:
+    sock.connect((sys.argv[1], int(sys.argv[2])))
+except OSError:
+    sys.exit(0)
+else:
+    sys.exit(1)
+finally:
+    sock.close()
+"""
     command = [
         "sudo", "systemd-run", "--scope", "--wait", "--quiet",
         "--unit=cin-network-isolation-runtime-test",
