@@ -1,60 +1,59 @@
-# CIN Main — Two-Phase Installation Strategy
+# CIN Main — First Installable Release
 
-CIN Main is built in **two sequential phases**. Phase 1 delivers the Main Lobby application. Phase 2 delivers the CIN Package Engine — the engine of engines.
+The immediate objective is to produce a downloadable Debian package named **CIN.deb** through GitHub Actions and manually qualify it on a Linux ARM64 / AArch64 environment.
 
-## Phase 1 — Main Lobby Application
+## First milestone — Install, launch and navigate
 
-The first milestone delivers a lightweight Linux-installable application with two working screens:
+The first installable release contains a native GTK 4 application with two working screens:
 
 1. **Main Lobby** — the initial application screen.
 2. **Settings** — an informational screen opened from the Lobby and equipped with a Back icon that returns to the Lobby.
 
-### Main Lobby
+Create opens an informational entry point and does not claim that node creation or certificate issuance is implemented. Enter and Import remain disabled.
 
-The Lobby displays:
-- **Welcome to the Main Lobby**
-- **Core Identification Nodes**
-- **Create**, **Enter** and **Import** actions.
-- A subtle Settings icon.
-- A professional copyright footer and clickable repository reference.
+## Technology
 
-Create is the only active primary action. Enter and Import remain visible but inactive until their respective workflows are implemented.
+- Python 3 and GTK 4 native UI.
+- Debian `.deb` package, initially named `CIN.deb`.
+- Package architecture `all`; GTK and Python dependencies are supplied by the target Linux distribution.
+- Intended operator qualification: Debian-compatible Linux ARM64 / AArch64.
+- No Electron, Chromium, WebKit, remote resources or network requirement to open the application.
 
-### Settings
+Package installation is managed by the Debian package manager and may require administrator authorization. The running application operates as the logged-in user.
 
-Settings is a distinct, read-only information screen. It displays the application name, project attribution, current phase and milestone, target platform, offline startup requirement, current action availability and project repository URL. It must not contain pretend toggles, nonfunctional preferences, invented version numbers or unmeasured performance claims.
+## Build and download
 
-The Settings Back icon returns to the Lobby. Both navigation directions must work repeatedly without restarting the application.
+GitHub Actions runs source tests, builds the package, installs it in CI, launches it under a virtual display and tests Lobby → Settings → Lobby navigation. A successful non-PR run uploads a downloadable artifact named **CIN-deb-installer**, containing `CIN.deb`.
 
-See the [Phase 1 Workplan](WORKPLAN_PHASE_1.md), [Lobby and Settings specification](lobby/README.md) and [Linux installer specification](installer/linux/README.md).
+See:
+- [First Installable Release Workplan](WORKPLAN_PHASE_1.md)
+- [Development Roadmap](ROADMAP.md)
+- [Linux Debian Installer](installer/linux/README.md)
+- [Lobby and Settings](lobby/README.md)
+- [Settings Screen Specification](lobby/SETTINGS.md)
 
-## Phase 1 — Longer-term node foundation
+## Operator test
 
-The first milestone does not claim that the founding certificate processes are already implemented. Later increments will integrate:
+Download the `CIN-deb-installer` artifact from a successful workflow run, extract `CIN.deb`, and install it on the target:
 
-1. **Genesis Environment Certificate** → Genesis Environment Manifest.
-2. **CIN Node Birth Certificate** → authoritative Node Birth Record and technical node identifiers.
-3. **CIN Global Personal Document and Node Marriage Certificate** → Global Personal Document identifier and separately persisted, cryptographically accepted node-document association.
+```bash
+sudo apt install ./CIN.deb
+cin-main
+```
 
-The CIN Package Engine remains Phase 2 and is not part of the Lobby application milestone.
+Open Settings, inspect the information, use Back, repeat the navigation and test offline startup. ARM64 compatibility is only confirmed after this manual target test; CI success on another architecture is not sufficient.
 
-## Phase 2 — CIN Package Engine Installer
+## Longer-term Phase 1
 
-The CIN Package Engine is a separate installer and product layer. It installs, registers, configures, enables, updates, disables and removes specialized CIN engines and packages.
+After the installer milestone is qualified, continue with local storage and the three founding processes:
+1. Genesis Environment Certificate → Genesis Environment Manifest.
+2. CIN Node Birth Certificate → authoritative Node Birth Record and technical node identifiers.
+3. CIN Global Personal Document and Node Marriage Certificate → deterministic document identifier and separately verified association.
 
-Initial package families include dedicated certificate engines, Ledgers, Binary Merkle Tree, Enterprise Merkle Tree, request and permission engines, external signing connectors, configurable one-time resource/UTXO-style engines and application-specific engines.
+## Phase 2 — CIN Package Engine
 
-## Governing rules
-
-- Phase 1 installs the Main Lobby application only; it does not install the Package Engine.
-- Phase 2 installs the Package Engine; it does not replace or reinstall the Main Lobby.
-- The initial package target is a Debian-compatible ARM64 userspace; virtualization is optional.
-- Application files, configuration, cache and persistent node records remain separate.
-- Installation is not node birth; node birth occurs through the Lobby's later certificate process.
-- The Genesis Manifest and Node Birth Record remain distinct documents.
-- Private signing keys remain outside CIN Main and its packages; signing uses external providers.
-- Historical files in `HISTORY/` are references, not automatically active implementation.
+A separate installer and product layer for the engine of engines. It is not included in the first Lobby package.
 
 ## Current maturity
 
-**Specification status:** the two-screen Lobby/Settings milestone is defined. The repository currently has no active application source tree or launchable runtime entry point in the new Main. Runtime implementation and device testing remain pending; documentation and CI contract checks must not be presented as proof of a working executable.
+The GTK4 application source and Debian packaging scaffold are present. The first CI build, package installation, automated UI smoke test and operator ARM64 installation remain to be executed and verified. Do not describe the release as tested until those checks have passed.
