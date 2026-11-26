@@ -25,8 +25,8 @@ class AppImageContractTests(unittest.TestCase):
 
     def test_build_targets_supported_architectures(self):
         text = BUILD.read_text(encoding="utf-8")
-        self.assertIn("x86_64", text)
         self.assertIn("aarch64", text)
+        self.assertNotIn("x86_64", text)
         self.assertIn("linuxdeploy", text)
 
 
