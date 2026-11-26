@@ -7,13 +7,9 @@
 
 ## What is delivered
 
-The ZIP contains:
-- `CIN.deb`: the native Debian ARM64 package containing the relocatable CIN AppDir.
-- `install-user.sh`: extracts the .deb with `dpkg-deb -x` and installs it into the current user's home directory.
-- `uninstall-user.sh`: removes the application and launchers belonging to this installation.
-- This README.
+The native ARM64 `CIN.deb` contains both the relocatable CIN AppDir and its user-space installer/uninstaller under `/opt/cin-installer/`. The ZIP is an optional convenience bundle containing the same .deb and helper scripts.
 
-The package is deliberately not installed with `dpkg -i`. A conventional system-wide .deb installation requires administrator authorization. Here the .deb is an immutable, versioned application payload; the included scripts extract it into user space.
+The package is deliberately not installed with `dpkg -i`. A conventional system-wide .deb installation requires administrator authorization. Here the .deb is an immutable, versioned application payload; the operator extracts it with `dpkg-deb -x` and runs its embedded installer from the temporary extraction.
 
 ## Requirements
 
@@ -27,10 +23,26 @@ The application runtime and GTK/PyGObject components are packaged in the relocat
 
 ## Install
 
-1. Extract `CIN-Debian13-Installer.zip` to a directory owned by your user.
-2. Open a terminal in that directory.
-3. Run `./install-user.sh`.
-4. Launch **Core Identification Nodes** from the desktop menu, or run `~/.local/bin/cin`.
+### Single-file `.deb` installation (recommended)
+
+Run these commands as the normal user from the directory containing `CIN.deb`:
+
+```sh
+tmp="$(mktemp -d)"
+dpkg-deb --extract ./CIN.deb "$tmp"
+sh "$tmp/opt/cin-installer/install-user.sh" "$PWD/CIN.deb"
+result=$?
+rm -rf "$tmp"
+exit "$result"
+```
+
+The `.deb` is ARM64-native, but it is not registered in the system package database. Its embedded installer places the application only in the current user's home directory.
+
+### ZIP convenience installation
+
+Alternatively, extract `CIN-Debian13-Installer.zip`, open a terminal in that directory, and run `./install-user.sh`.
+
+Launch **Core Identification Nodes** from the desktop menu, or run `~/.local/bin/cin`.
 
 Do not run the installer with sudo. It intentionally refuses root execution.
 
