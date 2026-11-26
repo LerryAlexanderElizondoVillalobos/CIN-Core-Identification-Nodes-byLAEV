@@ -43,6 +43,14 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
+def fingerprint(manifest: dict) -> str:
+    components = [{"path": item["path"], "sha256": item["sha256"], "size": item["size"]}
+                  for item in sorted(manifest.get("components", []), key=lambda x: x["path"])]
+    core = {"schema": manifest.get("schema"), "application": manifest.get("application"),
+            "components": components}
+    return hashlib.sha256(_canonical(core)).hexdigest()
+
+
 def local_manifest(root: Path = APP_DIR) -> dict:
     components = []
     if root.exists():
@@ -50,7 +58,7 @@ def local_manifest(root: Path = APP_DIR) -> dict:
             rel = path.relative_to(root).as_posix()
             components.append({"path": rel, "sha256": sha256_file(path), "size": path.stat().st_size})
     body = {"schema": MANIFEST_VERSION, "application": APP_ID, "components": components}
-    body["build_hash"] = hashlib.sha256(_canonical(body)).hexdigest()
+    body["build_hash"] = fingerprint(body)
     return body
 
 
@@ -89,6 +97,8 @@ def fetch_official(channel_url: str = DEFAULT_CHANNEL) -> tuple[dict, bytes]:
 def compare(local: dict, remote: dict) -> dict:
     if remote.get("schema") != MANIFEST_VERSION or remote.get("application") != APP_ID:
         raise DeploymentError("Manifest does not describe this CIN application.")
+    if fingerprint(remote) != remote.get("build_hash"):
+        raise DeploymentError("Official manifest build fingerprint is invalid.")
     old = {x["path"]: x for x in local.get("components", [])}
     new = {x["path"]: x for x in remote.get("components", [])}
     additions = [new[p] for p in sorted(new.keys() - old.keys())]
