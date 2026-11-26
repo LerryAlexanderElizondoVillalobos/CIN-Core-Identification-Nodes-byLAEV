@@ -6,7 +6,7 @@ import json
 import sys
 import gi
 from pathlib import Path
-from settings.network_connectivity import NetworkConnectivity, NetworkConnectivityError
+from settings.network_access import NetworkAccessController, NetworkAccessError
 
 from settings.deployment.engine import APP_DIR, KEY_PATH, compare, fetch_official, local_manifest, stage_and_apply
 
@@ -24,7 +24,7 @@ class CinMainWindow(Gtk.ApplicationWindow):
         self.set_size_request(280, 360)
         self.set_resizable(True)
         self.current_screen = "lobby"
-        self.network = NetworkConnectivity()
+        self.network = NetworkAccessController()
         self.set_child(self.build_lobby())
 
     def make_page(self):
@@ -136,7 +136,7 @@ class CinMainWindow(Gtk.ApplicationWindow):
             content.append(label)
 
         content.append(self.section_heading("Network Connectivity"))
-        explanation = Gtk.Label(label="Master switch for this computer's NetworkManager-managed connectivity. OFF disables managed network connections and Internet access. ON restores normal connectivity. CIN Main Lobby can still open while offline.")
+        explanation = Gtk.Label(label="Controls only CIN Main Lobby's Internet access. OFF blocks network traffic from CIN; ON allows it. Other Linux applications and the computer's network connection remain unaffected.")
         explanation.set_xalign(0)
         explanation.set_wrap(True)
         content.append(explanation)
@@ -169,27 +169,24 @@ class CinMainWindow(Gtk.ApplicationWindow):
     def add_network_control(self, parent, compact=False):
         try:
             state = self.network.status()
-        except NetworkConnectivityError:
+        except NetworkAccessError:
             state = "unavailable"
         enabled = state == "enabled"
-        button = Gtk.Button(label="Turn network off" if enabled else "Turn network on" if state == "disabled" else "Network control unavailable")
+        button = Gtk.Button(label="Turn CIN Internet access OFF" if enabled else "Turn CIN Internet access ON" if state == "disabled" else "CIN network control unavailable")
         button.add_css_class("destructive-action" if enabled else "suggested-action")
         button.set_sensitive(state in ("enabled", "disabled"))
         button.connect("clicked", lambda _button: self.toggle_network())
         parent.append(button)
-        status = Gtk.Label(label="Network: ON" if enabled else "Network: OFF" if state == "disabled" else "Network status unavailable")
+        status = Gtk.Label(label="CIN Internet access: ON" if enabled else "CIN Internet access: OFF" if state == "disabled" else "CIN network status unavailable")
         status.set_xalign(0.5 if compact else 0)
         status.add_css_class("dim-label")
         parent.append(status)
 
     def toggle_network(self):
         try:
-            if self.network.status() == "enabled":
-                self.network.disable()
-            else:
-                self.network.enable()
+            self.network.set_enabled(self.network.status() != "enabled")
             self.show_lobby() if self.current_screen == "lobby" else self.show_settings()
-        except NetworkConnectivityError as exc:
+        except NetworkAccessError as exc:
             self.show_deployment_result("Network control", str(exc))
 
     @staticmethod
@@ -229,6 +226,7 @@ class CinMainWindow(Gtk.ApplicationWindow):
 
     def check_deployment_channel(self):
         try:
+            self.network.require_enabled()
             manifest, _signature = fetch_official()
             proposal = compare(local_manifest(APP_DIR), manifest)
             changes = len(proposal["additions"]) + len(proposal["replacements"]) + len(proposal["removals"])
