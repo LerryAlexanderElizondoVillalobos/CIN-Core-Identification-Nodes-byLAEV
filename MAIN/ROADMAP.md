@@ -42,6 +42,25 @@ The first launch opens a graphical installer. The user can install for the curre
 - Verify first-run installation, Main Lobby, Settings, Deploy state, network behavior, and uninstall.
 - Publish only after runtime portability is demonstrated.
 
+
+## Milestone 1.6 — Debian 13 ARM64 user-space package for LinDesk
+
+Target: Debian GNU/Linux 13 (Trixie), ARM64/AArch64, including compatible Debian-based Linux environments hosted on Android such as LinDesk.
+
+Official payload: CIN.deb, Debian package core-identification-nodes, version 0.5.0, architecture arm64.
+
+- Bundle the relocatable GTK4 Main Lobby runtime and the user-space installer, uninstaller, and temporary runner in the same .deb.
+- Install without root, sudo, apt install, dpkg -i, system package database writes, or system-wide file changes.
+- Extract the .deb with dpkg-deb -x, then execute /opt/cin-installer/install-user.sh from the temporary extraction as the normal user.
+- Place the application under ~/.local/opt/cin-main-lobby/AppDir, launcher at ~/.local/bin/cin, and desktop entry/icon under XDG user directories.
+- Preserve user data, configuration, and cache on upgrades and uninstall.
+- Do not require systemd, a systemd user manager, cgroups, FUSE, or a resident daemon for installation and direct launch.
+- Require a graphical GTK4 session to display the application; headless installation is supported.
+- Qualify on a Debian 13 ARM64 CI runner, then perform physical LinDesk device testing before declaring device compatibility.
+
+The optional CIN-Debian13-Installer.zip contains the same .deb and helper scripts. It is a convenience format, not a second installation architecture.
+
+
 ## Milestone 2 — Main Lobby foundation
 - Establish private local storage.
 - Load installation and lifecycle records.
