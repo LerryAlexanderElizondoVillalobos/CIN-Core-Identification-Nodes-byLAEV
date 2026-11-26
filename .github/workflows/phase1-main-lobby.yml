@@ -1,4 +1,4 @@
-name: CIN Phase 1 — Main Lobby
+name: CIN Phase 1 — Main Lobby ARM64 DEB
 
 on:
   push:
@@ -20,7 +20,7 @@ concurrency:
 
 jobs:
   phase1-contract:
-    name: Validate Phase 1 scope and architecture
+    name: Validate Phase 1 scope and ARM64 Debian target
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -36,7 +36,7 @@ jobs:
           test -f MAIN/lobby/README.md
           test -f MAIN/WORKPLAN_PHASE_1.md
 
-      - name: Verify Phase 1 process and boundary contract
+      - name: Verify process, package and deployment contract
         shell: python
         run: |
           from pathlib import Path
@@ -48,25 +48,57 @@ jobs:
               "lobby": Path("MAIN/lobby/README.md").read_text(encoding="utf-8"),
               "workplan": Path("MAIN/WORKPLAN_PHASE_1.md").read_text(encoding="utf-8"),
           }
-
-          required_processes = (
+          combined = "\n".join(docs.values())
+          required = (
               "Genesis Environment Certificate",
               "CIN Node Birth Certificate",
               "CIN Global Personal Document and Node Marriage",
           )
-          combined = "\n".join(docs.values())
-          missing = [item for item in required_processes if item not in combined]
+          missing = [term for term in required if term not in combined]
           if missing:
               raise SystemExit("Missing founding process definitions: " + ", ".join(missing))
+
+          for term in ("arm64", "LinDesk", ".deb"):
+              if term.lower() not in combined.lower():
+                  raise SystemExit(f"Missing deployment target requirement: {term}")
 
           if "CIN Package Engine" not in docs["main"] or "Phase 2" not in docs["main"]:
               raise SystemExit("Phase 2 boundary is not documented in MAIN/README.md")
 
-          if "does not install the CIN Package Engine" not in docs["installer"]:
-              raise SystemExit("Installer scope must explicitly exclude the Package Engine")
-
-          if "implementation not yet started" not in docs["main"].lower():
-              raise SystemExit("Update the maturity statement when implementation status changes")
+          if "does not contain or install the CIN Package Engine" not in docs["installer"]:
+              raise SystemExit("Debian package scope must explicitly exclude the Package Engine")
 
           print("PASS: Phase 1 documentation contract is consistent.")
-          print("NOTE: This job validates documentation only; it does not claim functional implementation.")
+          print("NOTE: This job validates documentation only; it does not prove .deb build or device compatibility.")
+
+  deb-package-build:
+    name: Build and inspect ARM64 Debian package
+    runs-on: ubuntu-latest
+    needs: phase1-contract
+    if: ${{ hashFiles('MAIN/packaging/deb/DEBIAN/control') != '' }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install Debian packaging tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y dpkg-dev
+
+      - name: Validate package architecture and build
+        shell: bash
+        run: |
+          set -euo pipefail
+          CONTROL="MAIN/packaging/deb/DEBIAN/control"
+          grep -Eq '^Architecture: arm64$' "$CONTROL"
+          mkdir -p dist
+          dpkg-deb --build --root-owner-group MAIN/packaging/deb "dist/cin-main-lobby_0.1.0_arm64.deb"
+          dpkg-deb --info dist/cin-main-lobby_0.1.0_arm64.deb
+          dpkg-deb --contents dist/cin-main-lobby_0.1.0_arm64.deb
+
+      - name: Upload ARM64 Debian package
+        uses: actions/upload-artifact@v4
+        with:
+          name: cin-main-lobby-arm64-deb
+          path: dist/*.deb
+          if-no-files-found: error
