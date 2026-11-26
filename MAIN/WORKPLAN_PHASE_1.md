@@ -2,7 +2,7 @@
 
 ## Milestone objective
 
-Deliver a downloadable `CIN.deb` application payload and a user-space installer bundle. A normal desktop user must be able to install, launch, navigate, update and remove CIN without root privileges, `sudo`, system package-manager installation or writes to system directories.
+Deliver one downloadable `CIN-Linux-Installer.zip` artifact. It contains the `CIN.deb` application payload, user-space installer, uninstaller, instructions and checksums. The inner `.deb` is not a separate operator download. A normal desktop user must be able to install, launch, navigate, update and remove CIN without root privileges, `sudo`, system package-manager installation or writes to system directories.
 
 The installed application must open the native CIN Main Lobby and demonstrate navigation to the informational Settings screen and back.
 
@@ -51,7 +51,7 @@ Both screens must support resizing and reflow. The Settings content may scroll v
 | CIN-INS-05 | Debian payload | Architecture-independent `CIN.deb` containing application files under `/opt/cin-main-lobby` | `dpkg-deb` builds and extracts the payload |
 | CIN-INS-06 | User-space installer | Installer and uninstaller scripts | Installs only under the current user's home directory and refuses root execution |
 | CIN-INS-07 | GitHub Actions CI | Source, package and UI smoke-test workflow | Runs the user installer as an unprivileged account and launches under Xvfb |
-| CIN-INS-08 | Downloadable artifact | `CIN-deb-installer` containing `CIN.deb`, `install-user.sh` and `uninstall-user.sh` | Uploaded only after successful x86_64 and ARM64 runtime tests |
+| CIN-INS-08 | Single downloadable artifact | `CIN-Linux-Installer.zip` containing the payload, scripts, instructions and checksums | Uploaded only after successful x86_64 and ARM64 runtime tests |
 | CIN-INS-09 | ARM64 operator qualification | Manual installation and launch test | Operator installs on target Linux ARM64 / AArch64 without root and reports results |
 
 ## GitHub Actions pipeline
@@ -59,7 +59,7 @@ Both screens must support resizing and reflow. The Settings content may scroll v
 1. Check out the repository.
 2. Run Python source-contract tests.
 3. Provision GTK 4, Python GI bindings, Xvfb and Debian packaging tools on disposable CI runners. CI provisioning may use runner administrator permissions; this is not part of the user installer.
-4. Build `dist/CIN.deb` and the user-space install/uninstall scripts.
+4. Build `dist/CIN-Linux-Installer.zip` as the sole distributable artifact; keep `CIN.deb` inside it as the payload.
 5. Inspect package metadata and payload.
 6. Download the artifact on x86_64 and ARM64 runners.
 7. Provision CI runtime prerequisites.
@@ -76,7 +76,7 @@ The workflow must not use `apt install ./CIN.deb` or `dpkg -i` to install CIN. T
 
 After a successful workflow run:
 1. Open the repository's Actions tab.
-2. Open the successful `CIN Main — Build, Test and Package Debian Installer` run.
+2. Open the successful `CIN Main — Build, Test and Package Linux Installer` run.
 3. Download the `CIN-deb-installer` artifact.
 4. Extract the artifact ZIP to obtain `CIN.deb`, `install-user.sh` and `uninstall-user.sh`.
 5. As the normal desktop user, run `bash install-user.sh ./CIN.deb`.
