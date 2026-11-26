@@ -9,7 +9,7 @@ system_report() {
  kernel=$(uname -r 2>/dev/null || echo unknown); machine=$(uname -m 2>/dev/null || echo unknown)
  case "$machine" in x86_64|amd64) arch=x86_64;; aarch64|arm64) arch=arm64;; armv7l|armv6l) arch=arm;; i?86) arch=x86;; *) arch=unknown;; esac
  case "$kernel" in *android*) kernel_family=android;; *) kernel_family=linux;; esac
- if [ -n "${LINDESK_ROOT:-}\" ] || [ -n "${LINDESK_LOADER:-}" ]; then runtime=lindesk
+ if [ -n "${LINDESK_ROOT:-}" ] || [ -n "${LINDESK_LOADER:-}" ]; then runtime=lindesk
  elif [ -n "${PREFIX:-}" ] && [ -d "${PREFIX:-/nonexistent}/../usr" ]; then runtime=termux
  elif [ -f /.dockerenv ] || grep -qiE 'docker|podman|container' /proc/1/cgroup 2>/dev/null; then runtime=container
  elif [ "$kernel_family" = android ]; then runtime=linux_on_android
