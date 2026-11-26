@@ -60,6 +60,15 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y python3 python3-gi gir1.2-gtk-4.0 xvfb dbus-x11
+      - name: Start the runner's systemd user manager
+        run: |
+          sudo loginctl enable-linger "$(id -un)"
+          sudo systemctl start "user@$(id -u).service"
+      - name: Verify non-root user manager can toggle CIN scope network policy
+        run: |
+          export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+          export DBUS_SESSION_BUS_ADDRESS="unix:path=$XDG_RUNTIME_DIR/bus"
+          python3 MAIN/tests/settings/network_user_scope_runtime_check.py
       - name: Verify CIN-scoped network denial leaves host networking available
         run: sudo python3 MAIN/tests/settings/network_scope_runtime_check.py
       - name: Run Lobby and Settings navigation smoke test
