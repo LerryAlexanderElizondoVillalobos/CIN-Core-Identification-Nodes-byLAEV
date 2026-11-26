@@ -1,61 +1,71 @@
-# CIN Main — First Installable Release
+# Core Identification Nodes — Official Linux Package
 
-The first Linux distribution is delivered as **one downloadable artifact: `CIN-Linux-Installer.zip`**. It contains the `CIN.deb` application payload, user-space installer and uninstaller, usage instructions and SHA-256 checksums. The inner `.deb` is not a separate operator download.
+**Package:** `Core_Identification_Nodes.deb`  
+**Package version:** 0.3.0  
+**Debian package name:** `core-identification-nodes`  
+**Architecture:** `all` (architecture-independent Python application)
 
-## First milestone — Install, launch and navigate
+## Included capabilities
 
-The native GTK 4 application has two screens:
+- CIN Main Lobby, opening as the initial screen.
+- Settings with Lobby navigation.
+- Component-aware Deploy engine.
+- Local component manifest and SHA-256 build fingerprint.
+- Official manifest verification using a separately provisioned Ed25519 publisher public key.
+- Component comparison, HTTPS staging, explicit operator authorization and rollback on failed post-deployment verification.
+- CIN-only network ON/OFF control enforced on the dedicated `cin-main-lobby.scope` systemd user scope.
+- User-space installer and uninstaller; no system-wide installation or root privileges.
 
-1. **Main Lobby** — the initial application screen.
-2. **Settings** — an informational screen opened from the Lobby and equipped with a Back control.
+## Download
 
-Create opens an informational entry point. Node creation and certificate issuance are not yet implemented. Enter and Import remain disabled.
+The only official distributable is **`Core_Identification_Nodes.deb`**, published by the GitHub Actions workflow named **CIN — Official Core Identification Nodes Debian Package**, after source tests, network runtime qualification, package inspection and installation qualification pass.
 
-## User-first installation
+The previous ZIP installer workflow is retired. Do not use its historical artifacts.
 
-CIN is installed by the current desktop user, not by root. The installer does not invoke `sudo`, `apt install`, `dpkg -i` or system package scripts.
+## Installation
 
-- Application: `~/.local/opt/cin-main-lobby/`
-- Launcher: `~/.local/bin/cin-main`
-- Desktop entry: `~/.local/share/applications/cin-main.desktop`
-- Python 3, PyGObject, GTK 4, OpenSSL and dpkg-deb must already be available.
+Requirements: a Debian-compatible Linux desktop with Python 3, PyGObject, GTK 4, OpenSSL, `dpkg-deb`, `systemd --user`, and a systemd/cgroup environment that supports `IPAddressDeny`.
 
-## Build and download
-
-GitHub Actions runs source tests, builds one ZIP installer, verifies its checksums and Debian payload, then installs and launches CIN as an unprivileged user on x86_64 and ARM64 runners. It tests Lobby → Settings → Lobby and uninstalls the application. Only after all gates pass does the workflow publish the **CIN-Linux-Installer** artifact.
-
-The single operator download is `CIN-Linux-Installer.zip`. Do not use earlier `CIN-deb-installer` artifacts or standalone legacy package files.
-
-See:
-- [First Installable Release Workplan](WORKPLAN_PHASE_1.md)
-- [Development Roadmap](ROADMAP.md)
-- [Single Linux Installer](installer/linux/README.md)
-- [Installation and Acceptance Test](installer/linux/INSTALLATION_TEST_PLAN.md)
-- [Lobby and Settings](lobby/README.md)
-- [Settings Screen Specification](lobby/SETTINGS.md)
-
-## Install, launch and remove
-
-Extract `CIN-Linux-Installer.zip`, enter the extracted `CIN-Linux-Installer` directory and run as the normal desktop user:
+Run as the normal desktop user, never as root:
 
 ```bash
-sha256sum -c SHA256SUMS
-bash install-user.sh ./CIN.deb
+bash MAIN/installer/linux/install-user.sh ./Core_Identification_Nodes.deb
+```
+
+Launch:
+
+```bash
 ~/.local/bin/cin-main
 ```
 
-Remove:
+Uninstall:
 
 ```bash
-bash uninstall-user.sh
+bash MAIN/installer/linux/uninstall-user.sh
 ```
 
-No user installation or removal step requires root privileges. CI success does not replace manual qualification on the actual target Linux desktop.
+The Debian archive is a portable application payload. Do not install it with `sudo dpkg -i` or `apt install`.
 
-## Longer-term scope
+## Deployment trust setup
 
-The founding certificate processes, local storage and Phase 2 CIN Package Engine remain subsequent implementation work. The first installer does not claim these future capabilities are already operational.
+The Deploy engine is included, but it will not trust an unverified update source. The publisher's Ed25519 public key must be provisioned independently at:
 
-## Current maturity
+`~/.config/cin-main-lobby/deploy.pub`
 
-The single-installer build pipeline has been committed and is awaiting its first successful CI execution. Do not treat the new installer as released until source tests, package validation and both runtime qualification jobs pass.
+The signed official manifest and its signature must also be published at the configured official channel. Until both are correctly provisioned, Settings reports that publisher trust is not configured and no remote code is applied.
+
+## Network switch
+
+The ON/OFF control applies only to CIN's dedicated systemd user scope. OFF denies IP networking for CIN; ON restores it. It does not disable NetworkManager or change connectivity for the host or other applications. If the required systemd/cgroup support is unavailable, the application reports the policy as unavailable rather than claiming it is enforced.
+
+## Validation status
+
+The official workflow must pass:
+1. Source and Deploy tests.
+2. x86_64 and ARM64 network-scope runtime qualification.
+3. Debian payload inspection.
+4. Unprivileged installation and application launch.
+5. In-app network OFF/ON smoke test.
+6. Uninstallation while preserving user data and publisher configuration.
+
+A package is not considered released until the workflow publishes its single `.deb` artifact successfully.
