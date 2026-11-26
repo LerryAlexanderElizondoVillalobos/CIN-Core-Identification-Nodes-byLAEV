@@ -1,43 +1,48 @@
-# CIN Linux distribution — AppImage
+# CIN Linux distribution — ARM64 AppImage and Debian package
 
-## Distribution decision
+## Release scope
 
-The official Linux distribution format is AppImage, replacing the previous Debian archive proposal. The release target is one file per CPU architecture:
+The current Linux release targets ARM64 / AArch64 only. Supported execution environments are ARM64 Linux hardware and ARM64 virtual machines whose guest exposes an ARM64 Linux userspace and compatible kernel. Virtualization is optional. x86_64 is not part of this release.
 
-- `Core_Identification_Nodes-x86_64.AppImage`
-- `Core_Identification_Nodes-aarch64.AppImage`
+Two distribution artifacts are produced:
 
-AppImage is a portable Linux application format. It does not use the distribution package manager, does not require root or sudo, and does not write to system directories.
+- Core_Identification_Nodes-aarch64.AppImage — recommended graphical per-user installation, without root or sudo.
+- Core_Identification_Nodes-arm64.deb — conventional Debian/Ubuntu ARM64 package.
 
-## First-run experience
+## AppImage first-run experience
 
-1. The user downloads the AppImage.
-2. The user marks it executable once in the file manager (Properties → Permissions → Allow executing file as program; exact wording depends on the desktop).
-3. A double-click opens the CIN graphical welcome/installer.
-4. “Install for this user” copies the same self-contained AppImage to `~/Applications`, creates a desktop launcher under `~/.local/share/applications`, and creates a user uninstaller at `~/.local/bin/cin-uninstall`.
+1. The user downloads the AArch64 AppImage.
+2. If necessary, the user enables executable permission in the file manager.
+3. A double-click opens the CIN graphical welcome installer.
+4. “Install for this user” copies the AppImage to ~/Applications, creates a desktop launcher under ~/.local/share/applications, and creates a user uninstaller at ~/.local/bin/cin-uninstall.
 5. CIN starts in Main Lobby. “Run without installing” is also available.
 
-No terminal, root, sudo, administrator password, apt, dpkg or system-wide registration is used by the user-facing installation flow.
+The AppImage user flow does not use root, sudo, administrator authentication, apt, dpkg, or system directories. Some file managers require the user to enable executable permission before launching a downloaded AppImage.
 
-## Runtime and distribution compatibility
+## Debian package privilege model
 
-AppImage supports many mainstream Linux distributions, but not literally every Linux environment. The release matrix targets x86_64 and AArch64 on glibc-based desktop distributions. Alpine/musl, very old glibc systems, non-desktop systems, and unsupported CPU architectures are outside the initial target. The minimum glibc baseline and GTK runtime closure must be validated in clean distribution containers before release.
+The .deb installs the AppImage payload under /opt/cin and a desktop entry under /usr/share/applications. A conventional Debian package installation writes to system locations and therefore requires administrator authorization through the graphical package manager, apt, or dpkg. After installation, CIN itself runs as the logged-in user.
 
-The GTK4/PyGObject runtime, introspection typelibs, and dynamically loaded libraries must be included and verified in the AppImage. A successful AppImage file build alone is not proof of portability.
+A standard .deb cannot perform a system package installation without administrator authorization. Users requiring a strictly rootless installation must choose the AppImage.
+
+## Runtime compatibility
+
+The release is for mainstream glibc-based ARM64 desktop Linux distributions. Alpine/musl, x86_64, non-desktop systems, and unsupported CPU architectures are outside the initial target. ARM64 virtual machines are supported when the guest kernel/userspace and graphics stack meet the same requirements as native ARM64 Linux.
+
+The GTK4/PyGObject runtime, introspection typelibs, and dynamically loaded libraries must be included and verified in the AppImage. A successful file build alone is not proof of portability.
 
 ## CIN runtime components
 
-The AppImage must include Main Lobby, Settings, Deploy engine, and the CIN network controller. Deploy must preserve the user's independent publisher trust key and records. The network switch may only report OFF when CIN's own process scope is actually denied network access; if the host lacks a usable systemd user manager or required cgroup support, the UI must report the control as unavailable rather than imply that the host or other applications are affected.
+The distribution includes Main Lobby, Settings, Deploy engine, and the CIN network controller. The Deploy engine is included, but component-level updates remain disabled until an AppImage-aware signed replacement updater, genuine publisher public key, and signed official manifest are provisioned and verified.
+
+The network switch may only report OFF when CIN's own process scope is actually denied network access. If the host lacks a usable systemd user manager or required cgroup support, the UI must report the control as unavailable.
 
 ## Release gates
 
-- Build separately on x86_64 and AArch64.
-- Inspect the AppImage payload and confirm both GUI entry points and Deploy modules are present.
-- Run the AppImage on clean Ubuntu, Debian, Fedora, and Linux Mint desktop environments for each supported architecture where runners are available.
-- Verify first-run graphical installation, launch into Main Lobby, Settings navigation, uninstall, and preservation of user data.
-- Verify the network policy on supported systemd environments and confirm unrelated host processes retain connectivity.
-- Do not publish a release until GTK4 typelibs and native dependencies are resolved without relying on host-installed Python, PyGObject, or GTK packages.
-
-## Important limitation
-
-Some Linux file managers do not execute downloaded files until the user enables the executable permission. This is a desktop security policy, not an installer privilege requirement. CIN cannot bypass that policy without weakening the user's system security.
+- Build only for AArch64 on an ARM64 runner.
+- Inspect the AppImage payload and confirm the Main Lobby and installer entry points, GTK typelibs, Deploy engine, and network controller are present.
+- Smoke-test the AppImage on ARM64 Linux.
+- Build the .deb and verify its package metadata reports Architecture: arm64.
+- Test AppImage first-run installation, Main Lobby launch, Settings navigation, uninstall, and preservation of user data.
+- Verify network policy only on supported systemd environments.
+- Do not publish until GTK4 typelibs and native dependencies work without requiring host-installed Python, PyGObject, or GTK.
