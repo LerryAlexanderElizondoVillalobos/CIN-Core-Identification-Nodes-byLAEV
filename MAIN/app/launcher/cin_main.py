@@ -2,8 +2,13 @@
 """CIN Main Lobby — lightweight native GTK4 application."""
 
 import argparse
+import json
 import sys
 import gi
+from pathlib import Path
+from settings.network_access import NetworkAccessController, NetworkAccessError
+
+from settings.deployment.engine import APP_DIR, KEY_PATH, compare, fetch_official, local_manifest, stage_and_apply
 
 gi.require_version("Gtk", "4.0")
 from gi.repository import Gtk, Gio, GLib
@@ -19,6 +24,7 @@ class CinMainWindow(Gtk.ApplicationWindow):
         self.set_size_request(280, 360)
         self.set_resizable(True)
         self.current_screen = "lobby"
+        self.network = NetworkAccessController()
         self.set_child(self.build_lobby())
 
     def make_page(self):
@@ -59,6 +65,7 @@ class CinMainWindow(Gtk.ApplicationWindow):
         subtitle = Gtk.Label(label="Core Identification Nodes")
         subtitle.add_css_class("title-3")
         page.append(subtitle)
+        self.add_network_control(page, compact=True)
 
         actions = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
         actions.set_halign(Gtk.Align.CENTER)
@@ -128,6 +135,26 @@ class CinMainWindow(Gtk.ApplicationWindow):
             label.set_wrap(True)
             content.append(label)
 
+        content.append(self.section_heading("Network Connectivity"))
+        explanation = Gtk.Label(label="Controls only CIN Main Lobby's Internet access. OFF blocks network traffic from CIN; ON allows it. Other Linux applications and the computer's network connection remain unaffected.")
+        explanation.set_xalign(0)
+        explanation.set_wrap(True)
+        content.append(explanation)
+        self.add_network_control(content)
+
+        content.append(self.section_heading("Code Deployment"))
+        deployment_status = Gtk.Label(label=self.deployment_status_text())
+        deployment_status.set_xalign(0)
+        deployment_status.set_wrap(True)
+        content.append(deployment_status)
+        manifest_button = Gtk.Button(label="Generate Local Manifest")
+        manifest_button.connect("clicked", lambda _button: self.show_deployment_result(
+            "Local Manifest", self.local_manifest_summary()))
+        content.append(manifest_button)
+        check_button = Gtk.Button(label="Check Official Development Channel")
+        check_button.connect("clicked", lambda _button: self.check_deployment_channel())
+        content.append(check_button)
+
         content.append(self.section_heading("Project Repository"))
         content.append(self.make_link())
         scroll = Gtk.ScrolledWindow()
@@ -137,6 +164,113 @@ class CinMainWindow(Gtk.ApplicationWindow):
         page.append(scroll)
         page.append(self.make_footer())
         return page
+
+
+    def add_network_control(self, parent, compact=False):
+        try:
+            state = self.network.status()
+        except NetworkAccessError:
+            state = "unavailable"
+        enabled = state == "enabled"
+        button = Gtk.Button(label="Turn CIN Internet access OFF" if enabled else "Turn CIN Internet access ON" if state == "disabled" else "CIN network control unavailable")
+        button.add_css_class("destructive-action" if enabled else "suggested-action")
+        button.set_sensitive(state in ("enabled", "disabled"))
+        button.connect("clicked", lambda _button: self.toggle_network())
+        parent.append(button)
+        status = Gtk.Label(label="CIN Internet access: ON" if enabled else "CIN Internet access: OFF" if state == "disabled" else "CIN network status unavailable")
+        status.set_xalign(0.5 if compact else 0)
+        status.add_css_class("dim-label")
+        parent.append(status)
+
+    def toggle_network(self):
+        try:
+            self.network.set_enabled(self.network.status() != "enabled")
+            self.show_lobby() if self.current_screen == "lobby" else self.show_settings()
+        except NetworkAccessError as exc:
+            self.show_deployment_result("Network control", str(exc))
+
+    @staticmethod
+    def deployment_status_text():
+        if not KEY_PATH.is_file():
+            return ("Deployment engine installed. Publisher trust is not configured. "
+                    f"Provision the official Ed25519 public key at {KEY_PATH}; "
+                    "no update can be trusted or applied yet.")
+        return "Deployment engine installed. Publisher key found; check the official channel manually."
+
+    def local_manifest_summary(self):
+        manifest = local_manifest(APP_DIR)
+        return (f"Local build: {manifest['build_hash']}\\n"
+                f"Components: {len(manifest['components'])}\\n"
+                "Manifest generated locally from installed files.")
+
+    def show_deployment_result(self, title, message):
+        dialog = Gtk.Window(title=title)
+        dialog.set_transient_for(self)
+        dialog.set_modal(True)
+        dialog.set_default_size(520, 220)
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
+        box.set_margin_top(18)
+        box.set_margin_bottom(18)
+        box.set_margin_start(18)
+        box.set_margin_end(18)
+        label = Gtk.Label(label=message)
+        label.set_wrap(True)
+        label.set_selectable(True)
+        box.append(label)
+        close = Gtk.Button(label="Close")
+        close.connect("clicked", lambda _button: dialog.close())
+        close.set_halign(Gtk.Align.END)
+        box.append(close)
+        dialog.set_child(box)
+        dialog.present()
+
+    def check_deployment_channel(self):
+        try:
+            self.network.require_enabled()
+            manifest, _signature = fetch_official()
+            proposal = compare(local_manifest(APP_DIR), manifest)
+            changes = len(proposal["additions"]) + len(proposal["replacements"]) + len(proposal["removals"])
+            if not changes:
+                self.show_deployment_result("Code Deployment", "CIN is already at the official channel build.")
+                return
+            summary = (f"Proposed changes: {changes}\\n"
+                       f"Additions: {len(proposal['additions'])}; replacements: {len(proposal['replacements'])}; "
+                       f"removals: {len(proposal['removals'])}.\\n"
+                       f"Target build: {proposal['target_build_hash']}\\n\\n"
+                       "Deploy this exact verified proposal?")
+            dialog = Gtk.Window(title="Authorize CIN Deployment")
+            dialog.set_transient_for(self)
+            dialog.set_modal(True)
+            dialog.set_default_size(480, 240)
+            box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
+            box.set_margin_top(18)
+            box.set_margin_bottom(18)
+            box.set_margin_start(18)
+            box.set_margin_end(18)
+            label = Gtk.Label(label=summary)
+            label.set_wrap(True)
+            box.append(label)
+            actions = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+            cancel = Gtk.Button(label="Cancel")
+            cancel.connect("clicked", lambda _button: dialog.close())
+            deploy = Gtk.Button(label="Authorize and Deploy")
+            deploy.add_css_class("suggested-action")
+            def apply(_button):
+                try:
+                    record = stage_and_apply(proposal, manifest, confirmed=True, root=APP_DIR)
+                    dialog.close()
+                    self.show_deployment_result("Deployment complete", json.dumps(record, indent=2))
+                except Exception as exc:
+                    dialog.close()
+                    self.show_deployment_result("Deployment failed", str(exc))
+            deploy.connect("clicked", apply)
+            actions.append(cancel)
+            actions.append(deploy)
+            box.append(actions)
+            dialog.set_child(box)
+            dialog.present()
+        except Exception as exc:
+            self.show_deployment_result("Deployment unavailable", str(exc))
 
     @staticmethod
     def section_heading(text):

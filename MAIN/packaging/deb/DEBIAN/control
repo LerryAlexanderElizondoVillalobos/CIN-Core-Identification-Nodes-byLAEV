@@ -1,10 +1,10 @@
 Package: cin-main-lobby
-Version: 0.1.0
+Version: 0.2.0
 Section: utils
 Priority: optional
 Architecture: all
 Maintainer: Core Identification Nodes byLAEV
-Description: CIN Main Lobby user-space application payload
+Description: CIN Main Lobby with component-aware official code deployment
  This Debian archive contains the architecture-independent Python application
  payload. Use the included install-user.sh to extract it into the current
  user's home directory. Do not install it with apt or dpkg -i.

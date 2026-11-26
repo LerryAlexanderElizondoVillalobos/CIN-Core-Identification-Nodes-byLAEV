@@ -24,6 +24,13 @@ class ApplicationContractTests(unittest.TestCase):
     def test_inactive_actions_are_disabled(self):
         self.assertGreaterEqual(TEXT.count("set_sensitive(False)"), 2)
 
+    def test_network_switch_is_limited_to_cin(self):
+        self.assertIn("NetworkAccessController", TEXT)
+        self.assertIn("Other Linux applications", TEXT)
+        self.assertNotIn("NetworkManager", TEXT)
+        self.assertNotIn("nmcli", TEXT)
+        self.assertIn("self.network.require_enabled()", TEXT)
+
     def test_no_remote_assets_or_browser_runtime(self):
         self.assertNotIn("WebKit", TEXT)
         self.assertNotIn("http://", TEXT.replace(
