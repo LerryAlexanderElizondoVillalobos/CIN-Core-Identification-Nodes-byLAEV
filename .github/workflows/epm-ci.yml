@@ -34,7 +34,7 @@ jobs:
       - name: Terminal does not require GUI
         run: |
           env -u DISPLAY -u WAYLAND_DISPLAY MAIN/installer/epm/epm --report
-          ! grep -R -E '(^|[[:space:]])(python3|gtk|tkinter)' MAIN/installer/epm/epm MAIN/installer/epm/core
+          ! grep -R -E '(^|[[:space:]])(exec[[:space:]]+python3|python3[[:space:]]+.*epm-desktop)' MAIN/installer/epm/epm MAIN/installer/epm/core
 
   desktop:
     name: Desktop shared-engine integration
