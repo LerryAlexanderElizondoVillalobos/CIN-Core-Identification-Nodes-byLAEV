@@ -83,6 +83,18 @@ jobs:
           GDK_BACKEND: x11
         run: |
           dbus-run-session -- xvfb-run -a "dist/Core_Identification_Nodes-aarch64.AppImage" --smoke-test
+      - name: Test real AppImage per-user installation and uninstall
+        env:
+          APPIMAGE_EXTRACT_AND_RUN: "1"
+          GDK_BACKEND: x11
+        run: |
+          set -euo pipefail
+          TEST_HOME="$RUNNER_TEMP/cin-user-home"
+          mkdir -p "$TEST_HOME"
+          HOME="$TEST_HOME" dbus-run-session -- xvfb-run -a \
+            "dist/Core_Identification_Nodes-aarch64.AppImage" --smoke-install
+          test ! -e "$TEST_HOME/Applications/Core_Identification_Nodes.AppImage"
+          test ! -e "$TEST_HOME/.local/share/applications/cin-main-lobby.desktop"
       - name: Build Debian ARM64 package
         run: bash MAIN/installer/linux/build-deb-arm64.sh
       - name: Validate Debian ARM64 package payload
@@ -94,6 +106,17 @@ jobs:
           dpkg-deb --contents "$DEB" > "$RUNNER_TEMP/cin-deb-contents.txt"
           grep -q '/opt/cin/AppDir/AppRun' "$RUNNER_TEMP/cin-deb-contents.txt"
           grep -q '/usr/bin/cin-main-lobby' "$RUNNER_TEMP/cin-deb-contents.txt"
+      - name: Install, launch, and remove Debian ARM64 package
+        env:
+          GDK_BACKEND: x11
+        run: |
+          set -euo pipefail
+          sudo dpkg -i dist/Core_Identification_Nodes-arm64.deb
+          test -x /usr/bin/cin-main-lobby
+          dbus-run-session -- xvfb-run -a /usr/bin/cin-main-lobby --smoke-test
+          sudo dpkg -r core-identification-nodes
+          test ! -e /usr/bin/cin-main-lobby
+          test ! -e /opt/cin/AppDir/AppRun
       - name: Upload ARM64 AppImage
         uses: actions/upload-artifact@v4
         with:
