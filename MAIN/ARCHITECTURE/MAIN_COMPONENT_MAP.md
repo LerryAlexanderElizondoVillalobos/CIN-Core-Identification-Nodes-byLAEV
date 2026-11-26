@@ -2,12 +2,14 @@
 
 ## Phase 1 — Main Lobby Installer
 
-`Release Source → Package Origin Verifier → Extractor → User-Level Integrator → CIN Launcher`
+`GitHub Actions Artifact → Debian Package Manager → System Launcher → GTK 4 CIN Main Lobby`
 
-- **Package Origin Verifier:** validates archive size and digest, manifest schema/canonicalization, detached signature and independently provisioned publisher trust.
-- **Extractor:** expands only the verified release into its versioned directory.
-- **User-Level Integrator:** creates the launcher and desktop entry in the current user's environment.
-- **CIN Launcher:** starts the installed runtime and hands control to Main Lobby.
+- **Debian package:** contains the Python GTK 4 application, launcher and desktop entry; the first package is architecture-independent Python code.
+- **Package manager:** installs the package and resolves Python/GTK 4 dependencies from the target distribution.
+- **System launcher:** starts the GTK application as the logged-in user; the running application does not require root.
+- **GitHub Actions:** runs source tests, builds the .deb, installs it in CI, performs the two-screen smoke test and uploads the downloadable artifact.
+
+The first CI pipeline does not yet authenticate public release artifacts with a detached publisher signature. A versioned Debian release-signing profile is required before authenticated production distribution.
 
 This installer deploys the Main Lobby and its required runtime. The installer itself does not create node records or issue certificates; those processes execute inside the installed Lobby. The Phase 1 deliverable includes all three founding certificate processes.
 
