@@ -23,7 +23,7 @@ concurrency:
 
 jobs:
   source-tests:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - name: Run CIN source tests
@@ -40,10 +40,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - runner: ubuntu-24.04
+          - runner: ubuntu-22.04
             arch: x86_64
             linuxdeploy: linuxdeploy-x86_64.AppImage
-          - runner: ubuntu-24.04-arm
+          - runner: ubuntu-22.04-arm
             arch: aarch64
             linuxdeploy: linuxdeploy-aarch64.AppImage
     runs-on: ${{ matrix.runner }}
@@ -52,7 +52,7 @@ jobs:
       - name: Install build-time GTK and Python dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y python3 python3-venv python3-dev python3-gi python3-cairo gir1.2-gtk-4.0 libcairo2-dev libgirepository-2.0-dev gcc pkg-config file wget
+          sudo apt-get install -y python3 python3-venv python3-dev python3-gi python3-cairo gir1.2-gtk-4.0 libcairo2-dev libgirepository1.0-dev patchelf gcc pkg-config file wget
       - name: Download architecture-matched linuxdeploy
         run: |
           wget -q "https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/${{ matrix.linuxdeploy }}" -O linuxdeploy
@@ -74,6 +74,9 @@ jobs:
           test -x squashfs-root/AppRun
           test -x squashfs-root/usr/bin/cin-main
           test -x squashfs-root/usr/bin/cin-appimage-installer
+          test -d squashfs-root/usr/lib/girepository-1.0
+          test -n "$(find squashfs-root/usr/lib/girepository-1.0 -name 'Gtk-4.0.typelib' -print -quit)"
+          test -n "$(find squashfs-root/usr/lib -name 'libgtk-4.so*' -print -quit)"
           rm -rf squashfs-root
           sha256sum "$APPIMAGE"
       - name: Provision CI user systemd manager for scoped network test
