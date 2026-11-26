@@ -1,58 +1,46 @@
 # CIN Main — First Installable Release
 
-The immediate objective is to produce a downloadable **CIN.deb** payload and a user-space installer bundle through GitHub Actions, then manually qualify it on Linux ARM64 / AArch64.
+The first Linux distribution is delivered as **one downloadable artifact: `CIN-Linux-Installer.zip`**. It contains the `CIN.deb` application payload, user-space installer and uninstaller, usage instructions and SHA-256 checksums. The inner `.deb` is not a separate operator download.
 
 ## First milestone — Install, launch and navigate
 
-The first installable release contains a native GTK 4 application with two working screens:
+The native GTK 4 application has two screens:
 
 1. **Main Lobby** — the initial application screen.
-2. **Settings** — an informational screen opened from the Lobby and equipped with a Back icon that returns to the Lobby.
+2. **Settings** — an informational screen opened from the Lobby and equipped with a Back control.
 
-Create opens an informational entry point and does not claim that node creation or certificate issuance is implemented. Enter and Import remain disabled.
+Create opens an informational entry point. Node creation and certificate issuance are not yet implemented. Enter and Import remain disabled.
 
-## User-first installation model
+## User-first installation
 
-CIN is installed by the current desktop user, not by root.
+CIN is installed by the current desktop user, not by root. The installer does not invoke `sudo`, `apt install`, `dpkg -i` or system package scripts.
 
-- No `sudo`, root shell, `apt install ./CIN.deb` or `dpkg -i` for CIN.
-- Application files: `~/.local/opt/cin-main-lobby/`
+- Application: `~/.local/opt/cin-main-lobby/`
 - Launcher: `~/.local/bin/cin-main`
 - Desktop entry: `~/.local/share/applications/cin-main.desktop`
-- The installer extracts the `.deb` payload with `dpkg-deb --extract` and writes only inside the user's home directory.
-- Python 3, PyGObject and GTK 4 must already be available to the user. The installer checks them and does not attempt privileged dependency installation.
-- The running application operates as the logged-in user.
-
-## Technology
-
-- Python 3 and GTK 4 native UI.
-- Debian `.deb` payload named `CIN.deb`, architecture `all`.
-- Intended operator qualification: Debian-compatible Linux ARM64 / AArch64.
-- No Electron, Chromium, WebKit, remote resources or network requirement to open the application.
+- Python 3, PyGObject, GTK 4, OpenSSL and dpkg-deb must already be available.
 
 ## Build and download
 
-GitHub Actions runs source tests, builds the payload and user installer scripts, installs CIN into the CI user's home directory on x86_64 and ARM64 runners, launches it under a virtual display and tests Lobby → Settings → Lobby navigation. A successful non-PR run uploads **CIN-deb-installer**, containing `CIN.deb`, `install-user.sh` and `uninstall-user.sh`.
+GitHub Actions runs source tests, builds one ZIP installer, verifies its checksums and Debian payload, then installs and launches CIN as an unprivileged user on x86_64 and ARM64 runners. It tests Lobby → Settings → Lobby and uninstalls the application. Only after all gates pass does the workflow publish the **CIN-Linux-Installer** artifact.
+
+The single operator download is `CIN-Linux-Installer.zip`. Do not use earlier `CIN-deb-installer` artifacts or standalone legacy package files.
 
 See:
 - [First Installable Release Workplan](WORKPLAN_PHASE_1.md)
 - [Development Roadmap](ROADMAP.md)
-- [Linux User-Space Installer](installer/linux/README.md)
-- [Operator Installation and Acceptance Test](installer/linux/INSTALLATION_TEST_PLAN.md)
+- [Single Linux Installer](installer/linux/README.md)
+- [Installation and Acceptance Test](installer/linux/INSTALLATION_TEST_PLAN.md)
 - [Lobby and Settings](lobby/README.md)
 - [Settings Screen Specification](lobby/SETTINGS.md)
 
-## Operator installation
+## Install, launch and remove
 
-Extract the downloaded artifact ZIP. From that directory, run as the normal desktop user:
+Extract `CIN-Linux-Installer.zip`, enter the extracted `CIN-Linux-Installer` directory and run as the normal desktop user:
 
 ```bash
+sha256sum -c SHA256SUMS
 bash install-user.sh ./CIN.deb
-```
-
-Launch:
-
-```bash
 ~/.local/bin/cin-main
 ```
 
@@ -62,19 +50,12 @@ Remove:
 bash uninstall-user.sh
 ```
 
-None of these user operations requires root privileges or `sudo`. ARM64 compatibility is only confirmed after manual qualification on the actual target; CI success alone is not sufficient.
+No user installation or removal step requires root privileges. CI success does not replace manual qualification on the actual target Linux desktop.
 
-## Longer-term Phase 1
+## Longer-term scope
 
-After the installer milestone is qualified, continue with local storage and the three founding processes:
-1. Genesis Environment Certificate → Genesis Environment Manifest.
-2. CIN Node Birth Certificate → authoritative Node Birth Record and technical node identifiers.
-3. CIN Global Personal Document and Node Marriage Certificate → deterministic document identifier and separately verified association.
-
-## Phase 2 — CIN Package Engine
-
-A separate installer and product layer for the engine of engines. It is not included in the first Lobby package.
+The founding certificate processes, local storage and Phase 2 CIN Package Engine remain subsequent implementation work. The first installer does not claim these future capabilities are already operational.
 
 ## Current maturity
 
-The GTK4 application source and Debian user-space packaging scaffold are present. The first no-root CI installation, automated UI smoke test and operator ARM64 installation remain to be executed and verified. Do not describe the release as tested until those checks have passed.
+The single-installer build pipeline has been committed and is awaiting its first successful CI execution. Do not treat the new installer as released until source tests, package validation and both runtime qualification jobs pass.
