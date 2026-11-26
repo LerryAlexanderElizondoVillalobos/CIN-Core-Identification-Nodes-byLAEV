@@ -64,8 +64,8 @@ done
 export APPIMAGE_EXTRACT_AND_RUN=1
 LIB_ARGS=()
 while IFS= read -r library; do LIB_ARGS+=(--library "$library"); done < <(find "$APPDIR/usr/lib/cin-main" "$APPDIR/usr/lib/cin-appimage-installer" -type f -name '*.so*')
-linuxdeploy --appdir "$APPDIR" --executable "$APPDIR/usr/bin/cin-main" \
-  --executable "$APPDIR/usr/bin/cin-appimage-installer" "\${LIB_ARGS[@]}" \
+linuxdeploy --appdir "$APPDIR" --executable "$APPDIR/usr/lib/cin-main/cin-main" \
+  --executable "$APPDIR/usr/lib/cin-appimage-installer/cin-appimage-installer" "\${LIB_ARGS[@]}" \
   --desktop-file "$APPDIR/usr/share/applications/cin-main-lobby.desktop" \
   --icon-file "$APPDIR/usr/share/icons/hicolor/scalable/apps/cin-main-lobby.svg" \
   --output appimage
