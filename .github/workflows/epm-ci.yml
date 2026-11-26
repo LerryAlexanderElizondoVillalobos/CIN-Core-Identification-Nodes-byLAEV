@@ -28,7 +28,7 @@ jobs:
           sh -n MAIN/installer/epm/core/epm-core.sh
           sh -n MAIN/installer/epm/tests/test-epm.sh
       - name: ShellCheck
-        run: shellcheck -s sh MAIN/installer/epm/epm MAIN/installer/epm/core/epm-core.sh MAIN/installer/epm/tests/test-epm.sh
+        run: shellcheck -s sh MAIN/installer/epm/epm MAIN/installer/epm/epm-desktop MAIN/installer/epm/core/epm-core.sh MAIN/installer/epm/tests/test-epm.sh
       - name: Functional tests
         run: sh MAIN/installer/epm/tests/test-epm.sh
       - name: Terminal does not require GUI
