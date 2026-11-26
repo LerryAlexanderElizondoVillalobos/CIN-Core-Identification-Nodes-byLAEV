@@ -2,13 +2,15 @@
 
 **Release architecture:** ARM64 / AArch64 only  
 **Supported execution:** ARM64 Linux on physical hardware or an ARM64 virtual machine  
-**Primary format:** AppImage — graphical per-user installation, no root and no sudo  
-**Additional format:** Debian ARM64 package (.deb)
+**Primary desktop format:** AppImage — graphical per-user installation  
+**LinDesk format:** native Debian 13 ARM64 `.deb` with embedded per-user installer  
+**Installation model:** user-space only; no root or sudo
 
 ## Distribution files
 
 - `Core_Identification_Nodes-aarch64.AppImage` — recommended; user-space installation to `~/Applications`, no administrator access.
-- `Core_Identification_Nodes-arm64.deb` — conventional Debian package for Debian/Ubuntu ARM64 systems. Installation through apt, dpkg, GDebi, Discover or another package manager requires administrator authorization.
+- `CIN.deb` — native Debian 13 ARM64 application payload with its installer and uninstaller embedded; install by extracting with `dpkg-deb -x` and running the embedded installer as the current user.
+- `Core_Identification_Nodes-arm64.deb` — legacy conventional system package, if distributed separately; installing it through a package manager requires administrator authorization.
 
 The application itself does not require virtualization. It runs on compatible ARM64 Linux installations whether they are on physical ARM64 hardware or inside an ARM64 virtual machine. An x86_64 virtual machine or CPU-emulation layer is not an ARM64 target.
 
@@ -23,11 +25,22 @@ The graphical installer copies the AppImage to `~/Applications`, creates the des
 
 Uninstall the per-user launcher with `~/.local/bin/cin-uninstall`. User data and configuration are preserved.
 
-## Debian package installation
+## Debian 13 ARM64 user-space installation
 
-Install `Core_Identification_Nodes-arm64.deb` using the distribution's graphical package installer or package manager. This is a conventional ARM64 Debian package and normally requires administrator authentication because it installs the application under `/opt` and registers a system-wide launcher.
+`CIN.deb` is a native ARM64 package payload, not a request to register a system-wide package. Do not use `dpkg -i`, apt, or sudo. Run as the normal user:
 
-After installation, launch **Core Identification Nodes** from the application menu. Remove it using the distribution's package manager.
+```sh
+tmp="$(mktemp -d)"
+dpkg-deb --extract ./CIN.deb "$tmp"
+sh "$tmp/opt/cin-installer/install-user.sh" "$PWD/CIN.deb"
+result=$?
+rm -rf "$tmp"
+exit "$result"
+```
+
+The embedded installer writes the application, launcher, desktop entry and icon only under the current user's home directory. Launch with `~/.local/bin/cin`; uninstall with `~/.local/bin/cin-uninstall`. User data, configuration and cache are preserved.
+
+A separate legacy system package, if used, follows normal Debian administrator installation rules.
 
 ## Included application
 
@@ -64,10 +77,10 @@ The portable package reuses the existing GTK4 Main Lobby and Settings payload. L
 
 ## Debian 13 ARM64 — User Space Edition
 
-A dedicated Debian 13 (Trixie) ARM64 distribution is being prepared as a native Debian package payload plus a ZIP installer:
+A dedicated Debian 13 (Trixie) ARM64 distribution is being prepared as a native `arm64` `.deb` with its installer embedded, plus an optional ZIP convenience bundle:
 
-- `CIN.deb` — native `arm64` package containing the relocatable CIN AppDir.
-- `CIN-Debian13-Installer.zip` — includes `CIN.deb`, `install-user.sh`, `uninstall-user.sh`, and documentation.
+- `CIN.deb` — native `arm64` package containing the relocatable CIN AppDir and `/opt/cin-installer/` scripts.
+- `CIN-Debian13-Installer.zip` — optional bundle containing the same `.deb`, helper scripts and documentation.
 - Installation uses `dpkg-deb -x` and places the application under `~/.local/opt/cin-main-lobby/`.
 - No `sudo`, root, `dpkg -i`, `apt install`, system package database, daemon, or auto-start service is used.
 - The uninstaller preserves user data, configuration and cache.
