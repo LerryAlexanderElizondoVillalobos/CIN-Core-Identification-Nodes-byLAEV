@@ -1,0 +1,92 @@
+name: CIN EPM — Build and Test
+
+on:
+  push:
+    paths:
+      - 'MAIN/installer/epm/**'
+      - '.github/workflows/epm-ci.yml'
+  pull_request:
+    paths:
+      - 'MAIN/installer/epm/**'
+      - '.github/workflows/epm-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  terminal:
+    name: Terminal POSIX engine
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install ShellCheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+      - name: POSIX syntax
+        run: |
+          sh -n MAIN/installer/epm/epm
+          sh -n MAIN/installer/epm/core/epm-core.sh
+          sh -n MAIN/installer/epm/tests/test-epm.sh
+      - name: ShellCheck
+        run: shellcheck -s sh MAIN/installer/epm/epm MAIN/installer/epm/core/epm-core.sh MAIN/installer/epm/tests/test-epm.sh
+      - name: Functional tests
+        run: sh MAIN/installer/epm/tests/test-epm.sh
+      - name: Terminal does not require GUI
+        run: |
+          env -u DISPLAY -u WAYLAND_DISPLAY MAIN/installer/epm/epm --report
+          ! grep -R -E '(^|[[:space:]])(python3|gtk|tkinter)' MAIN/installer/epm/epm MAIN/installer/epm/core
+
+  desktop:
+    name: Desktop shared-engine integration
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Desktop test runtime
+        run: sudo apt-get update && sudo apt-get install -y python3-tk xvfb
+      - name: Python syntax
+        run: python3 -m py_compile MAIN/installer/epm/desktop/epm-desktop.py
+      - name: Tk runtime
+        run: python3 -c 'import tkinter; print("Tk available")'
+      - name: Desktop starts under virtual display
+        run: timeout 8s xvfb-run -a python3 MAIN/installer/epm/desktop/epm-desktop.py || test "$?" -eq 124
+      - name: Verify shared-engine delegation
+        run: grep -q 'subprocess.run(\[str(ENGINE)' MAIN/installer/epm/desktop/epm-desktop.py
+
+  package:
+    name: Build downloadable editions
+    needs: [terminal, desktop]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create Terminal and Desktop archives
+        run: |
+          set -eu
+          VERSION=$(sed -n 's/^EPM_VERSION="\([^"]*\)"/\1/p' MAIN/installer/epm/core/epm-core.sh)
+          mkdir -p dist/terminal dist/desktop
+          cp -R MAIN/installer/epm/epm MAIN/installer/epm/core dist/terminal/
+          cp MAIN/installer/epm/README.md dist/terminal/
+          cp -R MAIN/installer/epm/epm MAIN/installer/epm/core MAIN/installer/epm/desktop MAIN/installer/epm/epm-desktop MAIN/installer/epm/README.md dist/desktop/
+          tar -czf "dist/cin-epm-terminal-${VERSION}.tar.gz" -C dist/terminal .
+          tar -czf "dist/cin-epm-desktop-${VERSION}.tar.gz" -C dist/desktop .
+          (cd dist && sha256sum cin-epm-*.tar.gz > SHA256SUMS)
+      - name: Upload Terminal edition
+        uses: actions/upload-artifact@v4
+        with:
+          name: cin-epm-terminal
+          path: dist/cin-epm-terminal-*.tar.gz
+          if-no-files-found: error
+          retention-days: 30
+      - name: Upload Desktop edition
+        uses: actions/upload-artifact@v4
+        with:
+          name: cin-epm-desktop
+          path: dist/cin-epm-desktop-*.tar.gz
+          if-no-files-found: error
+          retention-days: 30
+      - name: Upload checksums
+        uses: actions/upload-artifact@v4
+        with:
+          name: cin-epm-sha256
+          path: dist/SHA256SUMS
+          if-no-files-found: error
+          retention-days: 30
