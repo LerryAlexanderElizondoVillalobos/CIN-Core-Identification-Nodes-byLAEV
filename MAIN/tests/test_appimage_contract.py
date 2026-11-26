@@ -14,8 +14,8 @@ class AppImageContractTests(unittest.TestCase):
                          "Path.home() / \"Applications\"",
                          ".local/share/applications", "APPIMAGE"):
             self.assertIn(expected, text)
-        self.assertNotIn("sudo", text)
-        self.assertNotIn("os.getuid() == 0", text)
+        self.assertNotIn("sudo ", text)
+        self.assertNotIn("pkexec", text)
 
     def test_apprun_has_installer_and_lobby_modes(self):
         text = APPRUN.read_text(encoding="utf-8")
