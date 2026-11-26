@@ -89,6 +89,8 @@ mkdir -p "$BUILD/appimage-output"
 export APPIMAGE_EXTRACT_AND_RUN=1
 # GTK is loaded dynamically by GI typelibs, so seed only the four GTK
 # runtime libraries. linuxdeploy follows their ELF dependencies recursively.
+# PyInstaller onedir executables already carry their private runtime; do not
+# ask linuxdeploy to re-parse those bootloaders (which can fail on ARM builds).
 # Avoid passing every PyInstaller .so/data file: some bundled resources carry
 # .so-like names but are not deployable ELF objects.
 LIB_ARGS=()
@@ -101,8 +103,6 @@ for library in "$APPDIR"/usr/lib/libgtk-4.so* "$APPDIR"/usr/lib/libgdk-4.so* \
 done
 
 (cd "$BUILD/appimage-output" && linuxdeploy --appdir "$APPDIR" \
-  --executable "$APPDIR/usr/lib/cin-main/cin-main" \
-  --executable "$APPDIR/usr/lib/cin-appimage-installer/cin-appimage-installer" \
   "${LIB_ARGS[@]}" \
   --desktop-file "$APPDIR/usr/share/applications/cin-main-lobby.desktop" \
   --icon-file "$APPDIR/usr/share/icons/hicolor/256x256/apps/cin-main-lobby.png" \
