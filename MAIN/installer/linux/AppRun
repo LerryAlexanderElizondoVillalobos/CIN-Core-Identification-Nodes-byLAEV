@@ -4,6 +4,9 @@ HERE="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
 export GI_TYPELIB_PATH="$HERE/usr/lib/girepository-1.0${GI_TYPELIB_PATH:+:$GI_TYPELIB_PATH}"
 if [ "${1:-}" = "--run" ]; then
     shift
+    if command -v systemd-run >/dev/null 2>&1 && systemctl --user show-environment >/dev/null 2>&1; then
+        exec systemd-run --user --scope --unit=cin-main-lobby -- "$HERE/usr/bin/cin-main" "$@"
+    fi
     exec "$HERE/usr/bin/cin-main" "$@"
 fi
 exec "$HERE/usr/bin/cin-appimage-installer" "$@"
