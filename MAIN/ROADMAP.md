@@ -1,80 +1,82 @@
-# CIN Main — Two-Phase Development Roadmap
+# CIN Main — Delivery Roadmap
 
-CIN Main has two installation phases. The immediate implementation target is the first milestone of Phase 1: a lightweight two-screen Main Lobby application.
+The immediate goal is a downloadable and manually installable Debian package for the first functional two-screen CIN Main Lobby.
 
-## Phase 1 — CIN Main Lobby Application
+## Milestone 1 — First installable release: `CIN.deb`
 
-**First milestone deliverable:** a Linux-installable application that opens the Main Lobby, navigates to an informational Settings screen and returns to the Lobby through a Back icon.
+**Deliverable:** a GitHub Actions-built Debian package containing the native GTK 4 CIN Main Lobby application.
 
-### Phase 1A — Application and navigation foundation
+### M1.1 — Native application
+- Implement the Lobby in Python with GTK 4.
+- Implement the distinct informational Settings screen.
+- Implement Settings and Back navigation.
+- Keep Create honest about its unimplemented node/certificate workflows.
+- Keep Enter and Import disabled.
+- Use native widgets, system typography and no embedded browser engine.
 
-- Select a lightweight native UI toolkit/runtime based on actual Linux ARM64 support, orientation handling, scaling and packaging.
-- Establish a launchable application baseline.
-- Implement the Main Lobby screen with its defined title, subtitle, Create/Enter/Import actions and professional footer.
-- Implement the separate informational Settings screen.
-- Display basic application, project, phase, milestone, platform, offline-startup and capability information.
-- Implement Lobby → Settings and Settings → Lobby navigation.
-- Keep both screens usable in landscape, portrait, compact and expanded windows.
-- Keep startup and both screens independent of network access.
-- Package and test the application on a qualified Linux ARM64 environment.
+### M1.2 — Debian packaging
+- Define package metadata and runtime dependencies.
+- Include the application launcher and desktop entry.
+- Build `CIN.deb` with `dpkg-deb`.
+- Keep future node data separate from replaceable application files.
+- Document installation and removal behavior.
 
-### Phase 1B — Lobby foundation and local state
+### M1.3 — Continuous integration
+- Run source-contract tests.
+- Build the Debian package on GitHub-hosted Linux.
+- Inspect package metadata and contents.
+- Install the package in the CI runner.
+- Launch it under Xvfb and execute the two-screen navigation smoke test.
+- Upload `CIN.deb` as a workflow artifact only after all required checks pass.
 
-- Initialize private local storage when required by the actual creation workflow.
+### M1.4 — Operator installation and qualification
+- Download the successful workflow artifact.
+- Install the package on a Debian-compatible Linux ARM64 / AArch64 target.
+- Launch the Lobby from desktop integration or terminal.
+- Open Settings and return with Back.
+- Repeat navigation, restart and test offline startup.
+- Record actual compatibility, display behavior and resource measurements.
+
+**Milestone 1 acceptance:** a successful downloadable package plus a successful manual installation and screen-navigation test on the operator's target environment. CI x86_64 success alone does not qualify ARM64 compatibility.
+
+## Technology baseline
+
+- Python 3 application code.
+- GTK 4 native interface via Python GObject Introspection.
+- Debian `.deb` package, initially `CIN.deb`.
+- Package architecture `all` because the Python application is architecture-independent; native GTK/Python dependencies are resolved by the target distribution.
+- No Electron, Chromium, WebKit, remote resources or network requirement for application startup.
+
+The package manager may require administrator authorization to install system-managed files. The running Lobby operates as the logged-in user and must not require root privileges.
+
+## Milestone 2 — Main Lobby foundation
+
+After the first installer has been manually qualified:
+- Establish private local storage.
 - Load installation and lifecycle records.
 - Reconstruct actual process state after restart.
 - Present pre-birth and incomplete states accurately.
 
-### Phase 1C — Genesis Environment Certificate
-
+## Milestone 3 — Genesis Environment Certificate
 - Implement environment collection and provenance labels.
 - Build and validate the Genesis Environment Manifest.
 - Register it as the first logical CIN record.
 
-### Phase 1D — CIN Node Birth Certificate
-
+## Milestone 4 — CIN Node Birth Certificate
 - Import the complete registered Genesis Manifest.
-- Finalize and approve the identifier derivation profile and conformance vectors.
+- Finalize the approved identifier derivation profile and conformance vectors.
 - Integrate separate Node Birth Authorization.
 - Commit and independently verify the Node Birth Record and applicable technical node identifiers.
 
-### Phase 1E — CIN Global Personal Document and Node Marriage
-
+## Milestone 5 — CIN Global Personal Document and Node Marriage
 - Implement deterministic document identifier derivation.
 - Integrate an external wallet/signer.
 - Verify the signed association and persist both artifacts separately.
-- Preserve actual authority, association and issuance status.
-
-### Phase 1 acceptance
-
-The first UI milestone is complete when the user can launch the application, open Settings, read the required information and return to the Lobby, with both screens adapting to orientation and window size. The broader Phase 1 node-foundation acceptance remains separate and requires the three defined founding processes and their persisted verification states. The Package Engine is not part of Phase 1.
 
 ## Phase 2 — CIN Package Engine Installer
 
-**Deliverable:** a separate installer for the CIN Package Engine — the engine of engines.
-
-This phase follows the establishment of the node's technical identifiers and CIN Global Personal Document association in Phase 1.
-
-- Specify package and engine contracts.
-- Implement package registry and manifest verifier.
-- Implement dependency resolver and package installer.
-- Implement engine registry and loader.
-- Implement configuration and lifecycle management.
-- Connect request/permission and external signer interfaces.
-- Preserve node records when installing, updating or removing engines.
-
-### Phase 2 acceptance
-
-The Package Engine installer installs the engine-of-engines subsystem, which can discover, verify, resolve, install, configure, activate, update, disable and remove a specialized engine package.
-
-## Subsequent package validation
-
-Select one specialized engine as the first end-to-end package and demonstrate the full package lifecycle through the Phase 2 Package Engine.
-
-## Deferred personal issuance phase
-
-The separate CIN Personal Registration and Credential process remains a later issuance stage, after the founding node and node-document association prerequisites, authorization and issuer model have been defined.
+A separate installer for the engine of engines, following the founding node and node-document association prerequisites. It will manage specialized packages, engines, dependencies, configuration, permissions, signing connectors and lifecycle.
 
 ## Release discipline
 
-The archived test workflows remain historical. New checks will be designed for the actual implementation as each phase becomes functional. Do not reactivate old workflows merely because similarly named folders or components reappear.
+A workflow contract check is not an application runtime test. An x86_64 CI test is not ARM64 device qualification. A generated Debian package is not considered delivered until the operator can download and install it and verify the planned behavior.
