@@ -16,7 +16,7 @@ command -v dpkg-deb >/dev/null || { echo "Missing dpkg-deb build dependency" >&2
 PKG="$ROOT/build/deb-arm64"
 rm -rf "$PKG"
 install -d "$PKG/DEBIAN" "$PKG/opt/cin" "$PKG/usr/share/applications" \
-  "$PKG/usr/share/icons/hicolor/256x256/apps" "$ROOT/dist"
+  "$PKG/usr/share/icons/hicolor/scalable/apps" "$PKG/usr/share/icons/hicolor/256x256/apps" "$ROOT/dist"
 
 install -m 0755 "$APPIMAGE" "$PKG/opt/cin/Core_Identification_Nodes-aarch64.AppImage"
 install -m 0644 MAIN/installer/linux/cin-main-lobby.svg "$PKG/usr/share/icons/hicolor/scalable/apps/cin-main-lobby.svg"
