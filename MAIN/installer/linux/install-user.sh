@@ -21,6 +21,7 @@ except Exception as exc:
     raise SystemExit("CIN requires Python 3, PyGObject and GTK 4 already available to this user. " + str(exc))
 PY
 PACKAGE="$(cd "$(dirname "$PACKAGE")" && pwd)/$(basename "$PACKAGE")"
+PYTHON_BIN="$(command -v python3)"
 APP_DIR="$HOME/.local/opt/cin-main-lobby"
 BIN_DIR="$HOME/.local/bin"
 APPS_DIR="$HOME/.local/share/applications"
@@ -32,7 +33,7 @@ install -d "$APP_DIR" "$BIN_DIR" "$APPS_DIR"
 install -m 0644 "$TEMP_DIR/opt/cin-main-lobby/cin_main.py" "$APP_DIR/cin_main.py"
 cat > "$BIN_DIR/cin-main" <<EOF
 #!/bin/sh
-exec /usr/bin/python3 "$APP_DIR/cin_main.py" "\$@"
+exec "$PYTHON_BIN" "$APP_DIR/cin_main.py" "\$@"
 EOF
 chmod 0755 "$BIN_DIR/cin-main"
 cat > "$APPS_DIR/cin-main.desktop" <<EOF
