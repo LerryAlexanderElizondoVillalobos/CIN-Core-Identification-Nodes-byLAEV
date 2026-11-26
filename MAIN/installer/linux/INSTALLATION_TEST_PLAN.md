@@ -1,69 +1,72 @@
-# Core Identification Nodes — Official Debian Acceptance Test
+# CIN Linux ARM64 — Acceptance Test Plan
 
-## Artifact
+## Release artifacts
 
-The sole official downloadable package is `Core_Identification_Nodes.deb`. The Debian package metadata must identify package `core-identification-nodes`, version `0.3.0`, architecture `all`.
+- `Core_Identification_Nodes-aarch64.AppImage`
+- `Core_Identification_Nodes-arm64.deb`
 
-## 1. Inspect package contents
+Both files must be built for ARM64/AArch64. No x86_64 artifact is part of this release.
 
-```bash
-dpkg-deb --field Core_Identification_Nodes.deb Package Version Architecture
-dpkg-deb --contents Core_Identification_Nodes.deb
-```
+## 1. AppImage payload
 
-The payload must include:
-- `opt/cin-main-lobby/cin_main.py`
-- `opt/cin-main-lobby/settings/deployment/engine.py`
-- `opt/cin-main-lobby/settings/network_access.py`
+Verify the AppImage contains:
+- AppRun entry point
+- CIN Main Lobby executable
+- graphical first-run installer
+- GTK4/PyGObject runtime dependencies and introspection typelibs
+- Deploy engine and network controller modules
+- desktop integration metadata and icon
 
-## 2. Install as a normal user
+## 2. AppImage user-mode installation
 
-Do not use root, `sudo`, `apt install` or `dpkg -i`.
+On a clean ARM64 Linux desktop:
+- Download the AppImage and enable executable permission if required.
+- Double-click it and confirm the graphical installer appears.
+- Select **Install for this user**.
+- Confirm installation under `~/Applications`.
+- Confirm desktop entry and icon under `~/.local/share`.
+- Confirm no root, sudo, administrator password, terminal, package manager, or system directory modification occurs.
+- Confirm Main Lobby opens after installation.
 
-```bash
-tmp="$(mktemp -d)"
-dpkg-deb --extract ./Core_Identification_Nodes.deb "$tmp"
-bash "$tmp/opt/cin-installer/install-user.sh" "$PWD/Core_Identification_Nodes.deb"
-result=$?
-rm -rf "$tmp"
-exit "$result"
-```
+Also test **Run without installing**.
 
-Expected application paths:
-- `~/.local/opt/cin-main-lobby/`
-- `~/.local/bin/cin-main`
-- `~/.local/share/applications/cin-main.desktop`
+## 3. Main Lobby
 
-## 3. Launch and navigation
+Open the installed launcher. Verify Main Lobby is the initial screen and Settings navigation works in both directions.
 
-```bash
-~/.local/bin/cin-main
-```
+## 4. Debian ARM64 package
 
-Verify Main Lobby opens first, Settings opens from its control, and Back returns to Main Lobby.
+- Run `dpkg-deb --info` and confirm `Architecture: arm64`.
+- Inspect contents and confirm the native relocatable AppDir under `/opt/cin/AppDir`, its Main Lobby launcher, GTK runtime, and desktop entry are present.
+- Install in a disposable Debian/Ubuntu ARM64 test environment with administrator authorization.
+- Launch CIN as a normal logged-in user.
+- Remove using the package manager and confirm package files are removed.
 
-## 4. Deploy
+The conventional .deb package-manager installation requires administrator authorization. This is not the no-root installation route.
 
-Generate the local manifest and verify that component hashes and build fingerprint are stable. Provision the genuine publisher Ed25519 public key independently and publish a signed official manifest before attempting remote deployment. Without those trust materials, the application must report Deploy as not configured and must not apply remote code.
+## 5. Deploy
 
-## 5. Network isolation
+Verify included Deploy components and current supported local functionality. Remote updates must remain disabled until the AppImage-aware signed replacement updater, genuine publisher public key, and signed official manifest are provisioned and verified.
 
-- Confirm CIN runs in `cin-main-lobby.scope`.
-- Turn CIN network access OFF and verify that a process in the CIN scope cannot reach IP endpoints.
-- Verify another process outside the CIN scope retains connectivity.
-- Turn CIN network access ON and verify connectivity is restored for CIN.
-- Confirm the switch does not invoke NetworkManager or alter host-wide networking.
+## 6. Network control
 
-## 6. Upgrade and uninstall
+On supported systemd environments:
+- Verify only CIN's process scope is affected.
+- Toggle OFF and verify CIN network traffic is denied.
+- Verify a separate process retains network access.
+- Toggle ON and verify CIN access returns.
+- On unsupported systems, confirm the UI reports unavailable.
 
-Verify an application replacement preserves `~/.local/share/cin-main-lobby` and `~/.config/cin-main-lobby`. Uninstall using:
+## 7. Environment coverage
 
-```bash
-bash ~/.local/opt/cin-main-lobby/uninstall-user.sh
-```
+Test:
+- Physical Linux ARM64 hardware.
+- Linux ARM64 virtual machine.
+- At least one Debian/Ubuntu ARM64 desktop.
+- Additional glibc-based ARM64 desktops where available.
 
-Verify application files and launcher are removed while user data and publisher configuration remain.
+Virtualization is optional; the guest must be ARM64. Record distribution release, kernel, glibc version, architecture, GUI result, and installation result.
 
-## 7. Release acceptance
+## 8. Uninstall and data preservation
 
-A release requires passing source tests, x86_64 and ARM64 scope tests, Debian payload inspection, normal-user installation, installed application smoke test including OFF/ON network behavior, and uninstall/data-preservation tests.
+Run `~/.local/bin/cin-uninstall` for AppImage installations. Verify the per-user AppImage and launcher are removed while user data and publisher trust configuration are preserved.

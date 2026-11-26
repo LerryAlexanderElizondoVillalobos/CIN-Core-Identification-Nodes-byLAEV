@@ -16,26 +16,26 @@ CIN Main is delivered in two consecutive installation phases:
 
 ### 2.1 Installation scope
 
-The first downloadable milestone is one self-contained Debian archive named `Core_Identification_Nodes.deb` (Debian package `core-identification-nodes`, version `0.3.0`, architecture `all`). It contains the Main Lobby application, Settings, Deploy engine, network controller, and embedded user-space installer and uninstaller. It is extracted with `dpkg-deb --extract`; it is not registered through `apt install` or `dpkg -i`.
+The Debian 13 ARM64 distribution consists of `CIN.deb` (Debian package `core-identification-nodes`, architecture `arm64`) and `CIN-Debian13-Installer.zip`. The ZIP contains the .deb plus `install-user.sh` and `uninstall-user.sh`. The .deb contains the relocatable CIN AppDir and is extracted with `dpkg-deb -x`; it is not registered through `apt install` or `dpkg -i`. The ARM64 package architecture reflects the native executable payload and must not be marked `all`.
 
 The user installer:
 - Must run as a normal desktop user and refuse root execution.
 - Must not invoke `sudo`, `apt install`, `dpkg -i` or privileged package scripts.
 - Must not write to `/usr`, system-wide `/opt`, system application directories or the system package database.
 - Must place application files under `~/.local/opt/cin-main-lobby/`.
-- Must place the launcher under `~/.local/bin/cin-main`.
-- Must place the desktop entry under `~/.local/share/applications/cin-main.desktop`.
+- Must place the launcher under `~/.local/bin/cin`.
+- Must place the desktop entry under `~/.local/share/applications/cin.desktop`.
 - Must keep future persistent CIN node data separate from replaceable application files.
 
-Python 3, PyGObject, GTK 4, OpenSSL, dpkg-deb, a running systemd user manager and systemd/cgroup support for `IPAddressDeny` are runtime prerequisites. The installer checks prerequisites and does not install system dependencies or request elevated privileges.
+The packaged AppDir carries the application runtime and GTK/PyGObject components required by CIN. `dpkg-deb` is required only by the user-space extraction script. A systemd user manager is optional for the dedicated application scope and network-policy integration; CIN must remain launchable without it and accurately report when host-enforced network isolation is unavailable. The installer does not install system dependencies or request elevated privileges.
 
 Default XDG locations (respect corresponding environment variables when implemented):
 
 | Purpose | Default location |
 |---|---|
 | Application files | `~/.local/opt/cin-main-lobby/` |
-| User command launcher | `~/.local/bin/cin-main` |
-| Desktop entry | `~/.local/share/applications/cin-main.desktop` |
+| User command launcher | `~/.local/bin/cin` |
+| Desktop entry | `~/.local/share/applications/cin.desktop` |
 | Persistent node data | `~/.local/share/cin/` |
 | User configuration | `~/.config/cin/` |
 | Cache and temporary working data | `~/.cache/cin/` |
@@ -44,13 +44,13 @@ Application binaries, configuration, cache and node records must remain separate
 
 ### 2.2 Installation sequence
 
-1. Download the single `Core_Identification_Nodes.deb` artifact.
-2. Extract the archive with `dpkg-deb --extract` into a temporary directory.
-3. Run the embedded `/opt/cin-installer/install-user.sh` as the normal desktop user, passing the original `.deb` path.
-4. The installer checks Python 3, PyGObject, GTK 4, OpenSSL and the systemd user manager.
-5. The script extracts the application and installs it in the user's local application directory.
-6. The script creates the user's launcher and desktop entry; the launcher runs CIN inside its dedicated systemd user scope.
-7. Start CIN Main Lobby as the logged-in user.
+1. Download and extract `CIN-Debian13-Installer.zip`.
+2. Run `./install-user.sh` as the normal desktop user.
+3. The script validates Debian 13 and ARM64, then extracts `CIN.deb` with `dpkg-deb -x` into a temporary directory.
+4. The script copies the relocatable application into `~/.local/opt/cin-main-lobby/`.
+5. The script creates `~/.local/bin/cin`, `~/.local/bin/cin-uninstall` and the per-user desktop entry.
+6. Start CIN Main Lobby as the logged-in user.
+7. Remove the application with `./uninstall-user.sh` or `~/.local/bin/cin-uninstall`.
 
 Release signature verification and a detached publisher trust chain are not implemented by this first build pipeline. They remain a release-engineering requirement before treating public downloads as authenticated production releases.
 

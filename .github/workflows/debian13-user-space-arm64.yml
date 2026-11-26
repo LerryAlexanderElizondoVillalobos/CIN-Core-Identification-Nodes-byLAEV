@@ -1,0 +1,180 @@
+name: CIN Debian 13 ARM64 — User Space Package
+
+on:
+  push:
+    branches: [feature/debian13-user-space-deb]
+    paths:
+      - "MAIN/app/**"
+      - "MAIN/tests/**"
+      - "MAIN/installer/linux/**"
+      - "MAIN/installer/debian13/**"
+      - ".github/workflows/debian13-user-space-arm64.yml"
+  pull_request:
+    paths:
+      - "MAIN/**"
+      - ".github/workflows/debian13-user-space-arm64.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: cin-debian13-user-space-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-test-package:
+    runs-on: ubuntu-24.04-arm
+    defaults:
+      run:
+        shell: bash
+    container:
+      image: debian:13-slim
+    timeout-minutes: 40
+    steps:
+      - name: Install Debian 13 ARM64 build dependencies
+        run: |
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+            ca-certificates git python3 python3-venv python3-dev python3-gi python3-cairo \
+            gir1.2-gtk-4.0 libcairo2-dev libgirepository-2.0-dev librsvg2-bin \
+            desktop-file-utils patchelf gcc pkg-config file wget zip dpkg-dev \
+            xvfb dbus-x11 xauth util-linux unzip passwd time
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install ARM64 linuxdeploy
+        run: |
+          wget -q "https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-aarch64.AppImage" -O /usr/local/bin/linuxdeploy
+          chmod 0755 /usr/local/bin/linuxdeploy
+      - name: Verify Debian and architecture
+        run: |
+          . /etc/os-release
+          test "$ID" = debian
+          test "$VERSION_ID" = 13
+          test "$(dpkg --print-architecture)" = arm64
+          test "$(uname -m)" = aarch64
+      - name: Run CIN source tests
+        run: python3 -m unittest discover -s MAIN/tests -v
+      - name: Validate installer scripts
+        run: |
+          bash -n MAIN/installer/linux/build-appimage.sh
+          bash -n MAIN/installer/debian13/build-deb-zip-arm64.sh
+          sh -n MAIN/installer/debian13/install-user.sh
+          sh -n MAIN/installer/debian13/uninstall-user.sh
+          sh -n MAIN/installer/debian13/run-user.sh
+          python3 -m compileall -q MAIN/app MAIN/installer/linux/appimage_installer.py
+      - name: Build CIN GTK AppDir
+        env:
+          APPIMAGE_EXTRACT_AND_RUN: "1"
+        run: bash MAIN/installer/linux/build-appimage.sh
+      - name: Build CIN.deb and installer ZIP
+        run: bash MAIN/installer/debian13/build-deb-zip-arm64.sh
+      - name: Inspect package metadata and ZIP contents
+        run: |
+          set -euo pipefail
+          test "$(dpkg-deb -f dist/CIN.deb Package)" = core-identification-nodes
+          test "$(dpkg-deb -f dist/CIN.deb Architecture)" = arm64
+          test "$(dpkg-deb -f dist/CIN.deb Version)" = 0.5.0
+          dpkg-deb -c dist/CIN.deb > dist/CIN.deb.contents.txt
+          grep -q './opt/cin/AppDir/AppRun' dist/CIN.deb.contents.txt
+          grep -q './opt/cin/AppDir/usr/bin/cin-main' dist/CIN.deb.contents.txt
+          grep -q './opt/cin-installer/install-user.sh' dist/CIN.deb.contents.txt
+          grep -q './opt/cin-installer/uninstall-user.sh' dist/CIN.deb.contents.txt
+          grep -q './opt/cin-installer/run-user.sh' dist/CIN.deb.contents.txt
+          if grep -q 'cin-appimage-installer' dist/CIN.deb.contents.txt; then echo 'Unused AppImage installer found in Debian payload'; exit 1; fi
+          mkdir -p "$RUNNER_TEMP/cin-deb-audit"
+          dpkg-deb -x dist/CIN.deb "$RUNNER_TEMP/cin-deb-audit"
+          find "$RUNNER_TEMP/cin-deb-audit/opt/cin/AppDir" -type f -print0 | while IFS= read -r -d '' file; do
+            if file -b "$file" | grep -q 'ELF'; then
+              output="$(ldd "$file" 2>&1 || true)"
+              if printf '%s\\n' "$output" | grep -q 'not found'; then printf 'Unresolved ELF dependencies in %s\\n%s\\n' "$file" "$output"; exit 1; fi
+            fi
+          done
+          unzip -t dist/CIN-Debian13-Installer.zip
+          unzip -l dist/CIN-Debian13-Installer.zip > dist/CIN-Debian13-Installer.contents.txt
+          grep -q 'CIN-Debian13-Installer/CIN.deb' dist/CIN-Debian13-Installer.contents.txt
+          grep -q 'CIN-Debian13-Installer/install-user.sh' dist/CIN-Debian13-Installer.contents.txt
+          grep -q 'CIN-Debian13-Installer/uninstall-user.sh' dist/CIN-Debian13-Installer.contents.txt
+          grep -q 'CIN-Debian13-Installer/run-user.sh' dist/CIN-Debian13-Installer.contents.txt
+          (cd dist && sha256sum -c SHA256SUMS)
+      - name: Test unprivileged install and uninstall
+        run: |
+          set -euo pipefail
+          useradd --create-home --shell /bin/bash cin-test
+          mkdir -p /tmp/cin-deb-installer
+          dpkg-deb -x dist/CIN.deb /tmp/cin-deb-installer
+          chown -R cin-test:cin-test /tmp/cin-deb-installer /home/cin-test
+          runuser -u cin-test -- env HOME=/home/cin-test XDG_DATA_HOME=/home/cin-test/.local/share sh /tmp/cin-deb-installer/opt/cin-installer/install-user.sh "$PWD/dist/CIN.deb"
+          test -x /home/cin-test/.local/bin/cin
+          test -x /home/cin-test/.local/bin/cin-uninstall
+          test -x /home/cin-test/.local/opt/cin-main-lobby/AppDir/AppRun
+          test -f /home/cin-test/.local/share/applications/cin.desktop
+          test -f /home/cin-test/.local/share/icons/hicolor/256x256/apps/cin.png
+          if sh /tmp/cin-deb-installer/opt/cin-installer/install-user.sh "$PWD/dist/CIN.deb"; then echo "Root install was unexpectedly accepted"; exit 1; fi
+          touch /home/cin-test/.local/opt/cin-main-lobby/AppDir/previous-install.test
+          mkdir -p /tmp/cin-broken-installer
+          cp dist/CIN.deb /tmp/cin-broken-installer/
+          cp /tmp/cin-deb-installer/opt/cin-installer/install-user.sh /tmp/cin-broken-installer/
+          chown -R cin-test:cin-test /tmp/cin-broken-installer
+          if runuser -u cin-test -- env HOME=/home/cin-test XDG_DATA_HOME=/home/cin-test/.local/share sh /tmp/cin-broken-installer/install-user.sh /tmp/cin-broken-installer/CIN.deb; then echo "Broken installer bundle unexpectedly succeeded"; exit 1; fi
+          test -f /home/cin-test/.local/opt/cin-main-lobby/AppDir/previous-install.test
+          test ! -e /opt/cin/AppDir
+          test ! -e /usr/bin/cin
+          mkdir -p /home/cin-test/.local/share/cin /home/cin-test/.config/cin /home/cin-test/.cache/cin
+          touch /home/cin-test/.local/share/cin/preserve.test /home/cin-test/.config/cin/preserve.test /home/cin-test/.cache/cin/preserve.test
+          runuser -u cin-test -- env HOME=/home/cin-test XDG_DATA_HOME=/home/cin-test/.local/share sh /tmp/cin-deb-installer/opt/cin-installer/install-user.sh "$PWD/dist/CIN.deb"
+          test -f /home/cin-test/.local/share/cin/preserve.test
+          test -f /home/cin-test/.config/cin/preserve.test
+          test -f /home/cin-test/.cache/cin/preserve.test
+          runuser -u cin-test -- env HOME=/home/cin-test XDG_DATA_HOME=/home/cin-test/.local/share /home/cin-test/.local/bin/cin-uninstall
+          test ! -e /home/cin-test/.local/opt/cin-main-lobby
+          test ! -e /home/cin-test/.local/bin/cin
+          test ! -e /home/cin-test/.local/share/applications/cin.desktop
+          test -f /home/cin-test/.local/share/cin/preserve.test
+          test -f /home/cin-test/.config/cin/preserve.test
+          test -f /home/cin-test/.cache/cin/preserve.test
+          test ! -e /home/cin-test/.local/share/icons/hicolor/256x256/apps/cin.png
+      - name: GUI smoke test and memory observation
+        env:
+          APPIMAGE_EXTRACT_AND_RUN: "1"
+          GDK_BACKEND: x11
+        run: |
+          set -euo pipefail
+          useradd --create-home --shell /bin/bash cin-gui
+          mkdir -p /home/cin-gui/.local/opt /home/cin-gui/.local/bin /home/cin-gui/.local/share
+          chown -R cin-gui:cin-gui /home/cin-gui
+          chown -R cin-gui:cin-gui /tmp/cin-deb-installer
+          runuser -u cin-gui -- env HOME=/home/cin-gui XDG_DATA_HOME=/home/cin-gui/.local/share sh /tmp/cin-deb-installer/opt/cin-installer/install-user.sh "$PWD/dist/CIN.deb"
+          dbus-run-session -- xvfb-run -a runuser -u cin-gui -- env HOME=/home/cin-gui XDG_DATA_HOME=/home/cin-gui/.local/share GDK_BACKEND=x11 /usr/bin/time -v /home/cin-gui/.local/bin/cin --smoke-test
+          useradd --create-home --shell /bin/bash cin-run
+          chown -R cin-run:cin-run /home/cin-run
+          dbus-run-session -- xvfb-run -a runuser -u cin-run -- env HOME=/home/cin-run XDG_CACHE_HOME=/home/cin-run/.cache CIN_DEB_PATH="$PWD/dist/CIN.deb" GDK_BACKEND=x11 /usr/bin/time -v sh /tmp/cin-deb-installer/opt/cin-installer/run-user.sh --smoke-test
+          test ! -e /home/cin-run/.local/opt/cin-main-lobby
+          test -z "$(find /home/cin-run/.cache -maxdepth 1 -type d -name 'cin-run.*' -print -quit 2>/dev/null || true)"
+      - name: Publish public release downloads
+        if: github.event_name != 'pull_request'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: cin-debian13-arm64-v0.5.0
+          target_commitish: ${{ github.sha }}
+          name: CIN cin-debian13-arm64-v0.5.0
+          body: |
+            CIN Debian 13 ARM64 user-space distribution. Install as an ordinary user; no sudo, no apt install, and no dpkg -i.
+          files: |
+            dist/CIN.deb
+            dist/CIN-Debian13-Installer.zip
+            dist/SHA256SUMS
+            dist/CIN.deb.contents.txt
+            dist/CIN-Debian13-Installer.contents.txt
+          fail_on_unmatched_files: true
+
+      - name: Upload Debian 13 ARM64 distribution
+        uses: actions/upload-artifact@v4
+        with:
+          name: CIN-Debian13-ARM64
+          path: |
+            dist/CIN.deb
+            dist/CIN-Debian13-Installer.zip
+            dist/SHA256SUMS
+          if-no-files-found: error
+          retention-days: 30

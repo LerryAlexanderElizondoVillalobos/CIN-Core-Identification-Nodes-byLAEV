@@ -1,12 +1,15 @@
 # CIN — Core Identification Nodes byLAEV
 
-The previous repository contents are preserved in [HISTORY](HISTORY/ARCHIVE_INDEX.md). The clean reconstruction workspace is [MAIN](MAIN/README.md).
+CIN is the project for a modular node application and its dedicated engines.
 
-**Current phase:** Main reset and clean reconstruction. Legacy code, specifications, documents, assets, scripts, tests and workflows are archived. They are not active requirements unless explicitly adopted into the new Main.
+## Current Linux distribution work
 
-- [New Main workspace](MAIN/README.md)
-- [Historical archive index](HISTORY/ARCHIVE_INDEX.md)
-- [Complete inventory of 176 archived files](HISTORY/INVENTORY.md)
-- [Source commit](https://github.com/LerryAlexanderElizondoVillalobos/CIN-Core-Identification-Nodes-byLAEV/commit/cf5b2761ba324fe97d1d1068e976ae0874949b41)
+The Debian 13 ARM64 User Space Edition is being developed on a dedicated feature branch.
 
-New automated workflows will be introduced only after the new Main architecture and acceptance scope are defined.
+- [Debian 13 package specification and installation](MAIN/installer/debian13/README.md)
+- [Debian 13 acceptance test plan](MAIN/installer/debian13/ACCEPTANCE_TEST_PLAN.md)
+- [Debian 13 ARM64 CI workflow](.github/workflows/debian13-user-space-arm64.yml)
+
+The planned distribution contains `CIN.deb` and `CIN-Debian13-Installer.zip`. The ZIP supplies per-user install and uninstall scripts. The .deb is extracted using `dpkg-deb -x` into the user's home directory; it is not installed with `dpkg -i` and does not require root.
+
+This work is not a released binary until the ARM64 Debian 13 build and acceptance workflow succeeds.

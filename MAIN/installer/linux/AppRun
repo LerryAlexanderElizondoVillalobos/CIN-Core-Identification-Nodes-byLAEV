@@ -1,0 +1,22 @@
+#!/bin/sh
+set -eu
+HERE="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+export LD_LIBRARY_PATH="$HERE/usr/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+export GI_TYPELIB_PATH="$HERE/usr/lib/girepository-1.0${GI_TYPELIB_PATH:+:$GI_TYPELIB_PATH}"
+export GTK_PATH="$HERE/usr/lib/gtk-4.0${GTK_PATH:+:$GTK_PATH}"
+export GSETTINGS_SCHEMA_DIR="$HERE/usr/share/glib-2.0/schemas"
+
+if [ "${1:-}" = "--run" ]; then
+    shift
+    if command -v systemd-run >/dev/null 2>&1 && systemctl --user show-environment >/dev/null 2>&1; then
+        # The transient scope is what makes the CIN-only systemd network policy
+        # possible. If the user manager cannot create it, keep the Lobby usable;
+        # its network controller will accurately report that enforcement is unavailable.
+        if systemd-run --user --scope --unit=cin-main-lobby -- "$HERE/usr/bin/cin-main" "$@"; then
+            exit 0
+        fi
+    fi
+    exec "$HERE/usr/bin/cin-main" "$@"
+fi
+
+exec "$HERE/usr/bin/cin-appimage-installer" "$@"

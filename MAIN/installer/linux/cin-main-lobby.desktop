@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Core Identification Nodes
+Comment=CIN Main Lobby
+Exec=AppRun --run
+Icon=cin-main-lobby
+Terminal=false
+Categories=Utility;
+StartupNotify=true

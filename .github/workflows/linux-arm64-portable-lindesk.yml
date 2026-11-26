@@ -1,0 +1,112 @@
+name: CIN Linux ARM64 Portable — LinDesk
+
+on:
+  push:
+    branches: [feature/lindesk-arm64-portable]
+    paths:
+      - "MAIN/app/**"
+      - "MAIN/tests/**"
+      - "MAIN/installer/linux/**"
+      - "MAIN/installer/linux-portable/**"
+      - ".github/workflows/linux-arm64-portable-lindesk.yml"
+  pull_request:
+    paths:
+      - "MAIN/**"
+      - ".github/workflows/linux-arm64-portable-lindesk.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cin-lindesk-arm64-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-test-package:
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install ARM64 GTK build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3 python3-venv python3-dev python3-gi python3-cairo gir1.2-gtk-4.0 libcairo2-dev libgirepository1.0-dev librsvg2-bin desktop-file-utils patchelf gcc pkg-config file wget tar
+      - name: Install ARM64 linuxdeploy
+        run: |
+          wget -q "https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-aarch64.AppImage" -O linuxdeploy
+          chmod 0755 linuxdeploy
+          sudo install -m 0755 linuxdeploy /usr/local/bin/linuxdeploy
+      - name: Verify runner architecture
+        run: |
+          test "$(uname -m)" = "aarch64"
+          python3 -c 'import platform; assert platform.machine() in ("aarch64", "arm64")'
+      - name: Run CIN source tests
+        run: python3 -m unittest discover -s MAIN/tests -v
+      - name: Validate shell and Python syntax
+        run: |
+          python3 -m compileall -q MAIN/app MAIN/installer/linux/appimage_installer.py
+          bash -n MAIN/installer/linux/build-appimage.sh
+          bash -n MAIN/installer/linux/build-deb-arm64.sh
+          bash -n MAIN/installer/linux-portable/package-portable-arm64.sh
+          sh -n MAIN/installer/linux-portable/install.sh
+          sh -n MAIN/installer/linux-portable/run-cin.sh
+      - name: Build GTK AppDir and AppImage payload
+        run: bash MAIN/installer/linux/build-appimage.sh
+        env:
+          APPIMAGE_EXTRACT_AND_RUN: "1"
+      - name: Package extracted AppDir for no-root Linux ARM64
+        run: bash MAIN/installer/linux-portable/package-portable-arm64.sh
+      - name: Inspect portable archive and payload
+        run: |
+          set -euo pipefail
+          ARCHIVE="dist/CIN-Linux-ARM64-Portable.tar.gz"
+          test -s "$ARCHIVE"
+          mkdir -p "$RUNNER_TEMP/cin-portable-inspect"
+          tar -xzf "$ARCHIVE" -C "$RUNNER_TEMP/cin-portable-inspect"
+          ROOT="$RUNNER_TEMP/cin-portable-inspect/CIN-Linux-ARM64-Portable"
+          test -x "$ROOT/AppDir/AppRun"
+          test -x "$ROOT/AppDir/usr/bin/cin-main"
+          test -x "$ROOT/AppDir/usr/bin/cin-appimage-installer"
+          test -x "$ROOT/install.sh"
+          test -x "$ROOT/run-cin.sh"
+          test -d "$ROOT/AppDir/usr/lib/girepository-1.0"
+          test -n "$(find "$ROOT/AppDir/usr/lib/girepository-1.0" -name 'Gtk-4.0.typelib' -print -quit)"
+          test -n "$(find "$ROOT/AppDir/usr/lib" -name 'libgtk-4.so*' -print -quit)"
+          (cd dist && sha256sum -c CIN-Linux-ARM64-Portable.tar.gz.sha256)
+      - name: Test user-space install and uninstall without privilege escalation
+        env:
+          APPIMAGE_EXTRACT_AND_RUN: "1"
+          GDK_BACKEND: x11
+        run: |
+          set -euo pipefail
+          ROOT="$RUNNER_TEMP/cin-portable-inspect/CIN-Linux-ARM64-Portable"
+          TEST_HOME="$RUNNER_TEMP/cin-portable-home"
+          mkdir -p "$TEST_HOME"
+          HOME="$TEST_HOME" XDG_DATA_HOME="$TEST_HOME/.local/share" sh "$ROOT/install.sh"
+          test -x "$TEST_HOME/.local/bin/cin"
+          test -x "$TEST_HOME/.local/bin/cin-uninstall"
+          test -x "$TEST_HOME/.local/share/cin/AppDir/AppRun"
+          test -f "$TEST_HOME/.local/share/applications/cin-main-lobby.desktop"
+          test ! -e /opt/cin
+          test ! -e /usr/bin/cin
+          HOME="$TEST_HOME" XDG_DATA_HOME="$TEST_HOME/.local/share" "$TEST_HOME/.local/bin/cin-uninstall"
+          test ! -e "$TEST_HOME/.local/share/cin/AppDir"
+          test ! -e "$TEST_HOME/.local/bin/cin"
+      - name: GUI smoke test on ARM64 Linux
+        env:
+          APPIMAGE_EXTRACT_AND_RUN: "1"
+          GDK_BACKEND: x11
+        run: |
+          sudo apt-get install -y xvfb dbus-x11
+          dbus-run-session -- xvfb-run -a "$RUNNER_TEMP/cin-portable-inspect/CIN-Linux-ARM64-Portable/run-cin.sh" --smoke-test
+      - name: Upload CIN Linux ARM64 Portable archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: CIN-Linux-ARM64-Portable
+          path: |
+            dist/CIN-Linux-ARM64-Portable.tar.gz
+            dist/CIN-Linux-ARM64-Portable.tar.gz.sha256
+          if-no-files-found: error
+          retention-days: 30
